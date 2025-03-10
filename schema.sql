@@ -69,18 +69,29 @@ CREATE TABLE IF NOT EXISTS EmployeeProjects (
     FOREIGN KEY (employee_id) REFERENCES Employees(employee_id)
 );
 
-CREATE TABLE IF NOT EXISTS Chat(
+CREATE TABLE IF NOT EXISTS Chats(
     chatID INTEGER NOT NULL,
-    adminID INTEGER NOT NULL,
+    -- ToDo - come up with other necessary field for chat table
     PRIMARY KEY(chat_id),
-    FOREIGN KEY (admin_id) REFERENCES Employees(employee_id)
+)
+
+CREATE TABLE IF NOT EXISTS ChatMessages(
+    chat_id INTEGER NOT NULL,
+    sender_id INTEGER NOT NULL,
+    message_id INTEGER NOT NULL,
+    date_time TIMESTAMP NOT NULL,
+    message_contents TEXT, 
+    read_receipt BOOLEAN DEFAULT FALSE,
+
 )
 
 CREATE TABLE IF NOT EXISTS ChatMembers(
     chat_id INTEGER NOT NULL,
     employee_id INTEGER NOT NULL,
+    is_admin BOOLEAN DEFAULT FALSE,
     PRIMARY KEY (chat_id, employee_id),
     FOREIGN KEY (chat_id) REFERENCES Chat(chat_id),
     FOREIGN KEY (employee_id) REFERENCES Employees(employee_id)
 )
 
+CREATE TABLE IF NOT EXISTS 

@@ -1,6 +1,5 @@
 import json
 import sqlite3
-import bcrypt
 import schedule
 import time
 from flask import Flask, g
@@ -16,7 +15,7 @@ app = Flask(__name__)
 CORS(app)
 
 """ Not necessarily what we'll us, but can use for inspiration """
-
+""" SQL IS IN SQLITE NOT MYSQL!!! NEEDS TO BE CONVERTED IF USED """
 
 """"" DB Initialisation Functionality """
 
@@ -159,7 +158,6 @@ def project_status(project_id):
 
         if not row:
             return jsonify({"error": "Project not found."}), 404
-
         if row["completed"] and row["authorised"]:
             status = "Completed"
         elif row["completed"]:
