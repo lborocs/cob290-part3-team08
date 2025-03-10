@@ -69,4 +69,18 @@ CREATE TABLE IF NOT EXISTS EmployeeProjects (
     FOREIGN KEY (employee_id) REFERENCES Employees(employee_id)
 );
 
+CREATE TABLE IF NOT EXISTS Chat(
+    chatID INTEGER NOT NULL,
+    adminID INTEGER NOT NULL,
+    PRIMARY KEY(chat_id),
+    FOREIGN KEY (admin_id) REFERENCES Employees(employee_id)
+)
+
+CREATE TABLE IF NOT EXISTS ChatMembers(
+    chat_id INTEGER NOT NULL,
+    employee_id INTEGER NOT NULL,
+    PRIMARY KEY (chat_id, employee_id),
+    FOREIGN KEY (chat_id) REFERENCES Chat(chat_id),
+    FOREIGN KEY (employee_id) REFERENCES Employees(employee_id)
+)
 

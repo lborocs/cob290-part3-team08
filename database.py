@@ -15,6 +15,8 @@ PORT = 3300
 app = Flask(__name__)
 CORS(app)
 
+""" Not necessarily what we'll us, but can use for inspiration """
+
 
 """"" DB Initialisation Functionality """
 
