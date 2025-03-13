@@ -16,11 +16,13 @@ CREATE TABLE IF NOT EXISTS UserTypes (
     type_name TEXT NOT NULL UNIQUE
 );
 
+
 -- Insert default user types
 INSERT OR IGNORE INTO UserTypes (type_id, type_name) VALUES
     (0, 'Manager'),
     (1, 'ProjectLead'),
     (2, 'Employee');
+
 
 -- Projects Table
 CREATE TABLE IF NOT EXISTS Projects (
@@ -35,6 +37,7 @@ CREATE TABLE IF NOT EXISTS Projects (
     FOREIGN KEY (team_leader_id) REFERENCES Employees(employee_id)
 );
 
+
 -- Tasks Table
 CREATE TABLE IF NOT EXISTS Tasks (
     task_id INTEGER PRIMARY KEY,
@@ -44,6 +47,8 @@ CREATE TABLE IF NOT EXISTS Tasks (
     description TEXT NOT NULL,
     start_date DATE NOT NULL,
     finish_date DATE NOT NULL,
+    time_allocated INT,
+    time_taken INT,
     completed BOOLEAN NOT NULL DEFAULT 0,
     completed_date DATETIME,
     FOREIGN KEY (project_id) REFERENCES Projects(project_id),
@@ -60,6 +65,7 @@ CREATE TABLE IF NOT EXISTS EmployeeTasks (
     FOREIGN KEY (employee_id) REFERENCES Employees(employee_id)
 );
 
+
 -- EmployeeProjects Table
 CREATE TABLE IF NOT EXISTS EmployeeProjects (
     project_id INTEGER NOT NULL,
@@ -69,11 +75,13 @@ CREATE TABLE IF NOT EXISTS EmployeeProjects (
     FOREIGN KEY (employee_id) REFERENCES Employees(employee_id)
 );
 
+
 CREATE TABLE IF NOT EXISTS Chats(
     chatID INTEGER NOT NULL,
     -- ToDo - come up with other necessary field for chat table
     PRIMARY KEY(chat_id),
 )
+
 
 CREATE TABLE IF NOT EXISTS ChatMessages(
     chat_id INTEGER NOT NULL,
@@ -82,8 +90,8 @@ CREATE TABLE IF NOT EXISTS ChatMessages(
     date_time TIMESTAMP NOT NULL,
     message_contents TEXT, 
     read_receipt BOOLEAN DEFAULT FALSE,
-
 )
+
 
 CREATE TABLE IF NOT EXISTS ChatMembers(
     chat_id INTEGER NOT NULL,
@@ -93,5 +101,6 @@ CREATE TABLE IF NOT EXISTS ChatMembers(
     FOREIGN KEY (chat_id) REFERENCES Chat(chat_id),
     FOREIGN KEY (employee_id) REFERENCES Employees(employee_id)
 )
+
 
 CREATE TABLE IF NOT EXISTS 
