@@ -1,28 +1,45 @@
 <?php
-$host = 'localhost';
-$username = 'root';
-$password = '';
-$database = 'my_project';
+    // Database connection details
+    $host = 'localhost';
+    $username = 'root';
+    $password = '';
+    $database = 'team08part3';
 
-// Connect to MySQL
-$conn = new mysqli($host, $username, $password);
+    // Connect to MySQL
+    $conn = new mysqli($host, $username, $password);
 
-// Create the database if it doesn’t exist
-$conn->query("CREATE DATABASE IF NOT EXISTS $database");
-$conn->select_db($database);
+    // Check connection
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
 
-// Create tables
-$conn->query("CREATE TABLE IF NOT EXISTS users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL
-)");
+    // Create the database if it does not exist
+    $conn->query("CREATE DATABASE IF NOT EXISTS $database");
+    $conn->select_db($database);
 
-// Insert sample data (if not already present)
-$conn->query("INSERT IGNORE INTO users (id, name, email) VALUES
-    (1, 'John Doe', 'john@example.com'),
-    (2, 'Jane Doe', 'jane@example.com')");
+    // Path to your SQL schema file
+    $sqlFile = 'schema.sql';
 
-echo "Database setup complete!";
-$conn->close();
+    // Read the SQL file
+    $sql = file_get_contents($sqlFile);
+    if (!$sql) {
+        die("Error reading SQL file.");
+    }
+
+    // Split SQL commands (for multi-query execution)
+    $queries = explode(";", $sql);
+
+    // Execute each query
+    foreach ($queries as $query) {
+        $trimmedQuery = trim($query);
+        if (!empty($trimmedQuery)) {
+            if ($conn->query($trimmedQuery) === FALSE) {
+                echo "Error executing query: " . $conn->error . "<br>";
+            }
+        }
+    }
+
+    echo "Database schema imported successfully.";
+
+    $conn->close();
 ?>
