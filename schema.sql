@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS Employees (
     FOREIGN KEY (user_type_id) REFERENCES UserTypes(type_id)
 );
 
+
 -- UserTypes Table
 CREATE TABLE IF NOT EXISTS UserTypes (
     type_id INTEGER PRIMARY KEY,
@@ -37,7 +38,6 @@ CREATE TABLE IF NOT EXISTS Projects (
     FOREIGN KEY (team_leader_id) REFERENCES Employees(employee_id)
 );
 
-
 -- Tasks Table
 CREATE TABLE IF NOT EXISTS Tasks (
     task_id INTEGER PRIMARY KEY,
@@ -55,6 +55,15 @@ CREATE TABLE IF NOT EXISTS Tasks (
     FOREIGN KEY (assigned_employee) REFERENCES Employees(employee_id)
 );
 
+CREATE TABLE IF NOT EXISTS TaskTags (
+    task_id INTEGER NOT NULL,
+    tag TEXT NOT NULL,
+    PRIMARY KEY (task_id, tag)
+)
+
+CREATE TABLE IF NOT EXISTS Tags (
+    tag TEXT PRIMARY KEY
+)
 
 -- EmployeeTasks Table
 CREATE TABLE IF NOT EXISTS EmployeeTasks (
