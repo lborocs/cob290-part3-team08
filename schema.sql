@@ -1,7 +1,7 @@
 -- UserTypes Table (Referenced by Employees)
 CREATE TABLE IF NOT EXISTS UserTypes (
     type_id INTEGER PRIMARY KEY,
-    type_name TEXT NOT NULL UNIQUE
+    type_name VARCHAR(255) NOT NULL UNIQUE
 ) ENGINE=InnoDB;
 
 -- Insert default user types
@@ -13,9 +13,9 @@ INSERT IGNORE INTO UserTypes (type_id, type_name) VALUES
 -- Employees Table (References UserTypes)
 CREATE TABLE IF NOT EXISTS Employees (
     employee_id INTEGER PRIMARY KEY,
-    employee_email TEXT NOT NULL UNIQUE,
-    first_name TEXT NOT NULL,
-    second_name TEXT NOT NULL,
+    employee_email VARCHAR(255) NOT NULL UNIQUE,
+    first_name VARCHAR(255) NOT NULL,
+    second_name VARCHAR(255) NOT NULL,
     user_type_id INTEGER NOT NULL,
     current_employee BOOLEAN NOT NULL,
     FOREIGN KEY (user_type_id) REFERENCES UserTypes(type_id)
@@ -23,11 +23,11 @@ CREATE TABLE IF NOT EXISTS Employees (
 
 -- Employee dummy data (AI generated)
 INSERT IGNORE INTO Employees VALUES 
-    (1, "jakebrooks@makeitall.com", "Jake", "Brooks", 0, True)
-    (2, "andreifilipasblai@makeitall.com", "Andrei", "Filipas Blai", 0, True)
-    (3, "faizananwar@makeitall.com", "Faizan", "Anwar", 0, True)
-    (4, "jevanbucknor@makeitall.com", "Jevan", "Bucknor", 0, True)
-    (5, "liamparker@makeitall.com", "Liam", "Parker", 0, True)
+    (1, "jakebrooks@makeitall.com", "Jake", "Brooks", 0, True),
+    (2, "andreifilipasblai@makeitall.com", "Andrei", "Filipas Blai", 0, True),
+    (3, "faizananwar@makeitall.com", "Faizan", "Anwar", 0, True),
+    (4, "jevanbucknor@makeitall.com", "Jevan", "Bucknor", 0, True),
+    (5, "liamparker@makeitall.com", "Liam", "Parker", 0, True),
     (6, "employee1@makeitall.com", "Employee1", "Smith", 2, True),
     (7, "employee2@makeitall.com", "Employee2", "Johnson", 2, True),
     (8, "employee3@makeitall.com", "Employee3", "Davis", 2, True),
@@ -37,8 +37,6 @@ INSERT IGNORE INTO Employees VALUES
     (12, "teamlead1@makeitall.com", "TeamLead1", "Taylor", 1, True),
     (13, "teamlead2@makeitall.com", "TeamLead2", "Anderson", 1, True),
     (14, "teamlead3@makeitall.com", "TeamLead3", "Thomas", 1, True);
-
-
 
 -- Chats Table (Referenced by ChatMessages and ChatMembers)
 CREATE TABLE IF NOT EXISTS Chats (
@@ -130,12 +128,7 @@ CREATE TABLE IF NOT EXISTS ChatMembers (
     FOREIGN KEY (employee_id) REFERENCES Employees(employee_id)
 ) ENGINE=InnoDB;
 
-
-
-
-
 -- Dummy data for data analytics page use
-
 
 -- Insert Projects (created by TeamLeads)
 INSERT IGNORE INTO Projects (project_id, project_name, team_leader_id, description, start_date, finish_date, completed) VALUES
