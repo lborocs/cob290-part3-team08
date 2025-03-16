@@ -97,31 +97,79 @@
 <body>
     <div class="chat-container">
         <div class="chat-list">
-            <div class="chat-list-item">
-                <img src="default-profile.png" alt="Profile">
+            <div class="chat-list-item" onclick="loadChat(1)">
+                <img src="{{ url_for('static', filename='default-profile.jpg') }}" alt="Profile">
                 <div>User 1</div>
             </div>
-            <div class="chat-list-item">
-                <img src="default-profile.png" alt="Profile">
+            <div class="chat-list-item" onclick="loadChat(2)">
+                <img src="{{ url_for('static', filename='default-profile.jpg') }}" alt="Profile">
                 <div>User 2</div>
             </div>
             <!-- Add more chat list items as needed -->
         </div>
         <div class="chat-window">
             <div class="chat-header">
-                <img src="default-profile.png" alt="Profile"
+                <img src="{{ url_for('static', filename='default-profile.jpg') }}" alt="Profile"
                     style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;">
-                <div>Chat with User 1</div>
+                <div id="chat-with">Chat with User 1</div>
             </div>
-            <div class="chat-messages">
+            <div class="chat-messages" id="chat-messages">
                 <!-- Messages will be displayed here -->
             </div>
             <div class="chat-input">
-                <input type="text" placeholder="Type a message" maxlength="500">
-                <button>Send</button>
+                <input type="text" id="message-input" placeholder="Type a message" maxlength="500">
+                <button onclick="sendMessage()">Send</button>
             </div>
         </div>
     </div>
+<script>
+    let currentChatId = 1; // Default chat ID
+
+    function loadChat(chatId) {
+        currentChatId = chatId;
+        fetch(`http://127.0.0.1:5000/chats/${chatId}/messages`)
+            .then(response => response.json())
+            .then(messages => {
+                const chatMessages = document.getElementById('chat-messages');
+                chatMessages.innerHTML = '';
+                messages.forEach(msg => {
+                    const messageElement = document.createElement('div');
+                    messageElement.textContent = msg.message_text;
+                    chatMessages.appendChild(messageElement);
+                });
+            })
+            .catch(error => console.error('Error loading chat:', error));
+    }
+
+    function sendMessage() {
+        const messageInput = document.getElementById('message-input');
+        const messageText = messageInput.value;
+        if (messageText.trim() === '') return;
+
+        fetch(`http://127.0.0.1:5000/chats/${currentChatId}/messages`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                sender_id: 1, // Example sender ID
+                message_text: messageText
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Message sent:', data);
+                messageInput.value = ''; // Clear input
+                loadChat(currentChatId); // Reload chat to show new message
+            })
+            .catch(error => console.error('Error sending message:', error));
+    }
+
+    // Load the default chat on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        loadChat(currentChatId);
+    });
+</script>
 </body>
 
 </html>

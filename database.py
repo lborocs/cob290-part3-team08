@@ -36,17 +36,55 @@ def commit_changes(db):
     
 def init_db():  
     try:
-        with app.app_context():
-            db = get_db()
-            if db is None:
-                return
-            cursor = db.cursor()
-            with open('schema.sql', 'r') as f:
-                schema_sql = f.read()
-            cursor.executescript(schema_sql)
-            commit_changes(db)
-    except sqlite3.DatabaseError as e:
-        print(f"Database error during initialization: {str(e)}")
+        # Connect to the SQLite database
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+        print("Connected to the database successfully.")
+
+        # Create Users table
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS Users (
+            user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username VARCHAR(255) NOT NULL UNIQUE,
+            profile_picture VARCHAR(255) DEFAULT 'default-profile.jpg'
+        )
+        ''')
+        print("Users table created or already exists.")
+
+        # Create Chats table
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS Chats (
+            chat_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user1_id INTEGER NOT NULL,
+            user2_id INTEGER NOT NULL,
+            FOREIGN KEY (user1_id) REFERENCES Users(user_id),
+            FOREIGN KEY (user2_id) REFERENCES Users(user_id)
+        )
+        ''')
+        print("Chats table created or already exists.")
+
+        # Create Messages table
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS Messages (
+            message_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            chat_id INTEGER NOT NULL,
+            sender_id INTEGER NOT NULL,
+            message_text TEXT NOT NULL,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (chat_id) REFERENCES Chats(chat_id),
+            FOREIGN KEY (sender_id) REFERENCES Users(user_id)
+        )
+        ''')
+        print("Messages table created or already exists.")
+
+        # Commit changes and close the connection
+        conn.commit()
+        print("Database changes committed.")
+    except sqlite3.Error as e:
+        print(f"An error occurred: {e}")
+    finally:
+        conn.close()
+        print("Database connection closed.")
 
 @app.teardown_appcontext
 def close_connection(exception):
