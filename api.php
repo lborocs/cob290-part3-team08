@@ -1,4 +1,6 @@
 <?php
+require_once 'Database.php';
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
@@ -10,84 +12,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-function getDb() {
-    $db = new SQLite3('database.db');
-    $db->enableExceptions(true);
-    return $db;
-}
+$db = new Database(); // Use the MySQL Database class
 
-// Simple routing
-$request_uri = $_SERVER['REQUEST_URI'];
+$requestUri = strtok($_SERVER['REQUEST_URI'], '?');
 $method = $_SERVER['REQUEST_METHOD'];
-
-// Remove query string if present
-$request_uri = strtok($request_uri, '?');
 
 // Route handling
 switch (true) {
-    case $request_uri === '/':
+    case $requestUri === '/':
         echo json_encode(['message' => 'Welcome to the Chat API!']);
         break;
 
-    case $request_uri === '/favicon.ico':
+    case $requestUri === '/favicon.ico':
         http_response_code(204);
         break;
 
-    case $request_uri === '/chats' && $method === 'GET':
-        $db = getDb();
-        $result = $db->query('SELECT * FROM Chats');
-        $chats = [];
-        while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
-            $chats[] = $row;
-        }
+    case $requestUri === '/chats' && $method === 'GET':
+        $chats = $db->getAllChats();
         echo json_encode($chats);
-        $db->close();
         break;
 
-    case preg_match('#^/chats/(\d+)/messages$#', $request_uri, $matches) && $method === 'GET':
-        $chat_id = $matches[1];
-        $db = getDb();
-        $stmt = $db->prepare('SELECT * FROM Messages WHERE chat_id = :chat_id');
-        $stmt->bindValue(':chat_id', $chat_id, SQLITE3_INTEGER);
-        $result = $stmt->execute();
-        $messages = [];
-        while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
-            $messages[] = $row;
-        }
+    case preg_match('#^/chats/(\d+)/messages$#', $requestUri, $matches) && $method === 'GET':
+        $chatId = $matches[1];
+        $messages = $db->getMessages($chatId);
         echo json_encode($messages);
-        $db->close();
         break;
 
-    case preg_match('#^/chats/(\d+)/messages$#', $request_uri, $matches) && $method === 'POST':
-        $chat_id = $matches[1];
+    case preg_match('#^/chats/(\d+)/messages$#', $requestUri, $matches) && $method === 'POST':
+        $chatId = $matches[1];
         $data = json_decode(file_get_contents('php://input'), true);
-        $sender_id = $data['sender_id'] ?? null;
-        $message_text = $data['message_text'] ?? null;
 
-        if (!$sender_id || !$message_text) {
+        $senderId = $data['sender_id'] ?? null;
+        $messageText = $data['message_text'] ?? null;
+
+        if (!$senderId || !$messageText) {
             http_response_code(400);
             echo json_encode(['error' => 'Missing required fields']);
             break;
         }
 
-        $db = getDb();
-        $stmt = $db->prepare('INSERT INTO Messages (chat_id, sender_id, message_text) VALUES (:chat_id, :sender_id, :message_text)');
-        $stmt->bindValue(':chat_id', $chat_id, SQLITE3_INTEGER);
-        $stmt->bindValue(':sender_id', $sender_id, SQLITE3_INTEGER);
-        $stmt->bindValue(':message_text', $message_text, SQLITE3_TEXT);
-        
-        if ($stmt->execute()) {
+        if ($db->createMessage($chatId, $senderId, $messageText)) {
             http_response_code(201);
             echo json_encode(['status' => 'Message sent']);
         } else {
             http_response_code(500);
             echo json_encode(['error' => 'Failed to send message']);
         }
-        $db->close();
         break;
 
     default:
         http_response_code(404);
         echo json_encode(['error' => 'Not Found']);
         break;
-} 
+}
+?>
