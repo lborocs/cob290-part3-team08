@@ -6,23 +6,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chat System (Full)</title>
     <style>
+        html {
+            height: 80vh;
+        }
+
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 0px 20px 20px;
-            /* Padding added to push content below navbar */
             background-color: #f0f2f5;
+            height: 100%;
         }
 
         .container {
-            max-width: 1200px;
-            height: auto;
+            height: 100%;
+            padding: 5px;
+            /* subtract top padding if needed */
             margin: 0 auto;
             display: grid;
             grid-template-columns: 300px 1fr;
             gap: 20px;
             padding-top: 5px;
         }
+
+        .container-wrapper {
+            height: 100%;
+            box-sizing: border-box;
+        }
+
 
         .chat-list,
         .chat-window {
@@ -123,31 +133,41 @@
 
         button {
             padding: 10px 20px;
-            background:rgb(19, 168, 51);
+            background: rgb(220, 222, 225);
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
         }
 
-        button:hover {
-            background:rgb(0, 230, 150);
+
+        .sub-action {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+            flex-direction: row;
+            flex-wrap: wrap;
         }
+
+        .hidden {
+            display: none;
+        }
+
 
         .chat-item {
             padding: 10px;
             margin-bottom: 5px;
             cursor: pointer;
             border-radius: 4px;
-            background:#f0f2f5;
+            background: #f0f2f5;
         }
 
         .chat-item:hover {
-            background:rgb(220, 222, 225);
+            background: rgb(220, 222, 225);
         }
 
         .chat-item.active {
-            background:rgb(196, 198, 202);
+            background: rgb(196, 198, 202);
         }
     </style>
 </head>
@@ -169,31 +189,49 @@
     </script>
 
     <?php include __DIR__ . '/includes/navbar.php'; ?>
-    <div class="container">
-        <div class="chat-list">
-            <h2>Chats</h2>
-            <div id="chatList"></div>
-            <div class="new-chat-input">
-                <input type="text" id="newChatName" placeholder="New chat name" />
-                <button onclick="createChat()">Create Chat</button>
-            </div>
-        </div>
-        <div class="chat-window">
-            <div class="chat-header">
-                <h2 id="currentChatName">Select a chat</h2>
-                <button class="more-btn" style="color:black" onclick="toggleChatActions()">⋯</button>
-                <div class="chat-actions" id="chatActions">
-                    <select id="addUserSelect"></select>
-                    <button onclick="addUserToChat()">Add</button>
-                    <select id="promoteUserSelect"></select>
-                    <button onclick="promoteUser()">Make Admin</button>
-                    <button style="background: red;" onclick="deleteChat()">Delete</button>
+    <div class="container-wrapper">
+        <div class="container">
+            <div class="chat-list">
+                <h2>Chats</h2>
+                <div id="chatList"></div>
+                <div class="new-chat-input">
+                    <input type="text" id="newChatName" placeholder="New chat name" />
+                    <button onclick="createChat()">Create Chat</button>
                 </div>
             </div>
-            <div class="message-list" id="messageList"></div>
-            <div class="message-input">
-                <input type="text" id="messageInput" placeholder="Type a message..." />
-                <button onclick="sendMessage()">Send</button>
+            <div class="chat-window">
+                <div class="chat-header">
+                    <h2 id="currentChatName">Select a chat</h2>
+                    <button class="more-btn" style="color:black" onclick="toggleChatActions()">⋯</button>
+                    <div class="chat-actions" id="chatActions">
+                        <div class="action-buttons">
+                            <button onclick="showSubAction('add')">Add User</button>
+                            <button onclick="showSubAction('promote')">Make Admin</button>
+                            <button onclick="showSubAction('delete')">Delete Chat</button>
+                        </div>
+
+                        <div id="addSubAction" class="sub-action hidden">
+                            <select id="addUserSelect"></select>
+                            <button onclick="addUserToChat()">Confirm</button>
+                        </div>
+
+                        <div id="promoteSubAction" class="sub-action hidden">
+                            <select id="promoteUserSelect"></select>
+                            <button onclick="promoteUser()">Confirm</button>
+                        </div>
+
+                        <div id="deleteSubAction" class="sub-action hidden">
+                            <button style="background: red;" onclick="deleteChat()">Confirm</button>
+                        </div>
+                    </div>
+
+
+                </div>
+                <div class="message-list" id="messageList"></div>
+                <div class="message-input">
+                    <input type="text" id="messageInput" placeholder="Type a message..." />
+                    <button onclick="sendMessage()">Send</button>
+                </div>
             </div>
         </div>
     </div>
@@ -210,8 +248,21 @@
             menu.classList.toggle('visible');
         }
 
+        function showSubAction(type) {
+            // Hide all sub-action panels first
+            ['add', 'promote', 'delete'].forEach(t => {
+                const el = document.getElementById(`${t}SubAction`);
+                if (el) el.classList.add('hidden');
+            });
+
+            // Show the selected one
+            const target = document.getElementById(`${type}SubAction`);
+            if (target) target.classList.remove('hidden');
+        }
+
+
         function loadUserDropdowns() {
-            fetch(`${BASE_URL}/server/api/users/getAll.php`) 
+            fetch(`${BASE_URL}/server/api/users/getAll.php`)
                 .then(res => res.json())
                 .then(users => {
                     const addSelect = document.getElementById('addUserSelect');
