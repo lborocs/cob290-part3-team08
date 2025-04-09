@@ -1,0 +1,172 @@
+{
+  "info": {
+    "name": "Team08 Chat & Analytics API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create Chat (Admin)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "chat_name",
+              "value": "Test Chat"
+            },
+            {
+              "key": "creator_id",
+              "value": "1"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost/api/chats/createWithAdmin.php",
+          "host": [
+            "localhost"
+          ],
+          "path": [
+            "api",
+            "chats",
+            "createWithAdmin.php"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Make User Admin",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "chat_id",
+              "value": "1"
+            },
+            {
+              "key": "user_id",
+              "value": "2"
+            },
+            {
+              "key": "is_admin",
+              "value": "1"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost/api/chats/makeAdmin.php",
+          "host": [
+            "localhost"
+          ],
+          "path": [
+            "api",
+            "chats",
+            "makeAdmin.php"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Tasks (Analytics)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost/api/analytics/getTasks.php",
+          "host": [
+            "localhost"
+          ],
+          "path": [
+            "api",
+            "analytics",
+            "getTasks.php"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Overrunning Tasks",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost/api/analytics/getOverrunningTasks.php",
+          "host": [
+            "localhost"
+          ],
+          "path": [
+            "api",
+            "analytics",
+            "getOverrunningTasks.php"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Near Deadline Tasks",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost/api/analytics/getNearDeadlineTasks.php?days=3",
+          "host": [
+            "localhost"
+          ],
+          "path": [
+            "api",
+            "analytics",
+            "getNearDeadlineTasks.php"
+          ],
+          "query": [
+            {
+              "key": "days",
+              "value": "3"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Employee Workload",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost/api/analytics/getEmployeeWorkload.php?employee_id=6&start_date=2024-03-01&end_date=2024-06-01",
+          "host": [
+            "localhost"
+          ],
+          "path": [
+            "api",
+            "analytics",
+            "getEmployeeWorkload.php"
+          ],
+          "query": [
+            {
+              "key": "employee_id",
+              "value": "6"
+            },
+            {
+              "key": "start_date",
+              "value": "2024-03-01"
+            },
+            {
+              "key": "end_date",
+              "value": "2024-06-01"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

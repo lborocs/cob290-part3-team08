@@ -1,6 +1,6 @@
 <?php
-require_once '../../includes/Database_Enhanced.php';
-header('Content-Type: application/json');
+require_once '../../includes/database.php';
+require_once '../../includes/headers.php';
 
 $db = new Database();
 $chatId = $_POST['chat_id'] ?? null;
