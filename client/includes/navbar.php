@@ -51,7 +51,7 @@
     <div class="navbar-links" id="navbarLinks">
         <a href="index.php">Dashboard</a>
         <a href="chatSystem.php">Chats</a>
-        <a href="dataAnalytics.php">Profile</a>
+        <a href="dataAnalytics.php">Data Analytics</a>
     </div>
 </nav>
 
