@@ -12,32 +12,36 @@
  */
 require_once 'config.php';
 
- class Database {
+class Database
+{
     private $conn;
-  
-    public function __construct() {
+
+    public function __construct()
+    {
         try {
             $this->conn = new PDO
-                ("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
+            ("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
 
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        } catch(PDOException $e) {
+        } catch (PDOException $e) {
             echo "Connection Error: " . $e->getMessage();
         }
     }
 
     // ------USERS
-    public function getAllEmployees() {
+    public function getAllEmployees()
+    {
         $stmt = $this->conn->prepare("SELECT employee_id, first_name, second_name FROM Employees");
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-    
+
 
     // ------CHAT SYSTEM
 
     #Function that creates a new chat and sets creator as admin
-    public function createChatWithCreator($creatorId, $chatName = null) {
+    public function createChatWithCreator($creatorId, $chatName = null)
+    {
         $stmt = $this->conn->prepare("INSERT INTO Chats (chat_name) VALUES (:chatName)");
         $stmt->bindParam(':chatName', $chatName);
         if ($stmt->execute()) {
@@ -48,8 +52,24 @@ require_once 'config.php';
         return false;
     }
 
+
+
+    public function getChatMessages($chatId)
+    {
+        $stmt = $this->conn->prepare("
+            SELECT * FROM ChatMessages
+            WHERE chat_id = :chatId
+            ORDER BY date_time ASC
+        ");
+        $stmt->bindParam(':chatId', $chatId);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
     #Function that adds user to a chat
-    public function addUserToChat($chatId, $userId, $isAdmin = false) {
+    public function addUserToChat($chatId, $userId, $isAdmin = false)
+    {
         $stmt = $this->conn->prepare("INSERT IGNORE INTO ChatMembers (chat_id, employee_id, is_admin) VALUES (:chatId, :userId, :isAdmin)");
         $stmt->bindParam(':chatId', $chatId);
         $stmt->bindParam(':userId', $userId);
@@ -58,7 +78,8 @@ require_once 'config.php';
     }
 
     #Function that removes user from chat
-    public function removeUserFromChat($chatId, $userId) {
+    public function removeUserFromChat($chatId, $userId)
+    {
         $stmt = $this->conn->prepare("DELETE FROM ChatMembers WHERE chat_id = :chatId AND employee_id = :userId");
         $stmt->bindParam(':chatId', $chatId);
         $stmt->bindParam(':userId', $userId);
@@ -66,7 +87,8 @@ require_once 'config.php';
     }
 
     #Function that sets a user to admin
-    public function setAdminStatus($chatId, $userId, $status) {
+    public function setAdminStatus($chatId, $userId, $status)
+    {
         $stmt = $this->conn->prepare("UPDATE ChatMembers SET is_admin = :status WHERE chat_id = :chatId AND employee_id = :userId");
         $stmt->bindParam(':chatId', $chatId);
         $stmt->bindParam(':userId', $userId);
@@ -75,7 +97,8 @@ require_once 'config.php';
     }
 
     #Function to rename chat
-    public function renameChat($chatId, $newName) {
+    public function renameChat($chatId, $newName)
+    {
         $stmt = $this->conn->prepare("UPDATE Chats SET chat_name = :newName WHERE chatID = :chatId");
         $stmt->bindParam(':newName', $newName);
         $stmt->bindParam(':chatId', $chatId);
@@ -83,7 +106,8 @@ require_once 'config.php';
     }
 
     #Function to delete messages
-    public function deleteMessage($messageId, $requesterId) {
+    public function deleteMessage($messageId, $requesterId)
+    {
         $stmt = $this->conn->prepare("
             SELECT sender_id, chat_id FROM ChatMessages WHERE message_id = :msgId
         ");
@@ -91,7 +115,8 @@ require_once 'config.php';
         $stmt->execute();
         $msg = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if (!$msg) return false;
+        if (!$msg)
+            return false;
 
         #Check if requester is sender or admin, admins can delete any messages, users only their own
         if ($msg['sender_id'] == $requesterId || $this->isAdmin($msg['chat_id'], $requesterId)) {
@@ -104,18 +129,21 @@ require_once 'config.php';
     }
 
     #Function to check if user is admin of chat
-    public function isAdmin($chatId, $userId) {
+    public function isAdmin($chatId, $userId)
+    {
         $stmt = $this->conn->prepare("SELECT is_admin FROM ChatMembers WHERE chat_id = :chatId AND employee_id = :userId");
         $stmt->bindParam(':chatId', $chatId);
         $stmt->bindParam(':userId', $userId);
         $stmt->execute();
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $result ? (bool)$result['is_admin'] : false;
+        return $result ? (bool) $result['is_admin'] : false;
     }
 
     #Function to check if user can leave chat (cannot leave if they are the only admin)
-    public function canLeaveChat($chatId, $userId) {
-        if (!$this->isAdmin($chatId, $userId)) return true;
+    public function canLeaveChat($chatId, $userId)
+    {
+        if (!$this->isAdmin($chatId, $userId))
+            return true;
         $stmt = $this->conn->prepare("
             SELECT COUNT(*) as admin_count 
             FROM ChatMembers WHERE chat_id = :chatId AND is_admin = 1
@@ -127,73 +155,68 @@ require_once 'config.php';
     }
 
     #Function to leave chat
-    public function leaveChat($chatId, $userId) {
+    public function leaveChat($chatId, $userId)
+    {
         if ($this->canLeaveChat($chatId, $userId)) {
             return $this->removeUserFromChat($chatId, $userId);
         }
         return false;
     }
 
-        #Function to get all chats for a user
-        public function getUserChats($userId) {
-            $stmt = $this->conn->prepare("
-                SELECT C.chatID, C.chat_name
-                FROM Chats C
-                JOIN ChatMembers CM ON C.chatID = CM.chat_id
-                WHERE CM.employee_id = :userId
-            ");
-            $stmt->bindParam(':userId', $userId);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        }
-    
-        #Function to get messages from a chat
-        public function getChatMessages($chatId) {
-            $stmt = $this->conn->prepare("
-                SELECT * FROM ChatMessages 
-                WHERE chat_id = :chatId 
-                ORDER BY date_time ASC
-            ");
-            $stmt->bindParam(':chatId', $chatId);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        }
-    
-        #Function to send a message
-        public function sendMessage($chatId, $senderId, $message) {
-            $stmt = $this->conn->prepare("
+    #Function to get all chats for a user
+    public function getUserChats($userId)
+    {
+        $stmt = $this->conn->prepare("
+            SELECT C.chatID, C.chat_name
+            FROM Chats C
+            JOIN ChatMembers CM ON C.chatID = CM.chat_id
+            WHERE CM.employee_id = :userId
+        ");
+        $stmt->bindParam(':userId', $userId);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+    #Function to send a message
+    public function sendMessage($chatId, $senderId, $message)
+    {
+        $stmt = $this->conn->prepare("
                 INSERT INTO ChatMessages (chat_id, sender_id, message_contents) 
                 VALUES (:chatId, :senderId, :msg)
             ");
-            $stmt->bindParam(':chatId', $chatId);
-            $stmt->bindParam(':senderId', $senderId);
-            $stmt->bindParam(':msg', $message);
-            return $stmt->execute();
-        }
-    
-        #Function to mark a message as read
-        public function markMessageRead($messageId) {
-            $stmt = $this->conn->prepare("
+        $stmt->bindParam(':chatId', $chatId);
+        $stmt->bindParam(':senderId', $senderId);
+        $stmt->bindParam(':msg', $message);
+        return $stmt->execute();
+    }
+
+    #Function to mark a message as read
+    public function markMessageRead($messageId)
+    {
+        $stmt = $this->conn->prepare("
                 UPDATE ChatMessages 
                 SET read_receipt = 1 
                 WHERE message_id = :msgId
             ");
-            $stmt->bindParam(':msgId', $messageId);
-            return $stmt->execute();
-        }
-    
-        #Function to delete an entire chat
-        public function deleteChat($chatId) {
-            $stmt = $this->conn->prepare("DELETE FROM Chats WHERE chatID = :chatId");
-            $stmt->bindParam(':chatId', $chatId);
-            return $stmt->execute();
-        }
-    
+        $stmt->bindParam(':msgId', $messageId);
+        return $stmt->execute();
+    }
+
+    #Function to delete an entire chat
+    public function deleteChat($chatId)
+    {
+        $stmt = $this->conn->prepare("DELETE FROM Chats WHERE chatID = :chatId");
+        $stmt->bindParam(':chatId', $chatId);
+        return $stmt->execute();
+    }
+
 
     // ------DATA ANALYTICS 
 
     #Function to get all tasks with filtering (start date, end date, by employee, by project id, by priority)
-    public function getTasks($filters = []) {
+    public function getTasks($filters = [])
+    {
         $sql = "SELECT * FROM Tasks WHERE 1=1";
         $params = [];
 
@@ -227,7 +250,8 @@ require_once 'config.php';
     }
 
     #Function to get all projects with filtering (start date, end date, by team leader)
-    public function getProjects($filters = []) {
+    public function getProjects($filters = [])
+    {
         $sql = "SELECT * FROM Projects WHERE 1=1";
         $params = [];
 
@@ -251,7 +275,8 @@ require_once 'config.php';
     }
 
     #Function to get tasks that are taking longer than allocated time
-    public function getTasksOverrunning() {
+    public function getTasksOverrunning()
+    {
         $stmt = $this->conn->prepare("
             SELECT * FROM Tasks WHERE time_taken > time_allocated
         ");
@@ -260,7 +285,8 @@ require_once 'config.php';
     }
 
     #Function to get tasks near deadline (within 5 days)
-    public function getTasksNearDeadline($daysAhead = 5) {
+    public function getTasksNearDeadline($daysAhead = 5)
+    {
         $stmt = $this->conn->prepare("
             SELECT * FROM Tasks 
             WHERE DATEDIFF(finish_date, CURDATE()) BETWEEN 0 AND :days
@@ -271,7 +297,8 @@ require_once 'config.php';
     }
 
     #Function that gets information relating to employee workload in given time 
-    public function getEmployeeWorkload($employeeId, $startDate, $endDate) {
+    public function getEmployeeWorkload($employeeId, $startDate, $endDate)
+    {
         $stmt = $this->conn->prepare("
             SELECT T.task_name, T.time_allocated, T.time_taken, T.start_date, T.finish_date
             FROM Tasks T

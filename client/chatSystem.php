@@ -8,6 +8,10 @@
         exit;
     }
 ?>
+<script>
+  let currentUserId = <?= json_encode($userId) ?>;
+  const BASE_URL = '/cob290-part3-team08';
+</script>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -105,12 +109,12 @@
         <button onclick="createChat()">Create Chat</button>
       </div>
       <div class="message-input">
-        <input type="number" id="addUserId" placeholder="User ID to add" />
+        <select id="addUserSelect"></select>        
         <button onclick="addUserToChat()">Add to Chat</button>
       </div>
       <div class="message-input">
-        <input type="number" id="promoteUserId" placeholder="User ID to promote" />
-        <button onclick="promoteUser()">Make Admin</button>
+      <select id="promoteUserSelect"></select>
+      <button onclick="promoteUser()">Make Admin</button>
       </div>
       <div class="message-input">
         <button style="background: red;" onclick="deleteChat()">Delete Chat</button>
@@ -128,14 +132,33 @@
 
   <script>
     let currentChatId = null;
-    let currentUserId = 1;
 
     document.addEventListener('DOMContentLoaded', () => {
       loadChats();
+      loadUserDropdowns();
     });
 
+    function loadUserDropdowns() {
+        fetch(`${BASE_URL}/server/api/users/getAll.php`) // This should return all users with { employee_id, first_name, second_name }
+            .then(res => res.json())
+            .then(users => {
+            const addSelect = document.getElementById('addUserSelect');
+            const promoteSelect = document.getElementById('promoteUserSelect');
+
+            users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.employee_id;
+                option.textContent = `${user.first_name} ${user.second_name}`;
+                
+                const optionClone = option.cloneNode(true);
+                addSelect.appendChild(option);
+                promoteSelect.appendChild(optionClone);
+            });
+            });
+        }
+
     function loadChats() {
-      fetch('/server/api/chats/get.php?user_id=' + currentUserId)
+      fetch(`${BASE_URL}/server/api/chats/get.php?user_id=` + currentUserId)
         .then(res => res.json())
         .then(chats => {
           const chatList = document.getElementById('chatList');
@@ -159,7 +182,7 @@
     }
 
     function loadMessages(chatId) {
-      fetch('/server/api/chats/messages.php?chat_id=' + chatId)
+      fetch(`${BASE_URL}/server/api/chats/messages.php?chat_id=` + chatId)
         .then(res => res.json())
         .then(messages => {
           const messageList = document.getElementById('messageList');
@@ -179,7 +202,7 @@
     }
 
     function markMessageRead(messageId) {
-      fetch('/server/api/chats/markRead.php', {
+      fetch(`${BASE_URL}/server/api/chats/markRead.php`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `message_id=${messageId}&user_id=${currentUserId}`
@@ -191,7 +214,7 @@
       const input = document.getElementById('messageInput');
       const message = input.value.trim();
       if (message) {
-        fetch('/server/api/chats/sendMessage.php', {
+        fetch(`${BASE_URL}/server/api/chats/sendMessage.php`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: `chat_id=${currentChatId}&sender_id=${currentUserId}&message=${encodeURIComponent(message)}`
@@ -210,7 +233,7 @@
       const input = document.getElementById('newChatName');
       const name = input.value.trim();
       if (name) {
-        fetch('/server/api/chats/createWithAdmin.php', {
+        fetch(`${BASE_URL}/server/api/chats/createWithAdmin.php`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: `chat_name=${encodeURIComponent(name)}&creator_id=${currentUserId}`
@@ -226,44 +249,46 @@
     }
 
     function addUserToChat() {
-      const userId = document.getElementById('addUserId').value;
-      if (currentChatId && userId) {
-        fetch('/server/api/chats/addUser.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: `chat_id=${currentChatId}&user_id=${userId}`
-        })
-        .then(res => res.json())
-        .then(result => {
-          if (result.success) {
-            alert('User added to chat');
-            document.getElementById('addUserId').value = '';
-          }
-        });
-      }
-    }
+        const userId = document.getElementById('addUserSelect').value;
+        if (currentChatId && userId) {
+            fetch(`${BASE_URL}/server/api/chats/addUser.php`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `chat_id=${currentChatId}&user_id=${userId}`
+            })
+            .then(res => res.json())
+            .then(result => {
+            if (result.success) {
+                alert('User added to chat');
+                document.getElementById('addUserSelect').value = '';
+            }
+            });
+        }
+        }
+
 
     function promoteUser() {
-      const userId = document.getElementById('promoteUserId').value;
-      if (currentChatId && userId) {
-        fetch('/server/api/chats/promoteAdmin.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: `chat_id=${currentChatId}&user_id=${userId}`
-        })
-        .then(res => res.json())
-        .then(result => {
-          if (result.success) {
-            alert('User promoted to admin');
-            document.getElementById('promoteUserId').value = '';
-          }
-        });
-      }
-    }
+        const userId = document.getElementById('promoteUserSelect').value;
+        if (currentChatId && userId) {
+            fetch(`${BASE_URL}/server/api/chats/promoteAdmin.php`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `chat_id=${currentChatId}&user_id=${userId}`
+            })
+            .then(res => res.json())
+            .then(result => {
+            if (result.success) {
+                alert('User promoted to admin');
+                document.getElementById('promoteUserSelect').value = '';
+            }
+            });
+        }
+        }
+
 
     function deleteChat() {
       if (currentChatId && confirm("Are you sure you want to delete this chat?")) {
-        fetch('/server/api/chats/deleteChat.php', {
+        fetch(`${BASE_URL}/server/api/chats/deleteChat.php`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: `chat_id=${currentChatId}`
