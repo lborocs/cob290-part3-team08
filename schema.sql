@@ -1,3 +1,6 @@
+
+-- Employee Tables
+
 -- UserTypes Table (Referenced by Employees)
 CREATE TABLE IF NOT EXISTS UserTypes (
     type_id INTEGER PRIMARY KEY,
@@ -38,11 +41,8 @@ INSERT IGNORE INTO Employees VALUES
     (13, "teamlead2@makeitall.com", "TeamLead2", "Anderson", 1, True),
     (14, "teamlead3@makeitall.com", "TeamLead3", "Thomas", 1, True);
 
--- Chats Table (Referenced by ChatMessages and ChatMembers)
-CREATE TABLE IF NOT EXISTS Chats (
-    chatID INTEGER NOT NULL,
-    PRIMARY KEY(chatID)
-) ENGINE=InnoDB;
+
+-- Data Analytics Tables
 
 -- Projects Table (References Employees)
 CREATE TABLE IF NOT EXISTS Projects (
@@ -68,6 +68,8 @@ CREATE TABLE IF NOT EXISTS Tasks (
     finish_date DATE NOT NULL,
     time_allocated INT,
     time_taken INT,
+    priority INT NOT NULL CHECK (priority BETWEEN 1 AND 5)
+    difficulty INT NOT NULL CHECK (priority BETWEEN 1 AND 5)
     completed BOOLEAN NOT NULL DEFAULT 0,
     completed_date DATETIME,
     FOREIGN KEY (project_id) REFERENCES Projects(project_id),
@@ -106,27 +108,41 @@ CREATE TABLE IF NOT EXISTS EmployeeProjects (
     FOREIGN KEY (employee_id) REFERENCES Employees(employee_id)
 ) ENGINE=InnoDB;
 
--- ChatMessages Table (References Chats and Employees)
-CREATE TABLE IF NOT EXISTS ChatMessages (
-    chat_id INTEGER NOT NULL,
-    sender_id INTEGER NOT NULL,
-    message_id INTEGER NOT NULL,
-    date_time TIMESTAMP NOT NULL,
-    message_contents TEXT, 
-    read_receipt BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (chat_id) REFERENCES Chats(chatID),
-    FOREIGN KEY (sender_id) REFERENCES Employees(employee_id)
+
+-- Chat Subsystem Tables
+
+-- Chats Table (Tracks all conversations)
+CREATE TABLE IF NOT EXISTS Chats (
+    chatID INTEGER NOT NULL AUTO_INCREMENT,
+    chat_name VARCHAR(255),  -- For group chats
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY(chatID)
 ) ENGINE=InnoDB;
 
--- ChatMembers Table (References Chats and Employees)
+-- ChatMembers Table (Tracks members in each chat)
 CREATE TABLE IF NOT EXISTS ChatMembers (
     chat_id INTEGER NOT NULL,
     employee_id INTEGER NOT NULL,
     is_admin BOOLEAN DEFAULT FALSE,
     PRIMARY KEY (chat_id, employee_id),
-    FOREIGN KEY (chat_id) REFERENCES Chats(chatID),
-    FOREIGN KEY (employee_id) REFERENCES Employees(employee_id)
+    FOREIGN KEY (chat_id) REFERENCES Chats(chatID) ON DELETE CASCADE,
+    FOREIGN KEY (employee_id) REFERENCES Employees(employee_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+-- ChatMessages Table (Stores chat messages with soft-delete support)
+CREATE TABLE IF NOT EXISTS ChatMessages (
+    message_id INTEGER NOT NULL AUTO_INCREMENT,
+    chat_id INTEGER NOT NULL,
+    sender_id INTEGER,
+    date_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    message_contents TEXT DEFAULT NULL, 
+    read_receipt BOOLEAN DEFAULT FALSE,
+    status ENUM('sent', 'deleted') DEFAULT 'sent',  
+    PRIMARY KEY (message_id),
+    FOREIGN KEY (chat_id) REFERENCES Chats(chatID) ON DELETE CASCADE,
+    FOREIGN KEY (sender_id) REFERENCES Employees(employee_id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
 
 -- Dummy data for data analytics page use
 
@@ -137,13 +153,18 @@ INSERT IGNORE INTO Projects (project_id, project_name, team_leader_id, descripti
     (3, 'Project Gamma', 14, 'Enhance internal security.', '2024-03-15', '2024-08-01', 0);
 
 -- Insert Tasks (assigned to Employees under respective projects)
-INSERT IGNORE INTO Tasks (task_id, task_name, assigned_employee, project_id, description, start_date, finish_date, time_allocated, time_taken, completed) VALUES
-    (1, 'API Endpoint Creation', 6, 1, 'Build new API endpoints for user data.', '2024-03-05', '2024-04-10', 40, NULL, 0),
-    (2, 'Unit Testing', 7, 1, 'Write unit tests for the new endpoints.', '2024-03-10', '2024-04-20', 35, NULL, 0),
-    (3, 'Cloud Migration Analysis', 8, 2, 'Analyze legacy system readiness.', '2024-04-05', '2024-05-15', 50, NULL, 0),
-    (4, 'Data Migration Script', 9, 2, 'Create scripts for migrating data.', '2024-04-10', '2024-06-01', 45, NULL, 0),
-    (5, 'Security Audit', 10, 3, 'Perform a security audit.', '2024-03-20', '2024-05-10', 55, NULL, 0),
-    (6, 'Implement Encryption', 11, 3, 'Add end-to-end encryption.', '2024-04-01', '2024-06-15', 60, NULL, 0);
+INSERT IGNORE INTO Tasks (
+    task_id, task_name, assigned_employee, project_id, description, 
+    start_date, finish_date, time_allocated, time_taken, 
+    priority, difficulty, completed, completed_date
+) VALUES
+    (1, 'API Endpoint Creation', 6, 1, 'Build new API endpoints for user data.', '2024-03-05', '2024-04-10', 40, NULL, 3, 3, 0, NULL),
+    (2, 'Unit Testing', 7, 1, 'Write unit tests for the new endpoints.', '2024-03-10', '2024-04-20', 35, NULL, 2, 2, 0, NULL),
+    (3, 'Cloud Migration Analysis', 8, 2, 'Analyze legacy system readiness.', '2024-04-05', '2024-05-15', 50, NULL, 4, 4, 0, NULL),
+    (4, 'Data Migration Script', 9, 2, 'Create scripts for migrating data.', '2024-04-10', '2024-06-01', 45, NULL, 3, 4, 0, NULL),
+    (5, 'Security Audit', 10, 3, 'Perform a security audit.', '2024-03-20', '2024-05-10', 55, NULL, 4, 5, 0, NULL),
+    (6, 'Implement Encryption', 11, 3, 'Add end-to-end encryption.', '2024-04-01', '2024-06-15', 60, NULL, 5, 5, 0, NULL);
+
 
 -- Link Employees to Projects (EmployeeProjects)
 INSERT IGNORE INTO EmployeeProjects (project_id, employee_id) VALUES

@@ -8,6 +8,7 @@
  * 2. Place this file in your XAMPP htdocs folder
  * 3. Create a new database named 'chat_system' in phpMyAdmin
  * 4. Import the SQL structure from the comments below
+ * Need to update SQL structure using schema.sql - may need to be further refined. 
  */
 
 class Database {
