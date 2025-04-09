@@ -68,8 +68,8 @@ CREATE TABLE IF NOT EXISTS Tasks (
     finish_date DATE NOT NULL,
     time_allocated INT,
     time_taken INT,
-    priority INT NOT NULL CHECK (priority BETWEEN 1 AND 5)
-    difficulty INT NOT NULL CHECK (priority BETWEEN 1 AND 5)
+    priority INT NOT NULL CHECK (priority BETWEEN 1 AND 5),
+    difficulty INT NOT NULL CHECK (priority BETWEEN 1 AND 5),
     completed BOOLEAN NOT NULL DEFAULT 0,
     completed_date DATETIME,
     FOREIGN KEY (project_id) REFERENCES Projects(project_id),
