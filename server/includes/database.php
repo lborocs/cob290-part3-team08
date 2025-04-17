@@ -1,6 +1,14 @@
-
 <?php
 require_once __DIR__ . '/config.php';
+/***
+* This file handles all database operations for the chat system 
+* How to use:
+* 1. Make sure you have XAMPP installed
+* 2. Place this file in your XAMPP htdocs folder
+* 3. Create a new database named 'team08' in phpMyAdmin (go to localhost/phpmyadmin with apache and mysql running on XAMPP
+* create new database, then go to SQL tab and input all of schema.sql, press go and the tables will be created with input data)
+* Need to update SQL structure using schema.sql - may need to be further refined. 
+***/
 
 class Database
 {
