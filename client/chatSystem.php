@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Chat System (Full)</title>
-  <link rel="stylesheet" href="chatSystem.css">
+  <link rel="stylesheet" href="../server/api/chats/chatSystem.css">
 </head>
 <body>
   <?php
@@ -71,6 +71,6 @@
     const BASE_URL = '/cob290-part3-team08';
   </script>
   <!-- external JavaScript -->
-  <script src="chatSystem.js"></script>
+  <script src="../server/api/chats/chatSystem.js"></script>
 </body>
 </html>
