@@ -1,29 +1,26 @@
+<?php
+session_start();
+if (empty($_SESSION['user_id'])) {
+    header('Location: index.php');
+    exit;
+}
+$userId = $_SESSION['user_id'];
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Chat System (Full)</title>
-  <link rel="stylesheet" href="../server/api/chats/chatSystem.css">
+  <link rel="stylesheet" href="../server/api/chats/chatSystem.css" />
 </head>
 <body>
   <?php
-    if (session_status() === PHP_SESSION_NONE) {
-      session_start();
-    }
-    $userId = $_SESSION['user_id'] ?? null;
-    if (!$userId) {
-      echo "No user selected.";
-      exit;
-    }
+    include __DIR__ . '/includes/navbar.php';
   ?>
-
-  <!-- navbar include -->
-  <?php include __DIR__ . '/includes/navbar.php'; ?>
 
   <div class="container-wrapper">
     <div class="container">
-      <!-- chat list -->
       <div class="chat-list">
         <h2>Chats</h2>
         <div id="chatList"></div>
@@ -37,6 +34,7 @@
       <div class="chat-window">
         <div class="chat-header">
           <h2 id="currentChatName">Select a chat</h2>
+          <button id="membersBtn" class="icon-btn" title="Show members" onclick="toggleMembers()">👥</button>
           <button class="more-btn" onclick="toggleChatActions()">⋯</button>
           <div class="chat-actions" id="chatActions">
             <div class="action-buttons">
@@ -57,9 +55,15 @@
             </div>
           </div>
         </div>
+
+        <div class="chat-members hidden" id="chatMembersContainer">
+          <h3>Members</h3>
+          <ul id="memberList"></ul>
+        </div>
+
         <div class="message-list" id="messageList"></div>
         <div class="message-input">
-          <input type="text" id="messageInput" placeholder="Type a message..." />
+          <input type="text" id="messageInput" placeholder="Type a message…" />
           <button onclick="sendMessage()">Send</button>
         </div>
       </div>
@@ -68,9 +72,7 @@
 
   <script>
     let currentUserId = <?= json_encode($userId) ?>;
-    const BASE_URL = '/cob290-part3-team08';
   </script>
-  <!-- external JavaScript -->
   <script src="../server/api/chats/chatSystem.js"></script>
 </body>
 </html>

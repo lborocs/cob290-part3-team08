@@ -1,5 +1,3 @@
-/* chatSystem.css */
-
 html {
     height: 80vh;
 }
@@ -40,7 +38,6 @@ body {
 
 .chat-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     margin-bottom: 10px;
     position: relative;
@@ -77,6 +74,40 @@ body {
     cursor: pointer;
     display: none;
     color: black;
+    margin-left: auto;
+}
+
+.chat-members {
+    margin-bottom: 15px;
+    padding: 10px;
+    background: #fafafa;
+    border-radius: 6px;
+}
+
+.chat-members h3 {
+    margin: 0 0 8px;
+    font-size: 1em;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 4px;
+}
+
+.chat-members ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.chat-members li {
+    padding: 4px 0;
+    font-size: 0.9em;
+}
+
+.chat-members.hidden {
+    display: none;
+}
+
+.chat-members.visible {
+    display: block;
 }
 
 .message-list {
@@ -131,11 +162,18 @@ button {
     cursor: pointer;
 }
 
+.icon-btn {
+    background: none;
+    border: none;
+    font-size: 1.2em;
+    cursor: pointer;
+    margin-left: 8px;
+}
+
 .sub-action {
     margin-top: 10px;
     display: flex;
     gap: 10px;
-    flex-direction: row;
     flex-wrap: wrap;
 }
 
@@ -158,7 +196,6 @@ button {
 .chat-item.active {
     background: rgb(196, 198, 202);
 }
-
 
 .delete-confirm-btn {
     background: red;

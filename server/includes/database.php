@@ -1,161 +1,199 @@
+
 <?php
-/**
- * Database.php
- * This file handles all database operations for the chat system
- * 
- * How to use:
- * 1. Make sure you have XAMPP installed
- * 2. Place this file in your XAMPP htdocs folder
- * 3. Create a new database named 'team08' in phpMyAdmin (go to localhost/phpmyadmin with apache and mysql running on XAMPP
- * create new database, then go to SQL tab and input all of schema.sql, press go and the tables will be created with input data)
- * Need to update SQL structure using schema.sql - may need to be further refined. 
- */
-require_once 'config.php';
+require_once __DIR__ . '/config.php';
 
 class Database
 {
-    private $conn;
+    public $conn;
 
     public function __construct()
     {
         try {
-            $this->conn = new PDO
-            ("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
-
-            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->conn = new PDO(
+                "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
+                DB_USER,
+                DB_PASS,
+                [
+                    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_EMULATE_PREPARES   => false,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                ]
+            );
         } catch (PDOException $e) {
             echo "Connection Error: " . $e->getMessage();
+            exit;
         }
     }
 
-    // ------USERS
-    public function getAllEmployees()
+    // ------ USERS ------
+
+    public function getAllEmployees(): array
     {
-        $stmt = $this->conn->prepare("SELECT employee_id, first_name, second_name FROM Employees");
+        $stmt = $this->conn->prepare(
+            "SELECT employee_id, first_name, second_name
+               FROM Employees"
+        );
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll();
     }
 
+    // ------ CHAT SYSTEM ------
 
-    // ------CHAT SYSTEM
-
-    #Function that creates a new chat and sets creator as admin
-    public function createChatWithCreator($creatorId, $chatName = null)
+    public function createChatWithCreator(int $creatorId, ?string $chatName = null)
     {
-        $stmt = $this->conn->prepare("INSERT INTO Chats (chat_name) VALUES (:chatName)");
+        $stmt = $this->conn->prepare(
+            "INSERT INTO Chats (chat_name) VALUES (:chatName)"
+        );
         $stmt->bindParam(':chatName', $chatName);
         if ($stmt->execute()) {
-            $chatId = $this->conn->lastInsertId();
-            $this->addUserToChat($chatId, $creatorId, true); // Creator is admin
+            $chatId = (int)$this->conn->lastInsertId();
+            $this->addUserToChat($chatId, $creatorId, true);
             return $chatId;
         }
         return false;
     }
 
-
-
-    public function getChatMessages($chatId)
+    public function getChatMessages(int $chatId): array
     {
-        $stmt = $this->conn->prepare("
-            SELECT * FROM ChatMessages
-            WHERE chat_id = :chatId
-            ORDER BY date_time ASC
-        ");
-        $stmt->bindParam(':chatId', $chatId);
+        $stmt = $this->conn->prepare(
+            "SELECT * 
+               FROM ChatMessages
+              WHERE chat_id = :chatId
+           ORDER BY date_time ASC"
+        );
+        $stmt->bindParam(':chatId', $chatId, PDO::PARAM_INT);
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll();
     }
 
-
-    #Function that adds user to a chat
-    public function addUserToChat($chatId, $userId, $isAdmin = false)
+    public function getChatMembers(int $chatId): array
     {
-        $stmt = $this->conn->prepare("INSERT IGNORE INTO ChatMembers (chat_id, employee_id, is_admin) VALUES (:chatId, :userId, :isAdmin)");
-        $stmt->bindParam(':chatId', $chatId);
-        $stmt->bindParam(':userId', $userId);
+        $stmt = $this->conn->prepare(
+            "SELECT e.employee_id,
+                    e.first_name,
+                    e.second_name,
+                    cm.is_admin
+               FROM ChatMembers cm
+               JOIN Employees e ON e.employee_id = cm.employee_id
+              WHERE cm.chat_id = :chat_id"
+        );
+        $stmt->execute(['chat_id' => $chatId]);
+        return $stmt->fetchAll();
+    }
+
+    public function addUserToChat(int $chatId, int $userId, bool $isAdmin = false): bool
+    {
+        $stmt = $this->conn->prepare(
+            "INSERT IGNORE INTO ChatMembers (chat_id, employee_id, is_admin)
+             VALUES (:chatId, :userId, :isAdmin)"
+        );
+        $stmt->bindParam(':chatId', $chatId, PDO::PARAM_INT);
+        $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
         $stmt->bindParam(':isAdmin', $isAdmin, PDO::PARAM_BOOL);
         return $stmt->execute();
     }
 
-    #Function that removes user from chat
-    public function removeUserFromChat($chatId, $userId)
+    public function removeUserFromChat(int $chatId, int $userId): bool
     {
-        $stmt = $this->conn->prepare("DELETE FROM ChatMembers WHERE chat_id = :chatId AND employee_id = :userId");
-        $stmt->bindParam(':chatId', $chatId);
-        $stmt->bindParam(':userId', $userId);
+        $stmt = $this->conn->prepare(
+            "DELETE FROM ChatMembers
+              WHERE chat_id = :chatId
+                AND employee_id = :userId"
+        );
+        $stmt->bindParam(':chatId', $chatId, PDO::PARAM_INT);
+        $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
         return $stmt->execute();
     }
 
-    #Function that sets a user to admin
-    public function setAdminStatus($chatId, $userId, $status)
+    public function setAdminStatus(int $chatId, int $userId, bool $status): bool
     {
-        $stmt = $this->conn->prepare("UPDATE ChatMembers SET is_admin = :status WHERE chat_id = :chatId AND employee_id = :userId");
-        $stmt->bindParam(':chatId', $chatId);
-        $stmt->bindParam(':userId', $userId);
+        $stmt = $this->conn->prepare(
+            "UPDATE ChatMembers
+                SET is_admin = :status
+              WHERE chat_id = :chatId
+                AND employee_id = :userId"
+        );
+        $stmt->bindParam(':chatId', $chatId, PDO::PARAM_INT);
+        $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
         $stmt->bindParam(':status', $status, PDO::PARAM_BOOL);
         return $stmt->execute();
     }
 
-    #Function to rename chat
-    public function renameChat($chatId, $newName)
+    public function renameChat(int $chatId, string $newName): bool
     {
-        $stmt = $this->conn->prepare("UPDATE Chats SET chat_name = :newName WHERE chatID = :chatId");
+        $stmt = $this->conn->prepare(
+            "UPDATE Chats
+                SET chat_name = :newName
+              WHERE chatID = :chatId"
+        );
         $stmt->bindParam(':newName', $newName);
-        $stmt->bindParam(':chatId', $chatId);
+        $stmt->bindParam(':chatId', $chatId, PDO::PARAM_INT);
         return $stmt->execute();
     }
 
-    #Function to delete messages
-    public function deleteMessage($messageId, $requesterId)
+    public function deleteMessage(int $messageId, int $requesterId): bool
     {
-        $stmt = $this->conn->prepare("
-            SELECT sender_id, chat_id FROM ChatMessages WHERE message_id = :msgId
-        ");
-        $stmt->bindParam(':msgId', $messageId);
+        $stmt = $this->conn->prepare(
+            "SELECT sender_id, chat_id
+               FROM ChatMessages
+              WHERE message_id = :msgId"
+        );
+        $stmt->bindParam(':msgId', $messageId, PDO::PARAM_INT);
         $stmt->execute();
-        $msg = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if (!$msg)
+        $msg = $stmt->fetch();
+        if (!$msg) {
             return false;
+        }
 
-        #Check if requester is sender or admin, admins can delete any messages, users only their own
-        if ($msg['sender_id'] == $requesterId || $this->isAdmin($msg['chat_id'], $requesterId)) {
-            $stmt = $this->conn->prepare("UPDATE ChatMessages SET status = 'deleted' WHERE message_id = :msgId");
-            $stmt->bindParam(':msgId', $messageId);
-            return $stmt->execute();
+        if (
+            $msg['sender_id'] == $requesterId ||
+            $this->isAdmin((int)$msg['chat_id'], $requesterId)
+        ) {
+            $upd = $this->conn->prepare(
+                "UPDATE ChatMessages
+                    SET status = 'deleted'
+                  WHERE message_id = :msgId"
+            );
+            $upd->bindParam(':msgId', $messageId, PDO::PARAM_INT);
+            return $upd->execute();
         }
 
         return false;
     }
 
-    #Function to check if user is admin of chat
-    public function isAdmin($chatId, $userId)
+    public function isAdmin(int $chatId, int $userId): bool
     {
-        $stmt = $this->conn->prepare("SELECT is_admin FROM ChatMembers WHERE chat_id = :chatId AND employee_id = :userId");
-        $stmt->bindParam(':chatId', $chatId);
-        $stmt->bindParam(':userId', $userId);
+        $stmt = $this->conn->prepare(
+            "SELECT is_admin
+               FROM ChatMembers
+              WHERE chat_id = :chatId
+                AND employee_id = :userId"
+        );
+        $stmt->bindParam(':chatId', $chatId, PDO::PARAM_INT);
+        $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
         $stmt->execute();
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $result ? (bool) $result['is_admin'] : false;
+        $res = $stmt->fetch();
+        return $res ? (bool)$res['is_admin'] : false;
     }
 
-    #Function to check if user can leave chat (cannot leave if they are the only admin)
-    public function canLeaveChat($chatId, $userId)
+    public function canLeaveChat(int $chatId, int $userId): bool
     {
-        if (!$this->isAdmin($chatId, $userId))
+        if (!$this->isAdmin($chatId, $userId)) {
             return true;
-        $stmt = $this->conn->prepare("
-            SELECT COUNT(*) as admin_count 
-            FROM ChatMembers WHERE chat_id = :chatId AND is_admin = 1
-        ");
-        $stmt->bindParam(':chatId', $chatId);
+        }
+        $stmt = $this->conn->prepare(
+            "SELECT COUNT(*) AS admin_count
+               FROM ChatMembers
+              WHERE chat_id = :chatId
+                AND is_admin = 1"
+        );
+        $stmt->bindParam(':chatId', $chatId, PDO::PARAM_INT);
         $stmt->execute();
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $result && $result['admin_count'] > 1;
+        $row = $stmt->fetch();
+        return $row && $row['admin_count'] > 1;
     }
 
-    #Function to leave chat
-    public function leaveChat($chatId, $userId)
+    public function leaveChat(int $chatId, int $userId): bool
     {
         if ($this->canLeaveChat($chatId, $userId)) {
             return $this->removeUserFromChat($chatId, $userId);
@@ -163,54 +201,52 @@ class Database
         return false;
     }
 
-    #Function to get all chats for a user
-    public function getUserChats($userId)
+    public function getUserChats(int $userId): array
     {
-        $stmt = $this->conn->prepare("
-            SELECT C.chatID, C.chat_name
-            FROM Chats C
-            JOIN ChatMembers CM ON C.chatID = CM.chat_id
-            WHERE CM.employee_id = :userId
-        ");
-        $stmt->bindParam(':userId', $userId);
+        $stmt = $this->conn->prepare(
+            "SELECT C.chatID, C.chat_name
+               FROM Chats C
+               JOIN ChatMembers CM
+                 ON C.chatID = CM.chat_id
+              WHERE CM.employee_id = :userId"
+        );
+        $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll();
     }
 
-
-    #Function to send a message
-    public function sendMessage($chatId, $senderId, $message)
+    public function sendMessage(int $chatId, int $senderId, string $message): bool
     {
-        $stmt = $this->conn->prepare("
-                INSERT INTO ChatMessages (chat_id, sender_id, message_contents) 
-                VALUES (:chatId, :senderId, :msg)
-            ");
-        $stmt->bindParam(':chatId', $chatId);
-        $stmt->bindParam(':senderId', $senderId);
-        $stmt->bindParam(':msg', $message);
+        $stmt = $this->conn->prepare(
+            "INSERT INTO ChatMessages (chat_id, sender_id, message_contents)
+             VALUES (:chatId, :senderId, :msg)"
+        );
+        $stmt->bindParam(':chatId', $chatId, PDO::PARAM_INT);
+        $stmt->bindParam(':senderId', $senderId, PDO::PARAM_INT);
+        $stmt->bindParam(':msg',      $message, PDO::PARAM_STR);
         return $stmt->execute();
     }
 
-    #Function to mark a message as read
-    public function markMessageRead($messageId)
+    public function markMessageRead(int $messageId): bool
     {
-        $stmt = $this->conn->prepare("
-                UPDATE ChatMessages 
-                SET read_receipt = 1 
-                WHERE message_id = :msgId
-            ");
-        $stmt->bindParam(':msgId', $messageId);
+        $stmt = $this->conn->prepare(
+            "UPDATE ChatMessages
+                SET read_receipt = 1
+              WHERE message_id = :msgId"
+        );
+        $stmt->bindParam(':msgId', $messageId, PDO::PARAM_INT);
         return $stmt->execute();
     }
 
-    #Function to delete an entire chat
-    public function deleteChat($chatId)
+    public function deleteChat(int $chatId): bool
     {
-        $stmt = $this->conn->prepare("DELETE FROM Chats WHERE chatID = :chatId");
-        $stmt->bindParam(':chatId', $chatId);
+        $stmt = $this->conn->prepare(
+            "DELETE FROM Chats
+              WHERE chatID = :chatId"
+        );
+        $stmt->bindParam(':chatId', $chatId, PDO::PARAM_INT);
         return $stmt->execute();
     }
-
 
     // ------DATA ANALYTICS 
 
@@ -313,3 +349,4 @@ class Database
     }
 }
 ?>
+
