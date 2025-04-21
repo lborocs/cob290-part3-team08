@@ -64,16 +64,20 @@ class Database
     public function getChatMessages(int $chatId): array
     {
         $stmt = $this->conn->prepare(
-            "SELECT * 
-               FROM ChatMessages
-              WHERE chat_id = :chatId
-           ORDER BY date_time ASC"
+            "SELECT 
+                cm.*, 
+                e.first_name, 
+                e.second_name
+             FROM ChatMessages cm
+             JOIN Employees e ON cm.sender_id = e.employee_id
+            WHERE cm.chat_id = :chatId
+            ORDER BY cm.date_time ASC"
         );
         $stmt->bindParam(':chatId', $chatId, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll();
     }
-
+    
     public function getChatMembers(int $chatId): array
     {
         $stmt = $this->conn->prepare(

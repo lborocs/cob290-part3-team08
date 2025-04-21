@@ -273,7 +273,7 @@ function loadMessages(chatId) {
         const d = document.createElement('div');
         d.className = 'message';
         d.innerHTML =
-          `<strong>${m.sender_id}</strong>: ${m.message_contents}` +
+          `<strong>${m.first_name} ${m.second_name}</strong>: ${m.message_contents}` +
           (m.read_receipt ? ' <span class="read">(read)</span>' : '');
         pane.appendChild(d);
 
