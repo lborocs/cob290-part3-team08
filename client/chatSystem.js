@@ -228,7 +228,7 @@ function loadMembers(chatId) {
         (m) =>
           String(m.employee_id) === String(currentUserId) && m.is_admin == true
       )
-      console.log("Current user is admin:", currentIsAdmin)
+      console.log("Current user:", currentUserId)
 
       const ul = document.getElementById("memberList")
       ul.innerHTML = ""
