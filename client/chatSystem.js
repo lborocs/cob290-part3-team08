@@ -224,35 +224,42 @@ function loadMembers(chatId) {
   return fetch(`${API_BASE}/${chatId}/members`, { method: "GET" })
     .then((r) => r.json())
     .then((data) => {
-      const ul = document.getElementById("memberList")
-      ul.innerHTML = ""
+      currentIsAdmin = data.members.some(
+        (m) => String(m.employee_id) === String(currentUserId) && m.is_admin == true
+
+      );
+      console.log("Current user is admin:", currentIsAdmin);
+
+
+      const ul = document.getElementById("memberList");
+      ul.innerHTML = "";
 
       data.members.forEach((m) => {
-        const li = document.createElement("li")
+        const li = document.createElement("li");
         li.textContent =
-          `${m.first_name} ${m.second_name}` + (m.is_admin ? " (admin)" : "")
-        const canManage = currentIsAdmin || currentUserType < 2
-        if (canManage && m.employee_id !== currentUserId) {
-          const btn = document.createElement("button")
-          btn.textContent = "✖"
-          btn.className = "kick-btn"
+          `${m.first_name} ${m.second_name}` + (m.is_admin ? " (admin)" : "");
+
+        // ✅ Show ❌ only if current user is admin AND this is not their own name
+        if (currentIsAdmin && m.employee_id !== currentUserId) {
+          const btn = document.createElement("button");
+          btn.textContent = "✖";
+          btn.className = "kick-btn";
           btn.onclick = (e) => {
-            e.stopPropagation()
-            removeUser(m.employee_id)
-          }
-          li.appendChild(btn)
+            e.stopPropagation();
+            removeUser(m.employee_id);
+          };
+          li.appendChild(btn);
         }
 
-        ul.appendChild(li)
-      })
+        ul.appendChild(li);
+      });
 
-      rebuildPromoteSelect(data.members)
+      rebuildPromoteSelect(data.members);
 
-      return data.members.some(
-        (m) => m.employee_id === currentUserId && m.is_admin
-      )
-    })
+      return currentIsAdmin;
+    });
 }
+
 
 //function to retrieve and show messages for a specific chat
 //each message gets assgined its own div so basically iterating over the messages
@@ -399,6 +406,25 @@ function leaveChat() {
     }
   })
 }
+
+//kicks users from chat (admin functionality)
+function removeUser(userId) {
+  if (!currentChatId) return
+  if (!confirm("Remove this user from the chat?")) return
+
+  fetch(`${API_BASE}/${currentChatId}/members/${userId}`, {
+    method: "DELETE",
+  }).then((r) => {
+    if (r.status === 204) {
+      loadMembers(currentChatId)
+    } else if (r.status === 409) {
+      alert("Cannot remove the last admin.")
+    } else {
+      alert("Could not remove user (error " + r.status + ")")
+    }
+  })
+}
+
 
 //hides the admin menu for non-admins and also hides it after an operation is doen such as adding a user
 function closeAdminMenus() {

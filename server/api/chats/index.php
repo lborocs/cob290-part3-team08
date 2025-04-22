@@ -115,31 +115,39 @@ if (ctype_digit($parts[0])) {
         //handles users leaving chats and admins removing other users
         if ($method === 'DELETE' && count($parts) === 3) {
             $uid = (int) $parts[2];
-
+        
             // Case 1: User is trying to leave the chat themselves
             if ($uid === $currentUser) {
                 $ok = $db->leaveChat($chatId, $uid);
                 if ($ok) {
                     http_response_code(204);
                 } else {
-                    http_response_code(409); // last admin
+                    http_response_code(409); // last admin can't leave
                     echo json_encode(['error' => 'last_admin']);
                 }
                 exit;
             }
-
-
-            // Optional: prevent removing last admin
+        
+            // Case 2: User is trying to kick someone else — must be admin
+            if (!$db->isAdmin($chatId, $currentUser)) {
+                http_response_code(403); // forbidden
+                echo json_encode(['error' => 'Permission denied']);
+                exit;
+            }
+        
+            // Optional: prevent removing the last admin
             if ($db->isAdmin($chatId, $uid) && !$db->canLeaveChat($chatId, $uid)) {
                 http_response_code(409);
                 echo json_encode(['error' => 'Cannot remove the last admin']);
                 exit;
             }
-
+        
+            // Kick the user
             $db->removeUserFromChat($chatId, $uid);
             http_response_code(204);
             exit;
         }
+        
 
     }
 
