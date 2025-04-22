@@ -225,41 +225,39 @@ function loadMembers(chatId) {
     .then((r) => r.json())
     .then((data) => {
       currentIsAdmin = data.members.some(
-        (m) => String(m.employee_id) === String(currentUserId) && m.is_admin == true
+        (m) =>
+          String(m.employee_id) === String(currentUserId) && m.is_admin == true
+      )
+      console.log("Current user is admin:", currentIsAdmin)
 
-      );
-      console.log("Current user is admin:", currentIsAdmin);
-
-
-      const ul = document.getElementById("memberList");
-      ul.innerHTML = "";
+      const ul = document.getElementById("memberList")
+      ul.innerHTML = ""
 
       data.members.forEach((m) => {
-        const li = document.createElement("li");
+        const li = document.createElement("li")
         li.textContent =
-          `${m.first_name} ${m.second_name}` + (m.is_admin ? " (admin)" : "");
+          `${m.first_name} ${m.second_name}` + (m.is_admin ? " (admin)" : "")
 
         // ✅ Show ❌ only if current user is admin AND this is not their own name
         if (currentIsAdmin && m.employee_id !== currentUserId) {
-          const btn = document.createElement("button");
-          btn.textContent = "✖";
-          btn.className = "kick-btn";
+          const btn = document.createElement("button")
+          btn.textContent = "✖"
+          btn.className = "kick-btn"
           btn.onclick = (e) => {
-            e.stopPropagation();
-            removeUser(m.employee_id);
-          };
-          li.appendChild(btn);
+            e.stopPropagation()
+            removeUser(m.employee_id)
+          }
+          li.appendChild(btn)
         }
 
-        ul.appendChild(li);
-      });
+        ul.appendChild(li)
+      })
 
-      rebuildPromoteSelect(data.members);
+      rebuildPromoteSelect(data.members)
 
-      return currentIsAdmin;
-    });
+      return currentIsAdmin
+    })
 }
-
 
 //function to retrieve and show messages for a specific chat
 //each message gets assgined its own div so basically iterating over the messages
@@ -271,18 +269,32 @@ function loadMessages(chatId) {
     .then((msgs) => {
       const pane = document.getElementById("messageList")
       pane.innerHTML = ""
-      msgs.forEach((m) => {
-        const d = document.createElement("div")
-        const isOwnMessage = String(m.sender_id) === String(currentUserId)
-        d.className = "message" + (isOwnMessage ? " own" : "")
-        d.innerHTML =
-          `<strong>${m.first_name} ${m.second_name}</strong>: ${m.message_contents}` +
-          (isOwnMessage && m.read_receipt
-            ? ' <span class="read">(read)</span>'
-            : "")
-        pane.appendChild(d)
 
-        // Only mark other users' messages as read
+      msgs.forEach((m) => {
+        const isOwnMessage = String(m.sender_id) === String(currentUserId)
+        const wrapper = document.createElement("div")
+        wrapper.className = "message-wrapper" + (isOwnMessage ? " own" : "")
+
+        const time = m.date_time
+          ? new Date(m.date_time).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          : ""
+
+        wrapper.innerHTML = `
+          <div class="message-meta">
+            <span class="message-sender">${m.first_name} ${m.second_name}</span>
+            <span class="message-time">${time}</span>
+          </div>
+          <div class="message-bubble">${m.message_contents}</div>
+          ${
+            isOwnMessage && m.read_receipt ? `<div class="message-read">Read</div>` : ""
+          }
+        `
+
+        pane.appendChild(wrapper)
+
         if (!m.read_receipt && !isOwnMessage) {
           markMessageRead(m.message_id)
         }
@@ -424,7 +436,6 @@ function removeUser(userId) {
     }
   })
 }
-
 
 //hides the admin menu for non-admins and also hides it after an operation is doen such as adding a user
 function closeAdminMenus() {
