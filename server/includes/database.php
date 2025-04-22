@@ -78,16 +78,17 @@ class Database
         return $stmt->fetchAll();
     }
 
-    public function getMessageById(int $chatId): ?array
+    public function getMessageById(int $messageId): ?array
     {
         $stmt = $this->conn->prepare(
-            "SELECT * FROM ChatMessages WHERE message_id = :chatId"
+            "SELECT * FROM ChatMessages WHERE message_id = :messageId"
         );
-        $stmt->bindParam(':chatId', $chatId, PDO::PARAM_INT);
+        $stmt->bindParam(':messageId', $messageId, PDO::PARAM_INT);
         $stmt->execute();
         $message = $stmt->fetch(PDO::FETCH_ASSOC);
         return $message ?: null;
     }
+
 
 
     public function getChatMembers(int $chatId): array
@@ -202,20 +203,27 @@ class Database
 
     public function canLeaveChat(int $chatId, int $userId): bool
     {
+        // Non-admins can always leave
         if (!$this->isAdmin($chatId, $userId)) {
             return true;
         }
+
+        // Admins can only leave if there is at least one other admin
         $stmt = $this->conn->prepare(
             "SELECT COUNT(*) AS admin_count
-               FROM ChatMembers
-              WHERE chat_id = :chatId
-                AND is_admin = 1"
+           FROM ChatMembers
+          WHERE chat_id = :chatId AND is_admin = 1"
         );
+        error_log("Admin count for chat $chatId: " . ($row['admin_count'] ?? 'null'));
+        error_log("Current user is admin: " . ($this->isAdmin($chatId, $userId) ? 'true' : 'false'));
+
         $stmt->bindParam(':chatId', $chatId, PDO::PARAM_INT);
         $stmt->execute();
         $row = $stmt->fetch();
+
         return $row && $row['admin_count'] > 1;
     }
+
 
     public function leaveChat(int $chatId, int $userId): bool
     {

@@ -1,447 +1,437 @@
-
-
 //adjust this if your path is different
-const API_BASE = '/makeitall/cob290-part3-team08/server/api/chats/index.php';
+const API_BASE = "/makeitall/cob290-part3-team08/server/api/chats/index.php"
 
 //promoting to admin, only non-admin members in the members list
-function rebuildPromoteSelect (members) {
-  const sel = document.getElementById('promoteUserSelect');
-  if (!sel) return;                          
+function rebuildPromoteSelect(members) {
+  const sel = document.getElementById("promoteUserSelect")
+  if (!sel) return
 
-
-  sel.innerHTML = '<option value="">— choose —</option>';
-
+  sel.innerHTML = '<option value="">— choose —</option>'
 
   members
-    .filter(m => !m.is_admin)
-    .forEach(m => {
-      const opt = document.createElement('option');
-      opt.value = m.employee_id;
-      opt.textContent = `${m.first_name} ${m.second_name}`;
-      sel.appendChild(opt);
-    });
+    .filter((m) => !m.is_admin)
+    .forEach((m) => {
+      const opt = document.createElement("option")
+      opt.value = m.employee_id
+      opt.textContent = `${m.first_name} ${m.second_name}`
+      sel.appendChild(opt)
+    })
 }
 
+//cheks the id of chat and if user is admin on the chat
+let currentChatId = null
+let currentIsAdmin = false
 
-//cheks the id of chat and if user is admin on the chat 
-let currentChatId  = null;
-let currentIsAdmin = false;
-
-//queue for adding members to chat 
-let allEmployees   = [];    
-let queue          = [];     
+//queue for adding members to chat
+let allEmployees = []
+let queue = []
 
 //simpler way to select elems instead of always writing document.querySelector
-const $ = sel => document.querySelector(sel);
+const $ = (sel) => document.querySelector(sel)
 
 //these are helper functions that do certain things
 //like clears the UI after a chat has been made so no redundant text is left
 function resetChatUI() {
-  currentChatId  = null;
-  currentIsAdmin = false;
+  currentChatId = null
+  currentIsAdmin = false
 
-  $('#currentChatName').textContent         = 'Select a chat';
-  $('.message-input').style.display         = 'none';
-  $('#leaveBtn').style.display              = 'none';
-  $('.more-btn').style.display              = 'none';
-  $('#messageInput').disabled               = true;
+  $("#currentChatName").textContent = "Select a chat"
+  $(".message-input").style.display = "none"
+  $("#leaveBtn").style.display = "none"
+  $(".more-btn").style.display = "none"
+  $("#messageInput").disabled = true
 
-  $('#messageList').innerHTML  = '';
-  $('#memberList').innerHTML   = '';
-  $('#addUserSelect').selectedIndex    = 0;
-  $('#promoteUserSelect').innerHTML    = '<option value="">— choose —</option>';
-  queue = [];
-  renderQueue();
-  closeAdminMenus();
+  $("#messageList").innerHTML = ""
+  $("#memberList").innerHTML = ""
+  $("#addUserSelect").selectedIndex = 0
+  $("#promoteUserSelect").innerHTML = '<option value="">— choose —</option>'
+  queue = []
+  renderQueue()
+  closeAdminMenus()
 }
 
 function clearInputs() {
-  $('#newChatName').value = '';
-  $('#messageInput').value = '';
+  $("#newChatName").value = ""
+  $("#messageInput").value = ""
 }
 
 function renderQueue() {
-  const ul = $('#pendingList');
-  ul.innerHTML = '';
-  queue.forEach(id => {
-    const emp = allEmployees.find(e => e.employee_id === id);
-    if (!emp) return;
-    const li  = document.createElement('li');
-    li.className = 'pill';
-    li.textContent = `${emp.first_name} ${emp.second_name}`;
-    const x  = document.createElement('span');
-    x.textContent = '✖';
-    x.onclick = () => { queue = queue.filter(q => q !== id); renderQueue(); };
-    li.appendChild(x);
-    ul.appendChild(li);
-  });
+  const ul = $("#pendingList")
+  ul.innerHTML = ""
+  queue.forEach((id) => {
+    const emp = allEmployees.find((e) => e.employee_id === id)
+    if (!emp) return
+    const li = document.createElement("li")
+    li.className = "pill"
+    li.textContent = `${emp.first_name} ${emp.second_name}`
+    const x = document.createElement("span")
+    x.textContent = "✖"
+    x.onclick = () => {
+      queue = queue.filter((q) => q !== id)
+      renderQueue()
+    }
+    li.appendChild(x)
+    ul.appendChild(li)
+  })
 }
 
 //Runs once to load the employees then their chats
-//deals with "enter" as a shortcut 
-//deals with the queue array for pending user add 
+//deals with "enter" as a shortcut
+//deals with the queue array for pending user add
 
-document.addEventListener('DOMContentLoaded', () => {
-  resetChatUI();
-  loadUserDropdowns().then(() => loadChats());
+document.addEventListener("DOMContentLoaded", () => {
+  resetChatUI()
+  loadUserDropdowns().then(() => loadChats())
 
-  $('#messageInput')
-    .addEventListener('keypress',
-      e => e.key === 'Enter' && sendMessage());
+  $("#messageInput").addEventListener(
+    "keypress",
+    (e) => e.key === "Enter" && sendMessage()
+  )
 
-  $('#newChatName')
-    .addEventListener('keypress',
-      e => e.key === 'Enter' && createChat());
+  $("#newChatName").addEventListener(
+    "keypress",
+    (e) => e.key === "Enter" && createChat()
+  )
 
-$('#userSearch')
-  .addEventListener('keypress', e => {
-    if (e.key !== 'Enter') return;
-    queueFromInput(e.target);
-  });
+  $("#userSearch").addEventListener("keypress", (e) => {
+    if (e.key !== "Enter") return
+    queueFromInput(e.target)
+  })
 
+  $("#userSearch").addEventListener("change", (e) => queueFromInput(e.target))
 
-$('#userSearch')
-  .addEventListener('change',  e => queueFromInput(e.target));
-
-// this function is a helper function that takes the input and adds it to the array
-function queueFromInput (input) {
-  const id = +input.value;          
-  if (id && !queue.includes(id)) {
-    queue.push(id);
-    renderQueue();
+  // this function is a helper function that takes the input and adds it to the array
+  function queueFromInput(input) {
+    const id = +input.value
+    if (id && !queue.includes(id)) {
+      queue.push(id)
+      renderQueue()
+    }
+    input.value = ""
   }
-  input.value = '';             
-}
 
-
-
-  $('#addUserSelect')
-    .addEventListener('change', e => {
-      const id = +e.target.value;
-      if (id && !queue.includes(id)) { queue.push(id); renderQueue(); }
-      e.target.selectedIndex = 0; 
-    });
-});
+  $("#addUserSelect").addEventListener("change", (e) => {
+    const id = +e.target.value
+    if (id && !queue.includes(id)) {
+      queue.push(id)
+      renderQueue()
+    }
+    e.target.selectedIndex = 0
+  })
+})
 
 //this function uses the getAll.php to get all the employees from the database
 //it then populates the dropdowns with the employees
 //it also populates the list of employees in the admin menu
 function loadUserDropdowns() {
-  return fetch('../server/api/users/getAll.php')
-    .then(r => r.json())
-    .then(users => {
-      allEmployees = users;
+  return fetch("../server/api/users/getAll.php")
+    .then((r) => r.json())
+    .then((users) => {
+      allEmployees = users
 
+      const sel = $("#addUserSelect")
+      const frag1 = document.createDocumentFragment()
+      sel.innerHTML = '<option value="">— pick —</option>'
+      users.forEach((u) => {
+        const opt = document.createElement("option")
+        opt.value = u.employee_id
+        opt.textContent = `${u.first_name} ${u.second_name}`
+        frag1.appendChild(opt)
+      })
+      sel.appendChild(frag1)
 
-      const sel   = $('#addUserSelect');
-      const frag1 = document.createDocumentFragment();
-      sel.innerHTML = '<option value="">— pick —</option>';
-      users.forEach(u => {
-        const opt = document.createElement('option');
-        opt.value = u.employee_id;
-        opt.textContent = `${u.first_name} ${u.second_name}`;
-        frag1.appendChild(opt);
-      });
-      sel.appendChild(frag1);
-
-
-      const dl    = $('#allEmployees');
-      const frag2 = document.createDocumentFragment();
-      users.forEach(u => {
-        const o = document.createElement('option');
-        o.value = u.employee_id; 
-        o.label = `${u.first_name} ${u.second_name}`;
-        frag2.appendChild(o);
-      });
-      dl.appendChild(frag2);
-    });
+      const dl = $("#allEmployees")
+      const frag2 = document.createDocumentFragment()
+      users.forEach((u) => {
+        const o = document.createElement("option")
+        o.value = u.employee_id
+        o.label = `${u.first_name} ${u.second_name}`
+        frag2.appendChild(o)
+      })
+      dl.appendChild(frag2)
+    })
 }
 
-//this function helps with adding the queued users to the chat 
+//this function helps with adding the queued users to the chat
 
 function addQueued() {
-  if (!queue.length) return;
+  if (!queue.length) return
   //this basically creates more than one fetch and then waits for all to be finished
   //then it alerts the user how many users were added
-  const promises = queue.map(uid =>
+  const promises = queue.map((uid) =>
     fetch(`${API_BASE}/${currentChatId}/members`, {
-      method : 'POST',
-      headers: { 'Content-Type':'application/json' },
-      body   : JSON.stringify({ user_id: uid, is_admin:false })
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: uid, is_admin: false }),
     })
-  );
+  )
   Promise.all(promises).then(() => {
-    alert(queue.length + ' user(s) added');
-    queue = [];
-    renderQueue();
-    loadMembers(currentChatId);
-    closeAdminMenus();
-  });
+    alert(queue.length + " user(s) added")
+    queue = []
+    renderQueue()
+    loadMembers(currentChatId)
+    closeAdminMenus()
+  })
 }
 
 //this function helps with getting the chats that the current user is part of
 function loadChats() {
-  fetch(API_BASE, { method: 'GET' })
-    .then(r => r.json())
-    .then(chats => {
-      const list = document.getElementById('chatList');
-      list.innerHTML = '';
-      chats.forEach(c => {
-        const div = document.createElement('div');
-        div.className = 'chat-item';
-        div.textContent = c.chat_name;
-        div.onclick = () => selectChat(c.chatID, c.chat_name, div);
-        list.appendChild(div);
-      });
-    });
+  fetch(API_BASE, { method: "GET" })
+    .then((r) => r.json())
+    .then((chats) => {
+      const list = document.getElementById("chatList")
+      list.innerHTML = ""
+      chats.forEach((c) => {
+        const div = document.createElement("div")
+        div.className = "chat-item"
+        div.textContent = c.chat_name
+        div.onclick = () => selectChat(c.chatID, c.chat_name, div)
+        list.appendChild(div)
+      })
+    })
 }
 
 //this function brings up the chat when the user clicks on one on the left
 //it also highlights the chosen chat
 //if the user is an admin it shows the admin menu
 function selectChat(id, name, elem) {
-  currentChatId = id;
-  document.getElementById('currentChatName').textContent = name;
+  currentChatId = id
+  document.getElementById("currentChatName").textContent = name
 
-  document.querySelectorAll('.chat-item')
-          .forEach(i => i.classList.remove('active'));
-  elem.classList.add('active');
+  document
+    .querySelectorAll(".chat-item")
+    .forEach((i) => i.classList.remove("active"))
+  elem.classList.add("active")
 
-  document.querySelector('.message-input').style.display = 'flex';
-  document.getElementById('leaveBtn').style.display      = 'inline-block';
-  document.getElementById('messageInput').disabled       = false;
+  document.querySelector(".message-input").style.display = "flex"
+  document.getElementById("leaveBtn").style.display = "inline-block"
+  document.getElementById("messageInput").disabled = false
 
-  loadMessages(id);
-  loadMembers(id).then(isAdmin => {
-    currentIsAdmin = isAdmin;
-    const canManage = isAdmin || currentUserType < 2; 
-    document.querySelector('.more-btn')
-            .style.display = canManage ? 'inline-block' : 'none';
-    if (!canManage) closeAdminMenus();
-  });
+  loadMessages(id)
+  loadMembers(id).then((isAdmin) => {
+    currentIsAdmin = isAdmin
+    const canManage = isAdmin || currentUserType < 2
+    document.querySelector(".more-btn").style.display = canManage
+      ? "inline-block"
+      : "none"
+    if (!canManage) closeAdminMenus()
+  })
 }
 
 //this function deals with kicking people from the chat by using the x next to their name on the members list
 //it also adds an admin label if the member has privileges (is_admin on current chat or < 2 user type)
 function loadMembers(chatId) {
-  return fetch(`${API_BASE}/${chatId}/members`, { method: 'GET' })
-    .then(r => r.json())
-    .then(data => {
-      const ul = document.getElementById('memberList');
-      ul.innerHTML = '';
+  return fetch(`${API_BASE}/${chatId}/members`, { method: "GET" })
+    .then((r) => r.json())
+    .then((data) => {
+      const ul = document.getElementById("memberList")
+      ul.innerHTML = ""
 
-      data.members.forEach(m => {
-        const li  = document.createElement('li');
-        li.textContent = `${m.first_name} ${m.second_name}` +
-                         (m.is_admin ? ' (admin)' : '');
-        const canManage = currentIsAdmin || currentUserType < 2;
+      data.members.forEach((m) => {
+        const li = document.createElement("li")
+        li.textContent =
+          `${m.first_name} ${m.second_name}` + (m.is_admin ? " (admin)" : "")
+        const canManage = currentIsAdmin || currentUserType < 2
         if (canManage && m.employee_id !== currentUserId) {
-          const btn = document.createElement('button');
-          btn.textContent = '✖';
-          btn.className   = 'kick-btn';
-          btn.onclick     = e => {
-            e.stopPropagation();
-            removeUser(m.employee_id);
-          };
-          li.appendChild(btn);
+          const btn = document.createElement("button")
+          btn.textContent = "✖"
+          btn.className = "kick-btn"
+          btn.onclick = (e) => {
+            e.stopPropagation()
+            removeUser(m.employee_id)
+          }
+          li.appendChild(btn)
         }
 
-        ul.appendChild(li);
-      });
+        ul.appendChild(li)
+      })
 
-      rebuildPromoteSelect(data.members); 
+      rebuildPromoteSelect(data.members)
 
-      return data.members.some(m =>
-        m.employee_id === currentUserId && m.is_admin
-      );
-    });
+      return data.members.some(
+        (m) => m.employee_id === currentUserId && m.is_admin
+      )
+    })
 }
 
-
-
 //function to retrieve and show messages for a specific chat
-//each message gets assgined its own div so basically iterating over the messages 
+//each message gets assgined its own div so basically iterating over the messages
 //adds a (read) receipt if the message has been read (needs amending slightly)
 
 function loadMessages(chatId) {
-  fetch(`${API_BASE}/${chatId}/messages`, { method: 'GET' })
-    .then(r => r.json())
-    .then(msgs => {
-      const pane = document.getElementById('messageList');
-      pane.innerHTML = '';
-      msgs.forEach(m => {
-        const d = document.createElement('div');
-        const isOwnMessage = String(m.sender_id) === String(currentUserId);
-        d.className = 'message' + (isOwnMessage ? ' own' : '');
+  fetch(`${API_BASE}/${chatId}/messages`, { method: "GET" })
+    .then((r) => r.json())
+    .then((msgs) => {
+      const pane = document.getElementById("messageList")
+      pane.innerHTML = ""
+      msgs.forEach((m) => {
+        const d = document.createElement("div")
+        const isOwnMessage = String(m.sender_id) === String(currentUserId)
+        d.className = "message" + (isOwnMessage ? " own" : "")
         d.innerHTML =
           `<strong>${m.first_name} ${m.second_name}</strong>: ${m.message_contents}` +
-          (isOwnMessage && m.read_receipt ? ' <span class="read">(read)</span>' : '');
-        pane.appendChild(d);
-      
+          (isOwnMessage && m.read_receipt
+            ? ' <span class="read">(read)</span>'
+            : "")
+        pane.appendChild(d)
+
         // Only mark other users' messages as read
         if (!m.read_receipt && !isOwnMessage) {
-          markMessageRead(m.message_id);
+          markMessageRead(m.message_id)
         }
-      });
-      
-      pane.scrollTop = pane.scrollHeight; 
-    });
+      })
+
+      pane.scrollTop = pane.scrollHeight
+    })
 }
 
 //updates read status, function is called from the one above ^^
 function markMessageRead(msgId) {
-  
-  fetch(`${API_BASE}/${currentChatId}/messages/${msgId}`, { method: 'PATCH' });
+  fetch(`${API_BASE}/${currentChatId}/messages/${msgId}`, { method: "PATCH" })
 }
 
-//this function handles the action of sending a new message 
+//this function handles the action of sending a new message
 function sendMessage() {
-  const ipt = document.getElementById('messageInput');
-  const txt = ipt.value.trim();
-  if (!currentChatId || !txt) return;
+  const ipt = document.getElementById("messageInput")
+  const txt = ipt.value.trim()
+  if (!currentChatId || !txt) return
 
   fetch(`${API_BASE}/${currentChatId}/messages`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message: txt })
-  })
-  .then(r => {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message: txt }),
+  }).then((r) => {
     if (r.status === 201) {
-      ipt.value = '';
-      loadMessages(currentChatId);
+      ipt.value = ""
+      loadMessages(currentChatId)
     }
-  });
+  })
 }
 
 //this function creates conversations in the system and makes sure that the name is not empy for the creation
 function createChat() {
-  const name = document.getElementById('newChatName').value.trim();
-  if (!name) return;
+  const name = document.getElementById("newChatName").value.trim()
+  if (!name) return
 
   fetch(API_BASE, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_name: name })
-  })
-  .then(r => {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ chat_name: name }),
+  }).then((r) => {
     if (r.status === 201) {
-      clearInputs();    
-      loadChats();       
+      clearInputs()
+      loadChats()
     }
-  });
+  })
 }
 
 //this function handles adding a single user to the chat
 function addUserToChat() {
-  const sel = document.getElementById('addUserSelect');
-  const uid = +sel.value;          
-  if (!uid) return;                 
+  const sel = document.getElementById("addUserSelect")
+  const uid = +sel.value
+  if (!uid) return
   fetch(`${API_BASE}/${currentChatId}/members`, {
-    method : 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body   : JSON.stringify({ user_id: uid, is_admin: false })
-  })
-  .then(r => {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_id: uid, is_admin: false }),
+  }).then((r) => {
     if (r.status === 201) {
-      alert('User added');
-      sel.value = '';               
-      loadMembers(currentChatId);   
-      closeAdminMenus();            
+      alert("User added")
+      sel.value = ""
+      loadMembers(currentChatId)
+      closeAdminMenus()
     } else {
-      alert('Could not add user (error ' + r.status + ')');
+      alert("Could not add user (error " + r.status + ")")
     }
-  });
+  })
 }
 
 //function that handles the promotion to an admin
 function promoteUser() {
-  const sel = document.getElementById('promoteUserSelect');
-  const uid = +sel.value;
-  if (!uid) return;
+  const sel = document.getElementById("promoteUserSelect")
+  const uid = +sel.value
+  if (!uid) return
   fetch(`${API_BASE}/${currentChatId}/members/${uid}`, {
-    method : 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body   : JSON.stringify({ is_admin: true })
-  })
-  .then(r => {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ is_admin: true }),
+  }).then((r) => {
     if (r.status === 204) {
-      alert('Promoted to admin');
-      sel.value = '';
-      loadMembers(currentChatId);
-      closeAdminMenus();
+      alert("Promoted to admin")
+      sel.value = ""
+      loadMembers(currentChatId)
+      closeAdminMenus()
     } else {
-      alert('Could not promote (error ' + r.status + ')');
+      alert("Could not promote (error " + r.status + ")")
     }
-  });
+  })
 }
-  
+
 //function that deletes chats entirely from database and from all users
 //just as a simple explanation when the server receives the delete request it basically runs the DELETE
 //in database.php
 function deleteChat() {
-  if (!currentChatId || !confirm('Delete this chat?')) return;
+  if (!currentChatId || !confirm("Delete this chat?")) return
 
-  fetch(`${API_BASE}/${currentChatId}`, { method: 'DELETE' })
-    .then(r => {
-      if (r.status === 204) {
-        resetChatUI();   
-        loadChats();
-      }
-    });
+  fetch(`${API_BASE}/${currentChatId}`, { method: "DELETE" }).then((r) => {
+    if (r.status === 204) {
+      resetChatUI()
+      loadChats()
+    }
+  })
 }
 
 //this function allows users to leave chats
-//again makes a delete request to the members endpoint which removes the chat just from that user 
+//again makes a delete request to the members endpoint which removes the chat just from that user
 function leaveChat() {
-  if (!currentChatId || !confirm('Leave this chat?')) return;
+  if (!currentChatId || !confirm("Leave this chat?")) return
 
   fetch(`${API_BASE}/${currentChatId}/members/${currentUserId}`, {
-    method: 'DELETE'
-  })
-  .then(r => {
+    method: "DELETE",
+  }).then((r) => {
     if (r.status === 204) {
-      resetChatUI();
-      loadChats();
+      resetChatUI()
+      loadChats()
     } else if (r.status === 409) {
-      alert('You are the only admin.\nPromote another user before leaving.');
+      alert("You are the only admin.\nPromote another user before leaving.")
     } else {
-      alert('Could not leave chat (error ' + r.status + ')');
+      alert("Could not leave chat (error " + r.status + ")")
     }
-  });
+  })
 }
 
 //hides the admin menu for non-admins and also hides it after an operation is doen such as adding a user
 function closeAdminMenus() {
-  document.getElementById('chatActions').classList.remove('visible');
-  ['add','promote','delete'].forEach(t =>
-    document.getElementById(`${t}SubAction`).classList.add('hidden')
-  );
+  document.getElementById("chatActions").classList.remove("visible")
+  ;["add", "promote", "delete"].forEach((t) =>
+    document.getElementById(`${t}SubAction`).classList.add("hidden")
+  )
 }
 
 //this function basically brings the menu up when the user clicks on the toggle
 function toggleChatActions() {
-  document.getElementById('chatActions').classList.toggle('visible');
+  document.getElementById("chatActions").classList.toggle("visible")
 }
 
 //this function basically shows the list of participants and lets you hide or unhide the list
 function toggleMembers() {
-  const panel = document.getElementById('chatMembersContainer');
-  panel.classList.toggle('hidden');
-  panel.classList.toggle('visible');
+  const panel = document.getElementById("chatMembersContainer")
+  panel.classList.toggle("hidden")
+  panel.classList.toggle("visible")
 }
 //when clicking outside the box it hides the menu
-document.addEventListener('click', e => {
-  const menu = document.getElementById('chatActions');
-  const btn  = document.querySelector('.more-btn');
+document.addEventListener("click", (e) => {
+  const menu = document.getElementById("chatActions")
+  const btn = document.querySelector(".more-btn")
   if (!menu.contains(e.target) && !btn.contains(e.target)) {
-    menu.classList.remove('visible');
+    menu.classList.remove("visible")
   }
-});
+})
 
-//this function basically hides the subactions of the menu 
+//this function basically hides the subactions of the menu
 function showSubAction(type) {
-  ['add','promote','delete'].forEach(t =>
-    document.getElementById(`${t}SubAction`).classList.add('hidden')
-  );
-  document.getElementById(`${type}SubAction`).classList.toggle('hidden');
+  ;["add", "promote", "delete"].forEach((t) =>
+    document.getElementById(`${t}SubAction`).classList.add("hidden")
+  )
+  document.getElementById(`${type}SubAction`).classList.toggle("hidden")
 }
