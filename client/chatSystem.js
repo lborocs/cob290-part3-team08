@@ -271,22 +271,26 @@ function loadMessages(chatId) {
       pane.innerHTML = '';
       msgs.forEach(m => {
         const d = document.createElement('div');
-        d.className = 'message';
+        const isOwnMessage = m.sender_id === currentUserId;
+        d.className = 'message' + (isOwnMessage ? ' own' : '');
         d.innerHTML =
           `<strong>${m.first_name} ${m.second_name}</strong>: ${m.message_contents}` +
-          (m.read_receipt ? ' <span class="read">(read)</span>' : '');
+          (isOwnMessage && m.read_receipt ? ' <span class="read">(read)</span>' : '');
         pane.appendChild(d);
-
-        if (!m.read_receipt && m.sender_id !== currentUserId) {
+      
+        // Only mark other users' messages as read
+        if (!m.read_receipt && !isOwnMessage) {
           markMessageRead(m.message_id);
         }
       });
+      
       pane.scrollTop = pane.scrollHeight; 
     });
 }
 
 //updates read status, function is called from the one above ^^
 function markMessageRead(msgId) {
+  
   fetch(`${API_BASE}/${currentChatId}/messages/${msgId}`, { method: 'PATCH' });
 }
 

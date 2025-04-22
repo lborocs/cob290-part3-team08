@@ -162,13 +162,28 @@ if (ctype_digit($parts[0])) {
             exit;
         }
 
-        //used for read receipts
         if ($method === 'PATCH' && count($parts) === 3) {
             $msgId = (int)$parts[2];
-            $db->markMessageRead($msgId);
+            $currentUserId = $_SESSION['user_id']; // or get it from your auth system
+            error_log("Current user ID is $currentUserId, sender ID is {$message['sender_id']}");
+        
+            $message = $db->getMessageById($msgId);
+        
+            if (!$message) {
+                http_response_code(404);
+                echo json_encode(['error' => 'Message not found']);
+                exit;
+            }
+        
+            if ($message['sender_id'] !== $currentUserId) {
+                $db->markMessageRead($msgId, $currentUserId); // Keeps signature consistent
+            }
+        
             http_response_code(204);
             exit;
         }
+        
+        
 
         //used for deleting a specific message
         if ($method === 'DELETE' && count($parts) === 3) {

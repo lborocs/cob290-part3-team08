@@ -1,14 +1,14 @@
 <?php
 require_once __DIR__ . '/config.php';
 /***
-* This file handles all database operations for the chat system 
-* How to use:
-* 1. Make sure you have XAMPP installed
-* 2. Place this file in your XAMPP htdocs folder
-* 3. Create a new database named 'team08' in phpMyAdmin (go to localhost/phpmyadmin with apache and mysql running on XAMPP
-* create new database, then go to SQL tab and input all of schema.sql, press go and the tables will be created with input data)
-* Need to update SQL structure using schema.sql - may need to be further refined. 
-***/
+ * This file handles all database operations for the chat system 
+ * How to use:
+ * 1. Make sure you have XAMPP installed
+ * 2. Place this file in your XAMPP htdocs folder
+ * 3. Create a new database named 'team08' in phpMyAdmin (go to localhost/phpmyadmin with apache and mysql running on XAMPP
+ * create new database, then go to SQL tab and input all of schema.sql, press go and the tables will be created with input data)
+ * Need to update SQL structure using schema.sql - may need to be further refined. 
+ ***/
 
 class Database
 {
@@ -22,8 +22,8 @@ class Database
                 DB_USER,
                 DB_PASS,
                 [
-                    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_EMULATE_PREPARES   => false,
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_EMULATE_PREPARES => false,
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                 ]
             );
@@ -54,7 +54,7 @@ class Database
         );
         $stmt->bindParam(':chatName', $chatName);
         if ($stmt->execute()) {
-            $chatId = (int)$this->conn->lastInsertId();
+            $chatId = (int) $this->conn->lastInsertId();
             $this->addUserToChat($chatId, $creatorId, true);
             return $chatId;
         }
@@ -77,7 +77,19 @@ class Database
         $stmt->execute();
         return $stmt->fetchAll();
     }
-    
+
+    public function getMessageById(int $chatId): ?array
+    {
+        $stmt = $this->conn->prepare(
+            "SELECT * FROM ChatMessages WHERE message_id = :chatId"
+        );
+        $stmt->bindParam(':chatId', $chatId, PDO::PARAM_INT);
+        $stmt->execute();
+        $message = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $message ?: null;
+    }
+
+
     public function getChatMembers(int $chatId): array
     {
         $stmt = $this->conn->prepare(
@@ -159,7 +171,7 @@ class Database
 
         if (
             $msg['sender_id'] == $requesterId ||
-            $this->isAdmin((int)$msg['chat_id'], $requesterId)
+            $this->isAdmin((int) $msg['chat_id'], $requesterId)
         ) {
             $upd = $this->conn->prepare(
                 "UPDATE ChatMessages
@@ -185,7 +197,7 @@ class Database
         $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
         $stmt->execute();
         $res = $stmt->fetch();
-        return $res ? (bool)$res['is_admin'] : false;
+        return $res ? (bool) $res['is_admin'] : false;
     }
 
     public function canLeaveChat(int $chatId, int $userId): bool
@@ -235,11 +247,11 @@ class Database
         );
         $stmt->bindParam(':chatId', $chatId, PDO::PARAM_INT);
         $stmt->bindParam(':senderId', $senderId, PDO::PARAM_INT);
-        $stmt->bindParam(':msg',      $message, PDO::PARAM_STR);
+        $stmt->bindParam(':msg', $message, PDO::PARAM_STR);
         return $stmt->execute();
     }
 
-    public function markMessageRead(int $messageId): bool
+    public function markMessageRead(int $messageId, int $userId): bool
     {
         $stmt = $this->conn->prepare(
             "UPDATE ChatMessages
@@ -361,4 +373,3 @@ class Database
     }
 }
 ?>
-
