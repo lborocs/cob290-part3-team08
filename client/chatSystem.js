@@ -270,26 +270,62 @@ function loadMessages(chatId) {
       const pane = document.getElementById("messageList")
       pane.innerHTML = ""
 
+      let lastSenderId = null
+      let lastDate = null
+
       msgs.forEach((m) => {
         const isOwnMessage = String(m.sender_id) === String(currentUserId)
-        const wrapper = document.createElement("div")
-        wrapper.className = "message-wrapper" + (isOwnMessage ? " own" : "")
+        const msgDate = new Date(m.date_time)
+        const msgDay = msgDate.toDateString()
+        const timeStr = msgDate.toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
 
-        const time = m.date_time
-          ? new Date(m.date_time).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            })
-          : ""
+        // Date divider
+        if (msgDay !== lastDate) {
+          const divider = document.createElement("div")
+          divider.className = "date-divider"
+          divider.textContent = getDateLabel(msgDate)
+          pane.appendChild(divider)
+          lastDate = msgDay
+        }
+
+        // Grouping logic: show name + profile only if new sender
+        const showMeta = m.sender_id !== lastSenderId
+        lastSenderId = m.sender_id
+
+        const wrapper = document.createElement("div")
+        wrapper.className =
+          "message-wrapper" +
+          (isOwnMessage ? " own" : "") +
+          (showMeta ? "" : " grouped")
+
 
         wrapper.innerHTML = `
-          <div class="message-meta">
-            <span class="message-sender">${m.first_name} ${m.second_name}</span>
-            <span class="message-time">${time}</span>
-          </div>
+          ${
+            showMeta
+              ? `
+            <div class="message-meta">
+              ${
+                m.profile_picture_path
+                  ? `<img class="profile-pic" src="../${m.profile_picture_path}" alt="profile">`
+                  : `<div class="profile-pic placeholder"></div>`
+              }
+              <div class="meta-text">
+                <div class="sender-name">${m.first_name} ${m.second_name}</div>
+                <div class="message-time">${timeStr}</div>
+              </div>
+            </div>
+          `
+              : `<div class="message-meta spacer"></div>`
+          }
+
           <div class="message-bubble">${m.message_contents}</div>
           ${
-            isOwnMessage && m.read_receipt ? `<div class="message-read">Read</div>` : ""
+            isOwnMessage && m.read_receipt
+              ? `<div class="message-read">Read</div>`
+              : ""
           }
         `
 
@@ -302,6 +338,18 @@ function loadMessages(chatId) {
 
       pane.scrollTop = pane.scrollHeight
     })
+}
+
+// Helper to display “Today”, “Yesterday” etc.
+function getDateLabel(date) {
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const thatDay = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+
+  const diff = (today - thatDay) / (1000 * 60 * 60 * 24)
+  if (diff === 0) return "Today"
+  if (diff === 86400000) return "Yesterday"
+  return date.toLocaleDateString()
 }
 
 //updates read status, function is called from the one above ^^

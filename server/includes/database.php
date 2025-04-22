@@ -67,7 +67,8 @@ class Database
             "SELECT 
                 cm.*, 
                 e.first_name, 
-                e.second_name
+                e.second_name,
+                e.profile_picture_path
              FROM ChatMessages cm
              JOIN Employees e ON cm.sender_id = e.employee_id
             WHERE cm.chat_id = :chatId
