@@ -271,7 +271,7 @@ function loadMessages(chatId) {
       pane.innerHTML = '';
       msgs.forEach(m => {
         const d = document.createElement('div');
-        const isOwnMessage = m.sender_id === currentUserId;
+        const isOwnMessage = String(m.sender_id) === String(currentUserId);
         d.className = 'message' + (isOwnMessage ? ' own' : '');
         d.innerHTML =
           `<strong>${m.first_name} ${m.second_name}</strong>: ${m.message_contents}` +

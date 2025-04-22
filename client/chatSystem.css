@@ -34,7 +34,10 @@ body {
 .chat-window {
     display: flex;
     flex-direction: column;
-}
+      max-height: 75vh;  /* Or adjust as needed */
+
+  }
+  
 
 .chat-header {
     display: flex;
@@ -114,16 +117,19 @@ body {
 }
 
 .message-list {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-    overflow-y: auto;
+    flex-grow: 1;           /* takes remaining space in .chat-window */
+    overflow-y: auto;       /* enables internal scroll */
+    overflow-x: hidden;
     margin-bottom: 20px;
     padding: 10px;
     background: #f8f9fa;
     border-radius: 4px;
+    display: flex;
+    flex-direction: column;
     gap: 10px;
+    min-height: 0; /* ⬅️ required for flex scrolling */
   }
+  
   
   
   .message {
