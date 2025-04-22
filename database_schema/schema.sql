@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS Employees (
     second_name VARCHAR(255) NOT NULL,
     user_type_id INTEGER NOT NULL,
     current_employee BOOLEAN NOT NULL,
+    profile_picture_path VARCHAR(255) DEFAULT 'server/pictures/default-profile.jpg',
     FOREIGN KEY (user_type_id) REFERENCES UserTypes(type_id)
 ) ENGINE=InnoDB;
 
