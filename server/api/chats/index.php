@@ -66,7 +66,7 @@ if (count($parts) === 0) {
 
 if (ctype_digit($parts[0])) {
     $chatId = (int) $parts[0];
-    
+
     //DELETE removes a chat from the database (fully)
 
     if (!$db->isUserInChat($chatId, $currentUser)) {
@@ -140,38 +140,56 @@ if (ctype_digit($parts[0])) {
         //Leaving chat
         if ($method === 'DELETE' && count($parts) === 3) {
             $uid = (int) $parts[2];
+            
+            $members = $db->getChatMembers($chatId);
+            error_log(json_encode($members));
+            error_log(json_encode($uid));
 
-            // Case 1: User is trying to leave the chat themselves
-            if ($uid === $currentUser) {
-                if ($db->canLeaveChat($chatId, $uid)) {
-                    $db->removeUserFromChat($chatId, $uid);
-                    http_response_code(204);
-                } else {
+
+            // If user is removing themselves
+            if ($uid == $currentUser) {
+
+                        
+                if (count($members) === 1 && $members[0]['employee_id'] == $currentUser) {
+                    // Only user left – delete chat entirely
+                    $ok = $db->deleteChat($chatId);
+                    http_response_code($ok ? 204 : 500);
+                    exit;
+                }
+        
+                // More than 1 member – must not be last admin
+                if (!$db->canLeaveChat($chatId, $uid)) {
                     http_response_code(409); // Last admin can't leave
                     echo json_encode(['error' => 'last_admin']);
+                    exit;
                 }
+        
+                // Allowed to leave
+                $db->removeUserFromChat($chatId, $uid);
+                http_response_code(204);
                 exit;
             }
-
-            // Case 2: Admin trying to kick someone else
-            if (!$db->isAdmin($chatId, $currentUser) && $uid != $currentUser) {
-                http_response_code(403); // Only admins can kick
+        
+            // Admin removing someone else
+            if (!$db->isAdmin($chatId, $currentUser)) {
+                http_response_code(403);
                 echo json_encode(['error' => 'Permission denied']);
                 exit;
             }
-
+        
             // Prevent removing the last admin
             if ($db->isAdmin($chatId, $uid) && !$db->canLeaveChat($chatId, $uid)) {
                 http_response_code(409);
+                error_log("Reached last check");
                 echo json_encode(['error' => 'Cannot remove the last admin']);
                 exit;
             }
-            
-            // Admin removing another user
+        
             $db->removeUserFromChat($chatId, $uid);
             http_response_code(204);
             exit;
         }
+        
     }
 
     //this handles the messages in the chat 
@@ -199,13 +217,13 @@ if (ctype_digit($parts[0])) {
             $msgId = (int) $parts[2];
             $data = getJson();
             $message = $db->getMessageById($msgId);
-        
+
             if (!$message) {
                 http_response_code(404);
                 echo json_encode(['error' => 'Message not found']);
                 exit;
             }
-        
+
             // Handle read receipt
             error_log(json_encode($data));
 
@@ -216,7 +234,7 @@ if (ctype_digit($parts[0])) {
                 http_response_code(204);
                 exit;
             }
-        
+
             // Handle message edit
             error_log(json_encode($data));
 
@@ -234,12 +252,12 @@ if (ctype_digit($parts[0])) {
                 http_response_code($ok ? 204 : 500);
                 exit;
             }
-        
+
             http_response_code(400);
             echo json_encode(['error' => 'Invalid PATCH data']);
             exit;
         }
-        
+
 
         //used for deleting a specific message
         if ($method === 'DELETE' && count($parts) === 3) {

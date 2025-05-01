@@ -249,14 +249,12 @@ function loadMembers(chatId) {
         (m) =>
           String(m.employee_id) === String(currentUserId) && m.is_admin == true
       )
-      console.log("Current user:", currentUserId)
 
       const ul = document.getElementById("memberList")
       const senderDropdown = document.getElementById("senderSearchSelect")
       if (senderDropdown) {
         senderDropdown.innerHTML = '<option value="">— All Senders —</option>'
         data.members.forEach((m) => {
-          console.log(m.first_name)
           const opt = document.createElement("option")
           opt.value = m.employee_id
           opt.textContent = `${m.first_name} ${m.second_name}`
