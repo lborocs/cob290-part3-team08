@@ -294,6 +294,8 @@ function loadMessages(chatId) {
         const showMeta = m.sender_id !== lastSenderId
         lastSenderId = m.sender_id
 
+        const wrappedText = wrapText(m.message_contents)
+
         const wrapper = document.createElement("div")
         wrapper.className =
           "message-wrapper" +
@@ -301,53 +303,54 @@ function loadMessages(chatId) {
           (showMeta ? "" : " grouped")
 
         wrapper.innerHTML = `
-  ${
-    showMeta
-      ? `
-    <div class="message-meta">
-      ${
-        m.profile_picture_path
-          ? `<img class="profile-pic" src="../${m.profile_picture_path}" alt="profile">`
-          : `<div class="profile-pic placeholder"></div>`
-      }
-      <div class="meta-text">
-        <div class="sender-name">${m.first_name} ${m.second_name}</div>
-        <div class="message-time">${timeStr}</div>
-      </div>
-    </div>
-  `
-      : `<div class="message-meta spacer"></div>`
-  }
-
-  ${
-    isOwnMessage
-      ? `
-        <div class="message-options-top">
-          <button class="options-btn" onclick="toggleMessageMenu(this)">⋯</button>
-          <div class="options-menu hidden">
-            <button onclick="deleteMessage(${m.message_id})">Delete</button>
-            <button onclick="editMessage(${
-              m.message_id
-            }, \`${m.message_contents.replace(/`/g, "\\`")}\`)">Edit</button>
+          ${showMeta
+            ? `
+            <div class="message-meta">
+              ${m.profile_picture_path
+              ? `<img class="profile-pic" src="../${m.profile_picture_path}" alt="profile">`
+              : `<div class="profile-pic placeholder"></div>`
+            }
+              <div class="meta-text">
+                <div class="sender-name">${m.first_name} ${m.second_name}</div>
+                <div class="message-time">${timeStr}</div>
+              </div>
+            </div>
+          `
+            : `<div class="message-meta spacer"></div>`
+          }
+        
+          ${isOwnMessage
+            ? `
+              <div class="message-options-top">
+                <button class="options-btn" onclick="toggleMessageMenu(this)">⋯</button>
+                <div class="options-menu hidden">
+                  <button onclick="deleteMessage(${m.message_id})">Delete</button>
+                  <button onclick="editMessage(${m.message_id}, \`${m.message_contents.replace(/`/g, '\\`')}\`)">Edit</button>
+                </div>
+              </div>
+            `
+            : ""
+          }
+        
+          <div class="message-bubble-container">
+            <div class="message-bubble" id="msg-${m.message_id}">
+              ${wrappedText}
+            </div>
+            <div class="message-edit hidden" id="edit-${m.message_id}">
+              <textarea class="edit-input">${m.message_contents}</textarea>
+              <div class="edit-actions">
+                <button onclick="saveEdit(${m.message_id})">Save</button>
+                <button onclick="cancelEdit(${m.message_id})">Cancel</button>
+              </div>
+            </div>
           </div>
-        </div>
-      `
-      : ""
-  }
-
-  <div class="message-bubble-container">
-    <div class="message-bubble">${m.message_contents}</div>
-  </div>
-
-  ${
-    isOwnMessage && m.read_receipt ? `<div class="message-read">Read</div>` : ""
-  }
-  ${m.is_edited ? `<div class="message-edited">Edited</div>` : ""}
-`
-
-        pane.appendChild(wrapper)
+        
+          ${isOwnMessage && m.read_receipt ? `<div class="message-read">Read</div>` : ""}
+          ${m.is_edited ? `<div class="message-edited">Edited</div>` : ""}
+        `,  pane.appendChild(wrapper)
 
         if (!m.read_receipt && !isOwnMessage) {
+          console.log(`Marking as read: ${m.message_id}`);
           markMessageRead(m.message_id)
         }
       })
@@ -355,6 +358,7 @@ function loadMessages(chatId) {
       pane.scrollTop = pane.scrollHeight
     })
 }
+        
 
 // Helper to display “Today”, “Yesterday” etc.
 function getDateLabel(date) {
@@ -370,7 +374,8 @@ function getDateLabel(date) {
 
 //updates read status, function is called from the one above ^^
 function markMessageRead(msgId) {
-  fetch(`${API_BASE}/${currentChatId}/messages/${msgId}`, { method: "PATCH" })
+  fetch(`${API_BASE}/${currentChatId}/messages/${msgId}`, { method: "PATCH", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ read: true }) })
 }
 
 //this function handles the action of sending a new message
@@ -487,6 +492,38 @@ function deleteMessage(messageId) {
   })
 }
 
+function editMessage(messageId, originalText) {
+  document.getElementById(`msg-${messageId}`).classList.add("hidden")
+  document.getElementById(`edit-${messageId}`).classList.remove("hidden")
+}
+
+function cancelEdit(messageId) {
+  document.getElementById(`msg-${messageId}`).classList.remove("hidden")
+  document.getElementById(`edit-${messageId}`).classList.add("hidden")
+}
+
+function saveEdit(messageId) {
+  const textarea = document.querySelector(`#edit-${messageId} .edit-input`)
+  const newText = textarea.value.trim()
+  if (!newText) return alert("Message cannot be empty.")
+
+  fetch(`${API_BASE}/${currentChatId}/messages/${messageId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message_contents: newText }),
+  }).then((r) => {
+    if (r.status === 204) {
+      loadMessages(currentChatId)
+    } else {
+      alert("Failed to save edit.")
+    }
+  })
+}
+
+
+
+
+
 // Hide open menus on outside click
 document.addEventListener("click", () => {
   document
@@ -542,6 +579,10 @@ function closeAdminMenus() {
 //this function basically brings the menu up when the user clicks on the toggle
 function toggleChatActions() {
   document.getElementById("chatActions").classList.toggle("visible")
+}
+
+function wrapText(text, maxLen = 60) {
+  return text.replace(new RegExp(`(.{1,${maxLen}})(\\s|$)`, "g"), "$1\n").trim()
 }
 
 //this function basically shows the list of participants and lets you hide or unhide the list

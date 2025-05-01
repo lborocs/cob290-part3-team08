@@ -242,15 +242,27 @@ class Database
 
     public function editMessage(int $messageId, string $newContent): bool
     {
+        error_log("Editing message ID $messageId with new content: '$newContent'");
+    
         $stmt = $this->conn->prepare(
             "UPDATE ChatMessages 
-         SET message_contents = :msg, is_edited = 1 
-         WHERE message_id = :msgId"
+             SET message_contents = :msg, is_edited = 1 
+             WHERE message_id = :msgId"
         );
+    
         $stmt->bindParam(':msg', $newContent);
         $stmt->bindParam(':msgId', $messageId);
-        return $stmt->execute();
+    
+        $result = $stmt->execute();
+    
+        if (!$result) {
+            $errorInfo = $stmt->errorInfo();
+            error_log("SQL Error: " . print_r($errorInfo, true));
+        }
+    
+        return $result;
     }
+    
 
     // ------DATA ANALYTICS 
 

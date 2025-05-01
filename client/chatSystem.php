@@ -93,8 +93,8 @@ $currentUserType  = $row['user_type_id'] ?? 2;
       <div class="message-list" id="messageList"></div>
 
       <div class="message-input">
-        <input type="text" id="messageInput" placeholder="Type a message…" />
-        <button onclick="sendMessage()">Send</button>
+      <textarea id="messageInput" rows="2" maxlength="500" placeholder="Type a message..."></textarea>
+      <button onclick="sendMessage()">Send</button>
       </div>
 
       <button id="leaveBtn"

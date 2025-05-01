@@ -207,8 +207,10 @@ if (ctype_digit($parts[0])) {
             }
         
             // Handle read receipt
+            error_log(json_encode($data));
+
             if (isset($data['read']) && $data['read'] === true) {
-                if ($message['sender_id'] !== $currentUser) {
+                if ($message['sender_id'] != $currentUser) {
                     $db->markMessageRead($msgId, $currentUser);
                 }
                 http_response_code(204);
@@ -216,8 +218,14 @@ if (ctype_digit($parts[0])) {
             }
         
             // Handle message edit
+            error_log(json_encode($data));
+
             if (isset($data['message_contents'])) {
-                if ($message['sender_id'] !== $currentUser) {
+                error_log("Sender ID: " . $message['sender_id']);
+                error_log("Current user: " . $currentUser);
+                error_log("Incoming PATCH data: " . json_encode($data));
+
+                if ($message['sender_id'] != $currentUser) {
                     http_response_code(403);
                     echo json_encode(['error' => 'Cannot edit someone else\'s message']);
                     exit;
