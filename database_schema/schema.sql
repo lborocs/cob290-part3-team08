@@ -138,7 +138,8 @@ CREATE TABLE IF NOT EXISTS ChatMessages (
     date_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     message_contents TEXT DEFAULT NULL, 
     read_receipt BOOLEAN DEFAULT FALSE,
-    status ENUM('sent', 'deleted') DEFAULT 'sent',  
+    status ENUM('sent', 'deleted') DEFAULT 'sent',
+    is_edited TINYINT(1) DEFAULT 0, 
     PRIMARY KEY (message_id),
     FOREIGN KEY (chat_id) REFERENCES Chats(chatID) ON DELETE CASCADE,
     FOREIGN KEY (sender_id) REFERENCES Employees(employee_id) ON DELETE SET NULL
