@@ -230,6 +230,68 @@ html {
     vertical-align: middle;
     margin: 0 6px;
   }
+
+  .message-bubble-container {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .message-options {
+    position: absolute;
+    top: 0;
+    right: -5px;
+  }
+  
+  .options-btn {
+    background: none;
+    border: none;
+    font-size: 1.2em;
+    cursor: pointer;
+    padding: 2px 6px;
+    color: #666;
+  }
+  
+  .options-menu {
+    position: absolute;
+    right: 0;
+    top: 20px;
+    background: white;
+    border: 1px solid #ccc;
+    padding: 4px 0;
+    border-radius: 4px;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+    z-index: 100;
+  }
+  
+  .options-menu button {
+    display: block;
+    padding: 6px 10px;
+    width: 100%;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+  }
+  
+  .options-menu button:hover {
+    background: #eee;
+  }
+  
+  .options-menu.hidden {
+    display: none;
+  }
+
+  .message-options-top {
+    align-self: flex-start;
+    position: relative;
+    margin-bottom: 4px;
+  }
+  
+  .message-wrapper.own .message-options-top {
+    align-self: flex-end;
+  }
+  
+  
   
   /* === Chat Controls === */
   .message-input {
@@ -256,7 +318,7 @@ html {
   button {
     padding: 10px 20px;
     background: rgb(220, 222, 225);
-    color: white;
+    color: rgb(0, 0, 0);
     border: none;
     border-radius: 4px;
     cursor: pointer;

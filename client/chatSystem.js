@@ -238,7 +238,6 @@ function loadMembers(chatId) {
         li.textContent =
           `${m.first_name} ${m.second_name}` + (m.is_admin ? " (admin)" : "")
 
-        // ✅ Show ❌ only if current user is admin AND this is not their own name
         if (currentIsAdmin && m.employee_id !== currentUserId) {
           const btn = document.createElement("button")
           btn.textContent = "✖"
@@ -301,33 +300,50 @@ function loadMessages(chatId) {
           (isOwnMessage ? " own" : "") +
           (showMeta ? "" : " grouped")
 
-
         wrapper.innerHTML = `
-          ${
-            showMeta
-              ? `
-            <div class="message-meta">
-              ${
-                m.profile_picture_path
-                  ? `<img class="profile-pic" src="../${m.profile_picture_path}" alt="profile">`
-                  : `<div class="profile-pic placeholder"></div>`
-              }
-              <div class="meta-text">
-                <div class="sender-name">${m.first_name} ${m.second_name}</div>
-                <div class="message-time">${timeStr}</div>
-              </div>
-            </div>
-          `
-              : `<div class="message-meta spacer"></div>`
-          }
+  ${
+    showMeta
+      ? `
+    <div class="message-meta">
+      ${
+        m.profile_picture_path
+          ? `<img class="profile-pic" src="../${m.profile_picture_path}" alt="profile">`
+          : `<div class="profile-pic placeholder"></div>`
+      }
+      <div class="meta-text">
+        <div class="sender-name">${m.first_name} ${m.second_name}</div>
+        <div class="message-time">${timeStr}</div>
+      </div>
+    </div>
+  `
+      : `<div class="message-meta spacer"></div>`
+  }
 
-          <div class="message-bubble">${m.message_contents}</div>
-          ${
-            isOwnMessage && m.read_receipt
-              ? `<div class="message-read">Read</div>`
-              : ""
-          }
-        `
+  ${
+    isOwnMessage
+      ? `
+        <div class="message-options-top">
+          <button class="options-btn" onclick="toggleMessageMenu(this)">⋯</button>
+          <div class="options-menu hidden">
+            <button onclick="deleteMessage(${m.message_id})">Delete</button>
+            <button onclick="editMessage(${
+              m.message_id
+            }, \`${m.message_contents.replace(/`/g, "\\`")}\`)">Edit</button>
+          </div>
+        </div>
+      `
+      : ""
+  }
+
+  <div class="message-bubble-container">
+    <div class="message-bubble">${m.message_contents}</div>
+  </div>
+
+  ${
+    isOwnMessage && m.read_receipt ? `<div class="message-read">Read</div>` : ""
+  }
+  ${m.is_edited ? `<div class="message-edited">Edited</div>` : ""}
+`
 
         pane.appendChild(wrapper)
 
@@ -447,6 +463,36 @@ function deleteChat() {
     }
   })
 }
+
+function toggleMessageMenu(button) {
+  const menu = button.nextElementSibling
+  document.querySelectorAll(".options-menu").forEach((el) => {
+    if (el !== menu) el.classList.add("hidden")
+  })
+  menu.classList.toggle("hidden")
+  event.stopPropagation()
+}
+
+function deleteMessage(messageId) {
+  if (!confirm("Delete this message?")) return
+
+  fetch(`${API_BASE}/${currentChatId}/messages/${messageId}`, {
+    method: "DELETE",
+  }).then((r) => {
+    if (r.status === 204) {
+      loadMessages(currentChatId)
+    } else {
+      alert("Failed to delete message.")
+    }
+  })
+}
+
+// Hide open menus on outside click
+document.addEventListener("click", () => {
+  document
+    .querySelectorAll(".options-menu")
+    .forEach((el) => el.classList.add("hidden"))
+})
 
 //this function allows users to leave chats
 //again makes a delete request to the members endpoint which removes the chat just from that user
