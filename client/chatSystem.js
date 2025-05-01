@@ -83,6 +83,19 @@ document.addEventListener("DOMContentLoaded", () => {
   resetChatUI()
   loadUserDropdowns().then(() => loadChats())
 
+  $("#messageSearchInput").addEventListener("input", () => {
+    if (currentChatId) loadMessages(currentChatId)
+  })
+  
+  document.getElementById("chatSearchInput").addEventListener("input", (e) => {
+    loadChats(e.target.value)
+  })  
+
+  
+  $("#senderSearchSelect").addEventListener("change", () => {
+    if (currentChatId) loadMessages(currentChatId)
+  })
+  
   $("#messageInput").addEventListener(
     "keypress",
     (e) => e.key === "Enter" && sendMessage()
@@ -175,13 +188,18 @@ function addQueued() {
 }
 
 //this function helps with getting the chats that the current user is part of
-function loadChats() {
+function loadChats(searchTerm = "") {
   fetch(API_BASE, { method: "GET" })
     .then((r) => r.json())
     .then((chats) => {
       const list = document.getElementById("chatList")
       list.innerHTML = ""
-      chats.forEach((c) => {
+
+      const filtered = chats.filter((c) =>
+        c.chat_name.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+
+      filtered.forEach((c) => {
         const div = document.createElement("div")
         div.className = "chat-item"
         div.textContent = c.chat_name
@@ -191,12 +209,15 @@ function loadChats() {
     })
 }
 
+
 //this function brings up the chat when the user clicks on one on the left
 //it also highlights the chosen chat
 //if the user is an admin it shows the admin menu
 function selectChat(id, name, elem) {
   currentChatId = id
   document.getElementById("currentChatName").textContent = name
+  document.getElementById("chatHeader").classList.remove("hidden")
+
 
   document
     .querySelectorAll(".chat-item")
@@ -231,6 +252,18 @@ function loadMembers(chatId) {
       console.log("Current user:", currentUserId)
 
       const ul = document.getElementById("memberList")
+      const senderDropdown = document.getElementById("senderSearchSelect")
+      if (senderDropdown) {
+        senderDropdown.innerHTML = '<option value="">— All Senders —</option>'
+        data.members.forEach((m) => {
+          console.log(m.first_name)
+          const opt = document.createElement("option")
+          opt.value = m.employee_id
+          opt.textContent = `${m.first_name} ${m.second_name}`
+          senderDropdown.appendChild(opt)
+        })
+      }
+
       ul.innerHTML = ""
 
       data.members.forEach((m) => {
@@ -272,93 +305,93 @@ function loadMessages(chatId) {
       let lastSenderId = null
       let lastDate = null
 
-      msgs.forEach((m) => {
-        const isOwnMessage = String(m.sender_id) === String(currentUserId)
-        const msgDate = new Date(m.date_time)
-        const msgDay = msgDate.toDateString()
-        const timeStr = msgDate.toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
+      // Get filter inputs
+      const keyword = ($("#messageSearchInput")?.value || "").toLowerCase()
+      const senderId = $("#senderSearchSelect")?.value
+
+      msgs
+        .filter((m) => {
+          const contentMatch = m.message_contents.toLowerCase().includes(keyword)
+          const senderMatch = !senderId || String(m.sender_id) === senderId
+          return contentMatch && senderMatch
         })
+        .forEach((m) => {
+          const isOwnMessage = String(m.sender_id) === String(currentUserId)
+          const msgDate = new Date(m.date_time)
+          const msgDay = msgDate.toDateString()
+          const timeStr = msgDate.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })
 
-        // Date divider
-        if (msgDay !== lastDate) {
-          const divider = document.createElement("div")
-          divider.className = "date-divider"
-          divider.textContent = getDateLabel(msgDate)
-          pane.appendChild(divider)
-          lastDate = msgDay
-        }
-
-        // Grouping logic: show name + profile only if new sender
-        const showMeta = m.sender_id !== lastSenderId
-        lastSenderId = m.sender_id
-
-        const wrappedText = wrapText(m.message_contents)
-
-        const wrapper = document.createElement("div")
-        wrapper.className =
-          "message-wrapper" +
-          (isOwnMessage ? " own" : "") +
-          (showMeta ? "" : " grouped")
-
-        wrapper.innerHTML = `
-          ${showMeta
-            ? `
-            <div class="message-meta">
-              ${m.profile_picture_path
-              ? `<img class="profile-pic" src="../${m.profile_picture_path}" alt="profile">`
-              : `<div class="profile-pic placeholder"></div>`
-            }
-              <div class="meta-text">
-                <div class="sender-name">${m.first_name} ${m.second_name}</div>
-                <div class="message-time">${timeStr}</div>
-              </div>
-            </div>
-          `
-            : `<div class="message-meta spacer"></div>`
+          // Date divider
+          if (msgDay !== lastDate) {
+            const divider = document.createElement("div")
+            divider.className = "date-divider"
+            divider.textContent = getDateLabel(msgDate)
+            pane.appendChild(divider)
+            lastDate = msgDay
           }
-        
-          ${isOwnMessage
-            ? `
+
+          const showMeta = m.sender_id !== lastSenderId
+          lastSenderId = m.sender_id
+
+          const wrappedText = wrapText(m.message_contents, 60, keyword)
+
+          const wrapper = document.createElement("div")
+          wrapper.className =
+            "message-wrapper" +
+            (isOwnMessage ? " own" : "") +
+            (showMeta ? "" : " grouped")
+
+          wrapper.innerHTML = `
+            ${showMeta ? `
+              <div class="message-meta">
+                ${m.profile_picture_path
+                  ? `<img class="profile-pic" src="../${m.profile_picture_path}" alt="profile">`
+                  : `<div class="profile-pic placeholder"></div>`}
+                <div class="meta-text">
+                  <div class="sender-name">${m.first_name} ${m.second_name}</div>
+                  <div class="message-time">${timeStr}</div>
+                </div>
+              </div>` : `<div class="message-meta spacer"></div>`}
+
+            ${isOwnMessage ? `
               <div class="message-options-top">
                 <button class="options-btn" onclick="toggleMessageMenu(this)">⋯</button>
                 <div class="options-menu hidden">
                   <button onclick="deleteMessage(${m.message_id})">Delete</button>
-                  <button onclick="editMessage(${m.message_id}, \`${m.message_contents.replace(/`/g, '\\`')}\`)">Edit</button>
+                  <button onclick="editMessage(${m.message_id}, \`${m.message_contents.replace(/`/g, "\\`")}\`)">Edit</button>
+                </div>
+              </div>` : ""}
+
+            <div class="message-bubble-container">
+              <div class="message-bubble" id="msg-${m.message_id}">
+                ${wrappedText}
+              </div>
+              <div class="message-edit hidden" id="edit-${m.message_id}">
+                <textarea class="edit-input">${m.message_contents}</textarea>
+                <div class="edit-actions">
+                  <button onclick="saveEdit(${m.message_id})">Save</button>
+                  <button onclick="cancelEdit(${m.message_id})">Cancel</button>
                 </div>
               </div>
-            `
-            : ""
-          }
-        
-          <div class="message-bubble-container">
-            <div class="message-bubble" id="msg-${m.message_id}">
-              ${wrappedText}
             </div>
-            <div class="message-edit hidden" id="edit-${m.message_id}">
-              <textarea class="edit-input">${m.message_contents}</textarea>
-              <div class="edit-actions">
-                <button onclick="saveEdit(${m.message_id})">Save</button>
-                <button onclick="cancelEdit(${m.message_id})">Cancel</button>
-              </div>
-            </div>
-          </div>
-        
-          ${isOwnMessage && m.read_receipt ? `<div class="message-read">Read</div>` : ""}
-          ${m.is_edited ? `<div class="message-edited">Edited</div>` : ""}
-        `,  pane.appendChild(wrapper)
 
-        if (!m.read_receipt && !isOwnMessage) {
-          console.log(`Marking as read: ${m.message_id}`);
-          markMessageRead(m.message_id)
-        }
-      })
+            ${isOwnMessage && m.read_receipt ? `<div class="message-read">Read</div>` : ""}
+            ${m.is_edited ? `<div class="message-edited">Edited</div>` : ""}
+          `
+          pane.appendChild(wrapper)
+
+          if (!m.read_receipt && !isOwnMessage) {
+            markMessageRead(m.message_id)
+          }
+        })
 
       pane.scrollTop = pane.scrollHeight
     })
 }
-        
+
 
 // Helper to display “Today”, “Yesterday” etc.
 function getDateLabel(date) {
@@ -374,8 +407,11 @@ function getDateLabel(date) {
 
 //updates read status, function is called from the one above ^^
 function markMessageRead(msgId) {
-  fetch(`${API_BASE}/${currentChatId}/messages/${msgId}`, { method: "PATCH", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ read: true }) })
+  fetch(`${API_BASE}/${currentChatId}/messages/${msgId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ read: true }),
+  })
 }
 
 //this function handles the action of sending a new message
@@ -520,10 +556,6 @@ function saveEdit(messageId) {
   })
 }
 
-
-
-
-
 // Hide open menus on outside click
 document.addEventListener("click", () => {
   document
@@ -581,9 +613,15 @@ function toggleChatActions() {
   document.getElementById("chatActions").classList.toggle("visible")
 }
 
-function wrapText(text, maxLen = 60) {
+function wrapText(text, maxLen = 60, keyword = "") {
+  if (keyword) {
+    const safeKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") // escape special chars
+    const regex = new RegExp(`(${safeKeyword})`, "gi")
+    text = text.replace(regex, "<mark>$1</mark>")
+  }
   return text.replace(new RegExp(`(.{1,${maxLen}})(\\s|$)`, "g"), "$1\n").trim()
 }
+
 
 //this function basically shows the list of participants and lets you hide or unhide the list
 function toggleMembers() {

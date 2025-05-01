@@ -28,10 +28,41 @@ body {
 .chat-list,
 .chat-window {
   background: white;
-  border-radius: 8px;
+  border-radius: 4px;
   padding: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
+.chat-list {
+  flex-grow: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+}
+
+.chat-list-content {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  overflow: hidden; /* prevents overflow outside of chat list section */
+}
+
+#chatSearchInput {
+  margin-bottom: 10px;
+  flex-shrink: 0;
+}
+
+.chat-list-scroll {
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
 
 .chat-window {
   display: flex;
@@ -447,6 +478,23 @@ button {
 .kick-btn:hover {
   background: #c0392b;
 }
+
+/* === Search === */
+.message-search-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  margin-right: 10px;
+}
+
+.message-search-controls input,
+.message-search-controls select {
+  padding: 6px;
+  font-size: 0.9em;
+}
+
+
 
 /* === Pending Queue === */
 #pendingList {
