@@ -6,7 +6,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
     $_SESSION['user_id'] = $_POST['user_id'];
     //jeven u can change v ==========================================================================================================
     $_SESSION['page_id'] = "1";
-    $_SESSION['page_type'] = "project";
+    $_SESSION['page_type'] = "employee";
     header("Location:  index.php");
     exit;
 }

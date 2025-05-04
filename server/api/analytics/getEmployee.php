@@ -9,8 +9,8 @@ $filters = $_GET;
 
 
 
-$filters['project_id'] = $_SESSION['page_id'];
+$filters['employee_id'] = $_SESSION['page_id'];
 
 
-$projects = $db->getProjects($filters);
-echo json_encode($projects);
+$employee = $db->getEmployee($filters);
+echo json_encode($employee);
