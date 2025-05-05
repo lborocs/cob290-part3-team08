@@ -291,7 +291,7 @@ function loadMembers(chatId) {
 
 //function to retrieve and show messages for a specific chat
 //each message gets assgined its own div so basically iterating over the messages
-//adds a (read) receipt if the message has been read (needs amending slightly)
+//adds a (read) receipt if the message has been read, edited if message has been edited
 
 function loadMessages(chatId) {
   fetch(`${API_BASE}/${chatId}/messages`, { method: "GET" })
@@ -303,7 +303,7 @@ function loadMessages(chatId) {
       let lastSenderId = null
       let lastDate = null
 
-      // Get filter inputs
+      //get filter inputs
       const keyword = ($("#messageSearchInput")?.value || "").toLowerCase()
       const senderId = $("#senderSearchSelect")?.value
 
@@ -322,7 +322,7 @@ function loadMessages(chatId) {
             minute: "2-digit",
           })
 
-          // Date divider
+          //date divider
           if (msgDay !== lastDate) {
             const divider = document.createElement("div")
             divider.className = "date-divider"
@@ -391,7 +391,7 @@ function loadMessages(chatId) {
 }
 
 
-// Helper to display “Today”, “Yesterday” etc.
+//helper to display “Today”, “Yesterday” etc.
 function getDateLabel(date) {
   const now = new Date()
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
@@ -503,6 +503,7 @@ function deleteChat() {
   })
 }
 
+//function to toggle message options
 function toggleMessageMenu(button) {
   const menu = button.nextElementSibling
   document.querySelectorAll(".options-menu").forEach((el) => {
@@ -512,6 +513,7 @@ function toggleMessageMenu(button) {
   event.stopPropagation()
 }
 
+//function that deletes message from chat
 function deleteMessage(messageId) {
   if (!confirm("Delete this message?")) return
 
@@ -526,16 +528,19 @@ function deleteMessage(messageId) {
   })
 }
 
+//function that shows edit message box
 function editMessage(messageId, originalText) {
   document.getElementById(`msg-${messageId}`).classList.add("hidden")
   document.getElementById(`edit-${messageId}`).classList.remove("hidden")
 }
 
+//function that closes edit message box
 function cancelEdit(messageId) {
   document.getElementById(`msg-${messageId}`).classList.remove("hidden")
   document.getElementById(`edit-${messageId}`).classList.add("hidden")
 }
 
+//function that edits message
 function saveEdit(messageId) {
   const textarea = document.querySelector(`#edit-${messageId} .edit-input`)
   const newText = textarea.value.trim()
@@ -554,7 +559,7 @@ function saveEdit(messageId) {
   })
 }
 
-// Hide open menus on outside click
+//hide open menus on outside click
 document.addEventListener("click", () => {
   document
     .querySelectorAll(".options-menu")
@@ -611,6 +616,7 @@ function toggleChatActions() {
   document.getElementById("chatActions").classList.toggle("visible")
 }
 
+//long text messages wrap to next line
 function wrapText(text, maxLen = 60, keyword = "") {
   if (keyword) {
     const safeKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") // escape special chars
@@ -627,6 +633,7 @@ function toggleMembers() {
   panel.classList.toggle("hidden")
   panel.classList.toggle("visible")
 }
+
 //when clicking outside the box it hides the menu
 document.addEventListener("click", (e) => {
   const menu = document.getElementById("chatActions")

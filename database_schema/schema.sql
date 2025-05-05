@@ -41,6 +41,8 @@ INSERT IGNORE INTO Employees VALUES
     (12, "teamlead1@makeitall.com", "TeamLead1", "Taylor", 1, True),
     (13, "teamlead2@makeitall.com", "TeamLead2", "Anderson", 1, True),
     (14, "teamlead3@makeitall.com", "TeamLead3", "Thomas", 1, True);
+    (16, 'nataliafv@makeitall.com', 'Natalia', 'Figueroa-Vallejo', 0, 1),
+    (17, 'daniyadesai@makeitall.com', 'Daniya', 'Desai', 0, 1,)
 
 
 -- Data Analytics Tables
