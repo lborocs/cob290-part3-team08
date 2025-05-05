@@ -312,12 +312,32 @@ class Database
             $params[':start'] = $filters['start_date'];
             $params[':end'] = $filters['end_date'];
         }
-
+        if (!empty($filters['project_id'])) {
+            $sql .= " AND project_id = :proj";
+            $params[':proj'] = $filters['project_id'];
+        }
         if (!empty($filters['team_leader_id'])) {
             $sql .= " AND team_leader_id = :lead";
             $params[':lead'] = $filters['team_leader_id'];
         }
 
+        $stmt = $this->conn->prepare($sql);
+        foreach ($params as $key => &$val) {
+            $stmt->bindParam($key, $val);
+        }
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getEmployee($filters = [])
+    {
+        $sql = "SELECT * FROM employees WHERE 1=1";
+        $params = [];
+
+        if (!empty($filters['employee_id'])) {
+            $sql .= " AND employee_id = :emp";
+            $params[':emp'] = $filters['employee_id'];
+        }
         $stmt = $this->conn->prepare($sql);
         foreach ($params as $key => &$val) {
             $stmt->bindParam($key, $val);
