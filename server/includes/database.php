@@ -342,12 +342,22 @@ class Database
             $sql .= " AND employee_id = :emp";
             $params[':emp'] = $filters['employee_id'];
         }
+        if (!empty($filters['user_type_id'])) {
+            $sql .= " AND user_type_id = :type";
+            $params[':type'] = $filters['user_type_id'];
+        }
+
         $stmt = $this->conn->prepare($sql);
         foreach ($params as $key => &$val) {
             $stmt->bindParam($key, $val);
         }
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    function getAllTeamLeaders(): array
+    {
+        return $this->getEmployee(['user_type_id' => 1]);
     }
 
     #Function to get tasks that are taking longer than allocated time
