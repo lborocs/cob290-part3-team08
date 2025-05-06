@@ -18,7 +18,7 @@ function rebuildPromoteSelect(members) {
     })
 }
 
-//cheks the id of chat and if user is admin on the chat
+//checks the id of chat and if user is admin on the chat
 let currentChatId = null
 let currentIsAdmin = false
 

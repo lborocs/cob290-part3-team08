@@ -243,26 +243,26 @@ class Database
     public function editMessage(int $messageId, string $newContent): bool
     {
         error_log("Editing message ID $messageId with new content: '$newContent'");
-    
+
         $stmt = $this->conn->prepare(
             "UPDATE ChatMessages 
              SET message_contents = :msg, is_edited = 1 
              WHERE message_id = :msgId"
         );
-    
+
         $stmt->bindParam(':msg', $newContent);
         $stmt->bindParam(':msgId', $messageId);
-    
+
         $result = $stmt->execute();
-    
+
         if (!$result) {
             $errorInfo = $stmt->errorInfo();
             error_log("SQL Error: " . print_r($errorInfo, true));
         }
-    
+
         return $result;
     }
-    
+
 
     // ------DATA ANALYTICS 
 
@@ -373,19 +373,107 @@ class Database
     }
 
     #Function that gets information relating to employee workload in given time 
-    public function getEmployeeWorkload($employeeId, $startDate, $endDate)
+    public function getEmployeeWorkload(int $employeeId, string $startDate, string $endDate): array
     {
         $stmt = $this->conn->prepare("
-            SELECT T.task_name, T.time_allocated, T.time_taken, T.start_date, T.finish_date
-            FROM Tasks T
-            JOIN EmployeeTasks ET ON T.task_id = ET.task_id
-            WHERE ET.employee_id = :emp AND T.start_date >= :start AND T.finish_date <= :end
-        ");
+        SELECT T.task_name, T.time_allocated, T.time_taken, T.start_date, T.finish_date
+        FROM Tasks T
+        JOIN EmployeeTasks ET ON T.task_id = ET.task_id
+        WHERE ET.employee_id = :emp AND T.start_date >= :start AND T.finish_date <= :end
+    ");
         $stmt->bindParam(':emp', $employeeId);
         $stmt->bindParam(':start', $startDate);
         $stmt->bindParam(':end', $endDate);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+
+    public function getTaskCompletionStats($filters = [])
+    {
+        $sql = "SELECT 
+                    SUM(CASE WHEN completed = 1 THEN 1 ELSE 0 END) AS completed,
+                    SUM(CASE WHEN completed = 0 THEN 1 ELSE 0 END) AS pending
+                FROM tasks WHERE 1=1";
+        $params = [];
+
+        if (!empty($filters['employee_id'])) {
+            $sql .= " AND assigned_employee = :emp";
+            $params[':emp'] = $filters['employee_id'];
+        }
+
+        if (!empty($filters['project_id'])) {
+            $sql .= " AND project_id = :proj";
+            $params[':proj'] = $filters['project_id'];
+        }
+
+        $stmt = $this->conn->prepare($sql);
+        foreach ($params as $k => &$v) {
+            $stmt->bindParam($k, $v);
+        }
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getAverageTimePerTask($filters = [])
+    {
+        $sql = "SELECT AVG(time_taken) AS avg_time_taken, AVG(time_allocated) AS avg_time_allocated FROM tasks WHERE 1=1";
+        $params = [];
+
+        if (!empty($filters['employee_id'])) {
+            $sql .= " AND assigned_employee = :emp";
+            $params[':emp'] = $filters['employee_id'];
+        }
+
+        if (!empty($filters['project_id'])) {
+            $sql .= " AND project_id = :proj";
+            $params[':proj'] = $filters['project_id'];
+        }
+
+        $stmt = $this->conn->prepare($sql);
+        foreach ($params as $k => &$v) {
+            $stmt->bindParam($k, $v);
+        }
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getTeamPerformance($teamLeaderId)
+    {
+        $stmt = $this->conn->prepare("
+            SELECT 
+                E.employee_id,
+                CONCAT(E.first_name, ' ', E.second_name) AS name,
+                COUNT(T.task_id) AS total_tasks,
+                SUM(CASE WHEN T.completed = 1 THEN 1 ELSE 0 END) AS completed_tasks
+            FROM employees E
+            JOIN EmployeeProjects EP ON E.employee_id = EP.employee_id
+            JOIN Projects P ON EP.project_id = P.project_id
+            LEFT JOIN Tasks T ON T.assigned_employee = E.employee_id AND T.project_id = P.project_id
+            WHERE P.team_leader_id = :lead
+            GROUP BY E.employee_id
+        ");
+        $stmt->bindParam(':lead', $teamLeaderId);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getProjectProgress($projectId)
+    {
+        $stmt = $this->conn->prepare("
+            SELECT 
+                COUNT(*) AS total,
+                SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) AS completed
+            FROM tasks
+            WHERE project_id = :pid
+        ");
+        $stmt->bindParam(':pid', $projectId);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return [
+            'completed_percentage' => $row['total'] ? round(($row['completed'] / $row['total']) * 100, 2) : 0
+        ];
+    }
+
 }
 ?>
