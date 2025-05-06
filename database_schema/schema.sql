@@ -27,22 +27,22 @@ CREATE TABLE IF NOT EXISTS Employees (
 
 -- Employee dummy data (AI generated)
 INSERT IGNORE INTO Employees VALUES 
-    (1, "jakebrooks@makeitall.com", "Jake", "Brooks", 0, True),
-    (2, "andreifilipasblai@makeitall.com", "Andrei", "Filipas Blai", 0, True),
-    (3, "faizananwar@makeitall.com", "Faizan", "Anwar", 0, True),
-    (4, "jevanbucknor@makeitall.com", "Jevan", "Bucknor", 0, True),
-    (5, "liamparker@makeitall.com", "Liam", "Parker", 0, True),
-    (6, "employee1@makeitall.com", "Employee1", "Smith", 2, True),
-    (7, "employee2@makeitall.com", "Employee2", "Johnson", 2, True),
-    (8, "employee3@makeitall.com", "Employee3", "Davis", 2, True),
-    (9, "employee4@makeitall.com", "Employee4", "Miller", 2, True),
-    (10, "employee5@makeitall.com", "Employee5", "Wilson", 2, True),
-    (11, "employee6@makeitall.com", "Employee6", "Moore", 2, True),
-    (12, "teamlead1@makeitall.com", "TeamLead1", "Taylor", 1, True),
-    (13, "teamlead2@makeitall.com", "TeamLead2", "Anderson", 1, True),
-    (14, "teamlead3@makeitall.com", "TeamLead3", "Thomas", 1, True);
-    (16, 'nataliafv@makeitall.com', 'Natalia', 'Figueroa-Vallejo', 0, 1),
-    (17, 'daniyadesai@makeitall.com', 'Daniya', 'Desai', 0, 1,)
+    (1, "jakebrooks@makeitall.com", "Jake", "Brooks", 0, 1, 'server/pictures/default-profile.jpg'),
+    (2, "andreifilipasblai@makeitall.com", "Andrei", "Filipas Blai", 0, 1, 'server/pictures/default-profile.jpg'),
+    (3, "faizananwar@makeitall.com", "Faizan", "Anwar", 0, 1, 'server/pictures/default-profile.jpg'),
+    (4, "jevanbucknor@makeitall.com", "Jevan", "Bucknor", 0, 1, 'server/pictures/default-profile.jpg'),
+    (5, "liamparker@makeitall.com", "Liam", "Parker", 0, 1, 'server/pictures/default-profile.jpg'),
+    (6, "employee1@makeitall.com", "Employee1", "Smith", 2, 1, 'server/pictures/default-profile.jpg'),
+    (7, "employee2@makeitall.com", "Employee2", "Johnson", 2, 1, 'server/pictures/default-profile.jpg'),
+    (8, "employee3@makeitall.com", "Employee3", "Davis", 2, 1, 'server/pictures/default-profile.jpg'),
+    (9, "employee4@makeitall.com", "Employee4", "Miller", 2, 1, 'server/pictures/default-profile.jpg'),
+    (10, "employee5@makeitall.com", "Employee5", "Wilson", 2, 1, 'server/pictures/default-profile.jpg'),
+    (11, "employee6@makeitall.com", "Employee6", "Moore", 2, 1, 'server/pictures/default-profile.jpg'),
+    (12, "teamlead1@makeitall.com", "TeamLead1", "Taylor", 1, 1, 'server/pictures/default-profile.jpg'),
+    (13, "teamlead2@makeitall.com", "TeamLead2", "Anderson", 1, 1, 'server/pictures/default-profile.jpg'),
+    (14, "teamlead3@makeitall.com", "TeamLead3", "Thomas", 1, 1, 'server/pictures/default-profile.jpg'),
+    (16, 'nataliafv@makeitall.com', 'Natalia', 'Figueroa-Vallejo', 0, 1, 'server/pictures/default-profile.jpg'),
+    (17, 'daniyadesai@makeitall.com', 'Daniya', 'Desai', 0, 1, 'server/pictures/default-profile.jpg');
 
 
 -- Data Analytics Tables
@@ -167,7 +167,17 @@ INSERT IGNORE INTO Tasks (
     (3, 'Cloud Migration Analysis', 8, 2, 'Analyze legacy system readiness.', '2024-04-05', '2024-05-15', 50, NULL, 4, 4, 0, NULL),
     (4, 'Data Migration Script', 9, 2, 'Create scripts for migrating data.', '2024-04-10', '2024-06-01', 45, NULL, 3, 4, 0, NULL),
     (5, 'Security Audit', 10, 3, 'Perform a security audit.', '2024-03-20', '2024-05-10', 55, NULL, 4, 5, 0, NULL),
-    (6, 'Implement Encryption', 11, 3, 'Add end-to-end encryption.', '2024-04-01', '2024-06-15', 60, NULL, 5, 5, 0, NULL);
+    (6, 'Implement Encryption', 11, 3, 'Add end-to-end encryption.', '2024-04-01', '2024-06-15', 60, NULL, 5, 5, 0, NULL),
+    (7, 'Refactor Codebase', 6, 1, 'Improve code readability and structure.', '2024-04-12', '2024-05-01', 30, 32, 2, 3, 1, '2024-05-03'),
+    (8, 'Performance Benchmarking', 7, 1, 'Measure and log API response times.', '2024-04-15', '2024-05-05', 25, 20, 3, 2, 1, '2024-05-04'),
+    (9, 'Legacy System Cleanup', 8, 2, 'Remove deprecated components.', '2024-04-20', '2024-05-20', 20, NULL, 2, 3, 0, NULL),
+    (10, 'Database Optimization', 9, 2, 'Optimize SQL queries and indexes.', '2024-04-25', '2024-06-10', 40, NULL, 4, 4, 0, NULL),
+    (11, 'Penetration Testing', 10, 3, 'Simulate attacks to identify vulnerabilities.', '2024-05-01', '2024-06-15', 50, 60, 5, 5, 1, '2024-06-20'), 
+    (12, 'Encryption Key Rotation', 11, 3, 'Implement regular key rotation policy.', '2024-05-05', '2024-06-20', 35, 33, 4, 4, 1, '2024-06-18'),
+    (13, 'Bug Fixing Sprint', 6, 1, 'Address reported issues from QA.', '2024-05-10', '2024-05-25', 28, NULL, 3, 3, 0, NULL),
+    (14, 'API Documentation', 7, 1, 'Write and publish API usage guide.', '2024-05-12', '2024-06-01', 22, 24, 2, 2, 1, '2024-06-03'), 
+    (15, 'Access Control Review', 10, 3, 'Audit user role permissions.', '2024-05-15', '2024-06-05', 30, NULL, 3, 4, 0, NULL),
+    (16, 'Failover Testing', 9, 2, 'Test backup and disaster recovery.', '2024-05-18', '2024-06-10', 38, 40, 4, 4, 1, '2024-06-12');
 
 
 -- Link Employees to Projects (EmployeeProjects)
