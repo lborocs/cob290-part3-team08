@@ -14,7 +14,6 @@ if (!$userId) {
 }
 
 require_once __DIR__ . '/../server/includes/database.php';
-include __DIR__ . '/includes/navbar.php';
 ?>
 
 <!DOCTYPE html>
@@ -28,6 +27,8 @@ include __DIR__ . '/includes/navbar.php';
 </head>
 
 <body>
+<?php include __DIR__ . '/includes/navbar.php'; ?>
+
   <div class="container">
     <h1>Data Analytics Page</h1>
     <p>Welcome to the data analytics section of Made It All.</p>

@@ -473,7 +473,7 @@ class Database
         $stmt = $this->conn->prepare("
             SELECT 
                 COUNT(*) AS total,
-                SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) AS completed
+                SUM(CASE WHEN completed = 1 THEN 1 ELSE 0 END) AS completed
             FROM tasks
             WHERE project_id = :pid
         ");

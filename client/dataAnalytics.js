@@ -1,7 +1,6 @@
 // Adjust this if your path is different
 const API_BASE = "/makeitall/cob290-part3-team08/server/api/analytics/index.php";
 
-let currentPageType = "project"; // or "employee"
 const $ = (sel) => document.querySelector(sel);
 
 let analyticsData = {
@@ -45,7 +44,6 @@ function loadAnalytics() {
     loadAllTasks();
     loadAllProjectProgress();
     loadTeamPerformanceOverview();
-    loadOrgWideStats();
     loadDetails();
   } else if (currentUserType === 1) {
     // Team Leader
@@ -202,6 +200,34 @@ function loadProjectProgress(projectId) {
       console.log("Project progress:", data);
     });
 }
+
+// Manager-only: Fetch progress for all projects in the system
+function loadAllProjectProgress() {
+  analyticsData.projectProgress = {};
+
+  // Step 1: Get all projects (visible to the manager)
+  fetch(`${API_BASE}/projects`)
+    .then(r => r.json())
+    .then(projects => {
+      console.log("All projects:", projects);
+
+      // Step 2: For each project, fetch progress
+      projects.forEach(proj => {
+        const projectId = proj.project_id;
+
+        fetch(`${API_BASE}/progress?project_id=${projectId}`)
+          .then(r => r.json())
+          .then(progress => {
+            analyticsData.projectProgress[projectId] = {
+              projectName: proj.project_name,
+              progress: progress.completed_percentage
+            };
+            console.log(`Progress for project ${projectId}:`, progress);
+          });
+      });
+    });
+}
+
 
 // Calls countTasksByColumn() based on current page type and logs or displays a summary of tasks per user/project.
 function renderTaskCount(tasks) {
