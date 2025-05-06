@@ -122,7 +122,7 @@ function loadTeamPerformance(leaderId) {
     });
 }
 
-//Retrieves the percentage of completed tasks in a specific project. #
+//Retrieves the percentage of completed tasks in a specific project. 
 // This function can be used for rendering a progress bar or KPI chart to visually show how close a project is to completion.
 function loadProjectProgress(projectId) {
   fetch(`${API_BASE}/progress?project_id=${projectId}`)
