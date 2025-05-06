@@ -1,31 +1,39 @@
 //adjust this if your path is different
 const API_BASE = "/cob290-part3-team08/server/api/analytics/"
 
-
-//this gets the All the tasks
-fetch(API_BASE + "getTasks.php")
+document.addEventListener("DOMContentLoaded", () => {
+  //this gets the All the tasks
+  fetch(API_BASE + "getTasks.php")
   .then(response => {
     return response.json();
   })
   .then(data => {
     console.log("Received data:", data);
+
     // You can now use the JSON data here
-    console.log(getWorkloadDic(data));
+    let column;
+    if(currentPageType == "project"){
+      column = "employee_name";
+    }else{
+      column = "project_name";
+    }
+    console.log(countTasksByColumn(column, data));
+    
   })
   .catch(error => {
     console.error("Fetch error:", error);
-});
+  });
 
 
-//this gets the user/project information (description, email etc)
-let url = API_BASE
-if(currentPageType == "project"){
+  //this gets the user/project information (description, email etc)
+  let url = API_BASE
+  if(currentPageType == "project"){
   url += "getProjects.php";
-} else{
+  } else{
   url += "getEmployee.php";
-}
+  }
 
-fetch(url)
+  fetch(url)
   .then(response => {
     return response.json();
   })
@@ -37,10 +45,13 @@ fetch(url)
   .catch(error => {
     console.error("Fetch error:", error);
   });
+});
+
+
 
 
 //returns dictionary of users/project -> taskNum
-function getWorkloadDic(tasks){
+function countTasksByColumn(columName, tasks){
   let column;
   let taskCountDic = [];
   if(currentPageType == "project"){
@@ -50,10 +61,10 @@ function getWorkloadDic(tasks){
   }
 
   tasks.forEach(task => {
-    if (taskCountDic.hasOwnProperty(task[column])) {
-      taskCountDic[task[column]]++;
+    if (taskCountDic.hasOwnProperty(task[columName])) {
+      taskCountDic[task[columName]]++;
     } else {
-      taskCountDic[task[column]] = 1;
+      taskCountDic[task[columName]] = 1;
     }
   });
   return taskCountDic;
