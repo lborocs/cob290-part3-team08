@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
     $db = new Database();
     $userId = $_POST['user_id'];
 
-    // Fetch user data from DB
+    // Fetch user data from DB to set user type
     $userData = $db->getEmployee(['employee_id' => $userId]);
     if (!$userData || empty($userData[0])) {
         echo "Invalid user ID.";
