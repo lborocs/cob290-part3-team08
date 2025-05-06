@@ -269,7 +269,11 @@ class Database
     #Function to get all tasks with filtering (start date, end date, by employee, by project id, by priority)
     public function getTasks($filters = [])
     {
-        $sql = "SELECT * FROM Tasks WHERE 1=1";
+        $sql = "SELECT tasks.*, CONCAT(employees.first_name, ' ', employees.second_name) AS employee_name, projects.project_name AS project_name 
+        FROM Tasks tasks 
+        LEFT JOIN employees ON tasks.assigned_employee = employees.employee_id 
+        LEFT JOIN projects ON tasks.project_id = projects.project_id 
+        WHERE 1=1";
         $params = [];
 
         if (!empty($filters['start_date']) && !empty($filters['end_date'])) {
@@ -279,12 +283,12 @@ class Database
         }
 
         if (!empty($filters['employee_id'])) {
-            $sql .= " AND assigned_employee = :emp";
+            $sql .= " AND tasks.assigned_employee = :emp";
             $params[':emp'] = $filters['employee_id'];
         }
 
         if (!empty($filters['project_id'])) {
-            $sql .= " AND project_id = :proj";
+            $sql .= " AND tasks.project_id = :proj";
             $params[':proj'] = $filters['project_id'];
         }
 
