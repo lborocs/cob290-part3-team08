@@ -27,29 +27,51 @@ require_once __DIR__ . '/../server/includes/database.php';
 </head>
 
 <body>
-<?php include __DIR__ . '/includes/navbar.php'; ?>
+  <?php include __DIR__ . '/includes/navbar.php'; ?>
 
   <div class="container">
-    <h1>Data Analytics Page</h1>
-    <p>Welcome to the data analytics section of Made It All.</p>
 
+    <div id="analyticsNav"
+      style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <button id="prevPage">⬅</button>
+      <span id="analyticsPageTitle" style="font-weight: bold;"></span>
+      <button id="nextPage">➡</button>
+    </div>
     <div id="analyticsOutput">
-      <div id="managerPanel" class="hidden">
-        <h2>Manager Overview</h2>
-        <p>This section shows all project and team data across the organization.</p>
-        <!-- Charts, team comparisons, etc. -->
+      <div id="managerPanel" class="analyticsPage hidden">
+        <div class="chartGrid">
+          <canvas id="projectProgressChart"></canvas>
+          <canvas id="teamPerformanceChart"></canvas>
+        </div>
       </div>
 
-      <div id="teamLeaderStats" class="hidden">
-        <h2>Team Leader Dashboard</h2>
-        <p>Performance metrics for your assigned team and projects.</p>
-        <!-- Team-specific stats -->
+      <div id="teamLeaderStats" class="analyticsPage hidden">
+        <div class="chartGrid customLayout">
+          <div class="chart chart1">
+            <canvas id="teamLeadPerformanceChart"></canvas>
+          </div>
+          <div class="chart chart2">
+            <canvas id="teamLeadProjectProgressChart"></canvas>
+          </div>
+          <div class="chart chart3">
+            <canvas id="teamLeadTaskCompletionChart"></canvas>
+          </div>
+        </div>
       </div>
 
-      <div id="employeeStats" class="hidden">
-        <h2>My Task Analytics</h2>
-        <p>Your own workload, task completion, and deadlines.</p>
-        <!-- Personal task charts -->
+      <div id="employeeStats" class="analyticsPage hidden">
+        <div class="chartGrid customLayout">
+          <div class="chart chart1">
+            <canvas id="completionChart"></canvas>
+          </div>
+          <div class="chart chart2">
+            <canvas id="avgTimeChart"></canvas>
+          </div>
+          <div class="chart chart3">
+            <canvas id="workloadChart"></canvas>
+          </div>
+
+        </div>
       </div>
 
     </div>
@@ -61,6 +83,8 @@ require_once __DIR__ . '/../server/includes/database.php';
     const currentPageId = <?= json_encode($pageId) ?>;
     const currentPageType = <?= json_encode($pageType) ?>;
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <script src="dataAnalytics.js"></script>
 </body>
 
