@@ -269,7 +269,9 @@ class Database
     #Function to get all tasks with filtering (start date, end date, by employee, by project id, by priority)
     public function getTasks($filters = [])
     {
-        $sql = "SELECT tasks.*, CONCAT(employees.first_name, ' ', employees.second_name) AS employee_name, projects.project_name AS project_name 
+        $sql = "SELECT tasks.*, CONCAT(employees.first_name, ' ', employees.second_name) AS employee_name, 
+        projects.project_name AS project_name, projects.team_leader_id AS team_leader_id
+
         FROM Tasks tasks 
         LEFT JOIN employees ON tasks.assigned_employee = employees.employee_id 
         LEFT JOIN projects ON tasks.project_id = projects.project_id 
@@ -354,6 +356,24 @@ class Database
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function getEmployeesByProject($projectId)
+    {
+        $sql = "
+            SELECT e.employee_id
+            FROM Employees e
+            JOIN EmployeeProjects ep ON ep.employee_id = e.employee_id
+            WHERE ep.project_id = :projectId
+        ";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':projectId', $projectId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
 
     function getAllTeamLeaders(): array
     {
@@ -450,40 +470,63 @@ class Database
 
     public function getTeamPerformance($teamLeaderId)
     {
+        // Step 1: Fetch all team members under the given leader
         $stmt = $this->conn->prepare("
             SELECT 
                 E.employee_id,
-                CONCAT(E.first_name, ' ', E.second_name) AS name,
-                COUNT(T.task_id) AS total_tasks,
-                SUM(CASE WHEN T.completed = 1 THEN 1 ELSE 0 END) AS completed_tasks
+                CONCAT(E.first_name, ' ', E.second_name) AS name
             FROM employees E
             JOIN EmployeeProjects EP ON E.employee_id = EP.employee_id
             JOIN Projects P ON EP.project_id = P.project_id
-            LEFT JOIN Tasks T ON T.assigned_employee = E.employee_id AND T.project_id = P.project_id
             WHERE P.team_leader_id = :lead
             GROUP BY E.employee_id
         ");
         $stmt->bindParam(':lead', $teamLeaderId);
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+        // Step 2: Fetch tasks for each employee
+        foreach ($employees as &$emp) {
+            $taskStmt = $this->conn->prepare("
+                SELECT 
+                    T.task_id,
+                    T.task_name,
+                    T.completed,
+                    T.completed_date,
+                    T.time_taken
+                FROM Tasks T
+                WHERE T.assigned_employee = :emp_id
+            ");
+            $taskStmt->bindParam(':emp_id', $emp['employee_id']);
+            $taskStmt->execute();
+            $emp['tasks'] = $taskStmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+    
+        return $employees;
     }
+    
 
     public function getProjectProgress($projectId)
     {
         $stmt = $this->conn->prepare("
             SELECT 
-                COUNT(*) AS total,
-                SUM(CASE WHEN completed = 1 THEN 1 ELSE 0 END) AS completed
-            FROM tasks
-            WHERE project_id = :pid
+                COUNT(t.task_id) AS total,
+                SUM(CASE WHEN t.completed = 1 THEN 1 ELSE 0 END) AS completed,
+                p.finish_date AS project_due_date
+            FROM projects p
+            LEFT JOIN tasks t ON p.project_id = t.project_id
+            WHERE p.project_id = :pid
         ");
         $stmt->bindParam(':pid', $projectId);
         $stmt->execute();
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    
         return [
-            'completed_percentage' => $row['total'] ? round(($row['completed'] / $row['total']) * 100, 2) : 0
+            'completed_percentage' => $row['total'] ? round(($row['completed'] / $row['total']) * 100, 2) : 0,
+            'project_due_date' => $row['project_due_date'] ?? null
         ];
     }
+    
 
 }
 ?>

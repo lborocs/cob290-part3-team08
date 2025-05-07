@@ -18,50 +18,110 @@ require_once __DIR__ . '/../server/includes/database.php';
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Data Analytics</title>
   <link rel="stylesheet" href="analytics.css" />
 </head>
-
 <body>
-<?php include __DIR__ . '/includes/navbar.php'; ?>
+  <?php include __DIR__ . '/includes/navbar.php'; ?>
 
   <div class="container">
     <h1>Data Analytics Page</h1>
-    <p>Welcome to the data analytics section of Made It All.</p>
 
     <div id="analyticsOutput">
+      <!-- Manager Panel -->
       <div id="managerPanel" class="hidden">
-        <h2>Manager Overview</h2>
-        <p>This section shows all project and team data across the organization.</p>
-        <!-- Charts, team comparisons, etc. -->
+        <div id="managerViewSwitcher" class="view-switcher">
+          <button id="leftArrow" class="arrow-button">←</button>
+          <span id="currentViewLabel">Manager View</span>
+          <button id="rightArrow" class="arrow-button">→</button>
+        </div>
+
+        <div id="managerViews">
+          <!-- Manager Overview -->
+          <div id="managerView" class="manager-subview">
+            <div class="chart-grid">
+              <div class="graph-card">
+                <canvas id="orgTaskSummaryChart"></canvas>
+                <p class="chart-description">Organization-wide task completion status across all employees.</p>
+              </div>
+              <div class="graph-card">
+                <canvas id="teamComparisonChart"></canvas>
+                <p class="chart-description">Compare completed tasks by team leader.</p>
+              </div>
+              <div class="graph-card">
+                <canvas id="projectCompletionOverviewChart"></canvas>
+                <p class="chart-description">Progress chart showing project completion.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Projects View -->
+          <div id="projectsView" class="manager-subview hidden">
+            <select id="projectSelect">
+              <option value="">-- Select a project --</option>
+            </select>
+            <div class="chart-grid">
+              <div class="graph-card">
+                <canvas id="teamCompletionChartManager"></canvas>
+              </div>
+              <div class="graph-card">
+                <canvas id="teamBreakdownChartManager"></canvas>
+              </div>
+              <div class="graph-card">
+                <canvas id="projectProgressChartManager"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Employees View -->
+          <div id="employeesView" class="manager-subview hidden">
+            <select id="projectFilter">
+              <option value="">-- All Projects --</option>
+            </select>
+            <select id="employeeSelect">
+              <option value="">-- Select an employee --</option>
+            </select>
+            <div class="chart-grid">
+              <div class="graph-card"><canvas id="completionChartManager"></canvas></div>
+              <div class="graph-card"><canvas id="timeStatsChartManager"></canvas></div>
+              <div class="graph-card"><canvas id="deadlineChartManager"></canvas></div>
+              <div class="graph-card"><canvas id="workloadChartManager"></canvas></div>
+            </div>
+          </div>
+        </div>
       </div>
 
+      <!-- Team Leader View -->
       <div id="teamLeaderStats" class="hidden">
-        <h2>Team Leader Dashboard</h2>
-        <p>Performance metrics for your assigned team and projects.</p>
-        <!-- Team-specific stats -->
+        <div class="chart-grid">
+          <div class="graph-card"><canvas id="teamCompletionChartTL"></canvas></div>
+          <div class="graph-card"><canvas id="teamBreakdownChartTL"></canvas></div>
+          <div class="graph-card"><canvas id="projectProgressChartTL"></canvas></div>
+        </div>
       </div>
 
+      <!-- Employee View -->
       <div id="employeeStats" class="hidden">
-        <h2>My Task Analytics</h2>
-        <p>Your own workload, task completion, and deadlines.</p>
-        <!-- Personal task charts -->
+        <div class="chart-grid">
+          <div class="graph-card"><canvas id="completionChartEmployee"></canvas></div>
+          <div class="graph-card"><canvas id="timeStatsChartEmployee"></canvas></div>
+          <div class="graph-card"><canvas id="deadlineChartEmployee"></canvas></div>
+          <div class="graph-card"><canvas id="workloadChartEmployee"></canvas></div>
+        </div>
       </div>
-
     </div>
   </div>
 
   <script>
-    const currentUserId = <?= json_encode($userId) ?>;
-    const currentUserType = <?= json_encode($userType) ?>;
-    const currentPageId = <?= json_encode($pageId) ?>;
-    const currentPageType = <?= json_encode($pageType) ?>;
+    window.currentUserId = <?= json_encode($userId) ?>;
+    window.currentUserType = <?= json_encode($userType) ?>;
+    window.currentPageId = <?= json_encode($pageId) ?>;
+    window.currentPageType = <?= json_encode($pageType) ?>;
   </script>
-  <script src="dataAnalytics.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="dataAnalytics.js" defer></script>
 </body>
-
 </html>

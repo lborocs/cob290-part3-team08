@@ -35,6 +35,18 @@ if ($method === 'GET') {
         exit;
     }
 
+    // GET /analytics/employees
+    if (count($parts) === 1 && $parts[0] === 'employees') {
+        if ($_SESSION['user_type'] !== 0) {
+            http_response_code(403);
+            echo json_encode(['error' => 'Access denied']);
+            exit;
+        }
+
+        $employees = $db->getAllEmployees();
+        echo json_encode($employees);
+        exit;
+    }
     // GET /analytics/employee
     if (count($parts) === 1 && $parts[0] === 'employee') {
         $filters = $_GET;
@@ -79,11 +91,28 @@ if ($method === 'GET') {
     // GET /analytics/projects
     if (count($parts) === 1 && $parts[0] === 'projects') {
         $filters = $_GET;
-        $filters['project_id'] = $_SESSION['page_id'] ?? null;
+
+        // Only apply project_id filter if NOT manager
+        if ($_SESSION['user_type'] !== 0) {
+            $filters['project_id'] = $_SESSION['page_id'] ?? null;
+        }
+
         $projects = $db->getProjects($filters);
+
+        // If manager, attach employee assignments for each project
+        if ($_SESSION['user_type'] === 0) {
+            foreach ($projects as &$project) {
+                $projectId = $project['project_id'];
+                $employees = $db->getEmployeesByProject($projectId);
+                $project['assigned_employee_ids'] = array_column($employees, 'employee_id');
+            }
+        }
+
         echo json_encode($projects);
         exit;
     }
+
+
 
     // GET /analytics/tasks
     if (count($parts) === 1 && $parts[0] === 'tasks') {
