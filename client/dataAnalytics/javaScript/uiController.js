@@ -173,6 +173,8 @@ export function setupEmployeeSearch(apiBase) {
 
       // Handle project filter changes
       projectFilter.addEventListener("change", () => {
+        employeesDatalist.innerHTML = "";  // Clear existing options
+
         const projectId = projectFilter.value;
         if (!projectId) {
           renderEmployeeOptions(regularEmployees); // Show all employees if no project is selected
