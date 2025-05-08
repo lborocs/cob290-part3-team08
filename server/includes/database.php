@@ -470,7 +470,6 @@ class Database
 
     public function getTeamPerformance($teamLeaderId)
     {
-        // Step 1: Fetch all team members under the given leader
         $stmt = $this->conn->prepare("
             SELECT 
                 E.employee_id,
@@ -485,25 +484,21 @@ class Database
         $stmt->execute();
         $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-        // Step 2: Fetch tasks for each employee
+        // Fetch tasks for each employee
         foreach ($employees as &$emp) {
-            $taskStmt = $this->conn->prepare("
-                SELECT 
-                    T.task_id,
-                    T.task_name,
-                    T.completed,
-                    T.completed_date,
-                    T.time_taken
-                FROM Tasks T
-                WHERE T.assigned_employee = :emp_id
+            $empId = $emp['employee_id'];
+            $stmtTasks = $this->conn->prepare("
+                SELECT * FROM Tasks
+                WHERE assigned_employee = :emp
             ");
-            $taskStmt->bindParam(':emp_id', $emp['employee_id']);
-            $taskStmt->execute();
-            $emp['tasks'] = $taskStmt->fetchAll(PDO::FETCH_ASSOC);
+            $stmtTasks->bindParam(':emp', $empId);
+            $stmtTasks->execute();
+            $emp['tasks'] = $stmtTasks->fetchAll(PDO::FETCH_ASSOC);
         }
     
         return $employees;
     }
+    
     
 
     public function getProjectProgress($projectId)

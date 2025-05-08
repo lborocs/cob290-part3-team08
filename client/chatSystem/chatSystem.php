@@ -6,7 +6,7 @@ if (empty($_SESSION['user_id'])) {
 }
 $userId = $_SESSION['user_id'];
 
-require_once __DIR__ . '/../server/includes/database.php';
+require_once __DIR__ . '/../../server/includes/database.php';
 $db = new Database();
 $stmt = $db->conn->prepare(
   "SELECT user_type_id FROM Employees WHERE employee_id = :id"
@@ -22,11 +22,11 @@ $currentUserType = $row['user_type_id'] ?? 2;
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Chat System (Full)</title>
-  <link rel="stylesheet" href="chatSystem.css" />
+  <link rel="stylesheet" href="css/chatSystem.css" />
 </head>
 
 <body>
-  <?php include __DIR__ . '/includes/navbar.php'; ?>
+  <?php include __DIR__ . '/../includes/navbar.php'; ?>
 
   <div class="container-wrapper">
     <div class="container">
@@ -117,7 +117,7 @@ $currentUserType = $row['user_type_id'] ?? 2;
     let currentUserId = <?= json_encode($userId) ?>;
     let currentUserType = <?= json_encode($currentUserType) ?>;
   </script>
-  <script src="chatSystem.js"></script>
+  <script src="javaScript/chatSystem.js"></script>
 </body>
 
 </html>

@@ -13,7 +13,7 @@ if (!$userId) {
   exit;
 }
 
-require_once __DIR__ . '/../server/includes/database.php';
+require_once __DIR__ . '/../../server/includes/database.php';
 ?>
 
 <!DOCTYPE html>
@@ -22,10 +22,10 @@ require_once __DIR__ . '/../server/includes/database.php';
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Data Analytics</title>
-  <link rel="stylesheet" href="analytics.css" />
+  <link rel="stylesheet" href="css/analytics.css" />
 </head>
 <body>
-  <?php include __DIR__ . '/includes/navbar.php'; ?>
+  <?php include __DIR__ . '/../includes/navbar.php'; ?>
 
   <div class="container">
     <h1>Data Analytics Page</h1>
@@ -122,6 +122,6 @@ require_once __DIR__ . '/../server/includes/database.php';
     window.currentPageType = <?= json_encode($pageType) ?>;
   </script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="dataAnalytics.js" defer></script>
-</body>
+  <script type="module" src="javaScript/dataAnalytics.js"></script>
+  </body>
 </html>

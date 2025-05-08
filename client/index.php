@@ -58,10 +58,10 @@
 
   <h1>Make-It-All</h1>
   <div class="container">
-    <div class="box" onclick="window.location.href='dataAnalytics.php'">
+    <div class="box" onclick="window.location.href='dataAnalytics/dataAnalytics.php'">
       Team Analytics
     </div>
-    <div class="box" onclick="window.location.href='chatSystem.php'">
+    <div class="box" onclick="window.location.href='chatSystem/chatSystem.php'">
       Chat System
     </div>
   </div>
