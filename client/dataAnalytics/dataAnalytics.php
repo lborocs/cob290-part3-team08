@@ -62,10 +62,12 @@ require_once __DIR__ . '/../../server/includes/database.php';
 
           <!-- Projects View -->
           <div id="projectsView" class="manager-subview hidden">
-            <select id="projectSelect">
-              <option value="">-- Select a project --</option>
-            </select>
-            <!-- Info Icon (could be placed near project name or in header) -->
+            <input list="projects" id="projectSearch" placeholder="Search Projects..." />
+            <datalist id="projects">
+              <!-- Project options will be dynamically added here -->
+            </datalist>
+
+            <!-- Info Icon -->
             <button id="infoIcon" class="info-icon hidden">ℹ️</button>
 
             <!-- Project Info Modal -->
@@ -82,27 +84,28 @@ require_once __DIR__ . '/../../server/includes/database.php';
                 <div id="teamMembersContainer"></div>
               </div>
             </div>
+
+            <!-- Graph Cards -->
             <div class="chart-grid">
-              <div class="graph-card">
-                <canvas id="teamCompletionChartManager"></canvas>
-              </div>
-              <div class="graph-card">
-                <canvas id="teamBreakdownChartManager"></canvas>
-              </div>
-              <div class="graph-card">
-                <canvas id="projectProgressChartManager"></canvas>
-              </div>
+              <div class="graph-card"><canvas id="teamCompletionChartManager"></canvas></div>
+              <div class="graph-card"><canvas id="teamBreakdownChartManager"></canvas></div>
+              <div class="graph-card"><canvas id="projectProgressChartManager"></canvas></div>
             </div>
           </div>
 
           <!-- Employees View -->
+          <!-- Employees View -->
           <div id="employeesView" class="manager-subview hidden">
-            <select id="projectFilter">
-              <option value="">-- All Projects --</option>
-            </select>
-            <select id="employeeSelect">
-              <option value="">-- Select an employee --</option>
-            </select>
+            <input list="projectsList" id="projectFilter" placeholder="Search Projects..." />
+            <datalist id="projectsList">
+              <!-- Project options will be dynamically added here -->
+            </datalist>
+
+            <input list="employeesList" id="employeeSearch" placeholder="Search Employees..." />
+            <datalist id="employeesList">
+              <!-- Employee options will be dynamically added here -->
+            </datalist>
+
             <div class="chart-grid">
               <div class="graph-card"><canvas id="completionChartManager"></canvas></div>
               <div class="graph-card"><canvas id="timeStatsChartManager"></canvas></div>
@@ -110,38 +113,38 @@ require_once __DIR__ . '/../../server/includes/database.php';
               <div class="graph-card"><canvas id="workloadChartManager"></canvas></div>
             </div>
           </div>
+
+
+
+          <!-- Team Leader View -->
+          <div id="teamLeaderStats" class="hidden">
+            <div class="chart-grid">
+              <div class="graph-card"><canvas id="teamCompletionChartTL"></canvas></div>
+              <div class="graph-card"><canvas id="teamBreakdownChartTL"></canvas></div>
+              <div class="graph-card"><canvas id="projectProgressChartTL"></canvas></div>
+            </div>
+          </div>
+
+          <!-- Employee View -->
+          <div id="employeeStats" class="hidden">
+            <div class="chart-grid">
+              <div class="graph-card"><canvas id="completionChartEmployee"></canvas></div>
+              <div class="graph-card"><canvas id="timeStatsChartEmployee"></canvas></div>
+              <div class="graph-card"><canvas id="deadlineChartEmployee"></canvas></div>
+              <div class="graph-card"><canvas id="workloadChartEmployee"></canvas></div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Team Leader View -->
-      <div id="teamLeaderStats" class="hidden">
-        <div class="chart-grid">
-          <div class="graph-card"><canvas id="teamCompletionChartTL"></canvas></div>
-          <div class="graph-card"><canvas id="teamBreakdownChartTL"></canvas></div>
-          <div class="graph-card"><canvas id="projectProgressChartTL"></canvas></div>
-        </div>
-      </div>
-
-      <!-- Employee View -->
-      <div id="employeeStats" class="hidden">
-        <div class="chart-grid">
-          <div class="graph-card"><canvas id="completionChartEmployee"></canvas></div>
-          <div class="graph-card"><canvas id="timeStatsChartEmployee"></canvas></div>
-          <div class="graph-card"><canvas id="deadlineChartEmployee"></canvas></div>
-          <div class="graph-card"><canvas id="workloadChartEmployee"></canvas></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    window.currentUserId = <?= json_encode($userId) ?>;
-    window.currentUserType = <?= json_encode($userType) ?>;
-    window.currentPageId = <?= json_encode($pageId) ?>;
-    window.currentPageType = <?= json_encode($pageType) ?>;
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script type="module" src="javaScript/dataAnalytics.js"></script>
+      <script>
+        window.currentUserId = <?= json_encode($userId) ?>;
+        window.currentUserType = <?= json_encode($userType) ?>;
+        window.currentPageId = <?= json_encode($pageId) ?>;
+        window.currentPageType = <?= json_encode($pageType) ?>;
+      </script>
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <script type="module" src="javaScript/dataAnalytics.js"></script>
 </body>
 
 </html>

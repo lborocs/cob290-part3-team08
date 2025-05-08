@@ -82,8 +82,19 @@ h1 {
   display: none;
 }
 
-input[type="text"],
+input[type="text"], input[type="search"],
 select {
+  display: block;
+  margin: 0 auto 20px auto; /* center horizontally and add bottom space */
+  width: 100%;
+  max-width: 500px;
+  padding: 10px;
+  font-size: 1em;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+#projectSearch,#employeeSearch,#projectFilter {
   display: block;
   margin: 0 auto 20px auto; /* center horizontally and add bottom space */
   width: 100%;
