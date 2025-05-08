@@ -203,3 +203,6 @@ select {
 }
 
 
+.chartjs-tooltip {
+  white-space: pre-line; /* Ensures newlines are respected */
+}

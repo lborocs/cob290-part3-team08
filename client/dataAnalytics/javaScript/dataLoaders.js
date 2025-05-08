@@ -78,7 +78,7 @@ export function fetchProjectDetails(projectId) {
       // Create the team members title and set it as hoverable
       const teamMembersTitle = document.createElement("span");
       teamMembersTitle.classList.add("team-members-title");
-      teamMembersTitle.textContent = `Team Members (Hover to See List)`;
+      teamMembersTitle.textContent = `Team Members`;
 
       // Create the list container to show on hover
       const teamMembersList = document.createElement("div");

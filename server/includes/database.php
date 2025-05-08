@@ -43,7 +43,7 @@ class Database
     public function getAllEmployees(): array
     {
         $stmt = $this->conn->prepare(
-            "SELECT employee_id, first_name, second_name FROM Employees"
+            "SELECT employee_id, first_name, second_name, user_type_id FROM Employees"
         );
         $stmt->execute();
         return $stmt->fetchAll();

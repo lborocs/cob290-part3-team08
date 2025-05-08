@@ -62,22 +62,25 @@ export function renderCompletionChart(tasks, context = "Employee") {
 
 export function renderTimeStatsChart(tasks, context = "Employee") {
   const chartID =
-    context === "Manager" ? "timeStatsChartManager" : "timeStatsChartEmployee";
-  destroyChart(chartID);
-    // Ensure tasks is an array
-    if (!Array.isArray(tasks)) {
-      console.error("Expected tasks to be an array, but received:", tasks);
-      return;
-    }
-  
+    context === "Manager" ? "timeStatsChartManager" : "timeStatsChartEmployee"
+  destroyChart(chartID)
+  // Ensure tasks is an array
+  if (!Array.isArray(tasks)) {
+    console.error("Expected tasks to be an array, but received:", tasks)
+    return
+  }
 
   // Calculate the total time allocated and time taken
-  const totalAllocated = tasks.reduce((acc, task) => acc + task.time_allocated, 0);
-  const totalTaken = tasks.reduce((acc, task) => acc + (task.time_taken || 0), 0);
+  const totalAllocated = tasks
+    .filter((task) => task.completed === 1) // Filter for completed tasks
+    .reduce((acc, task) => acc + task.time_allocated, 0)
+  const totalTaken = tasks
+    .filter((task) => task.completed === 1) // Filter for completed tasks
+    .reduce((acc, task) => acc + task.time_taken, 0)
 
   // Calculate the average time allocated and time taken
-  const avgTimeAllocated = totalAllocated / tasks.length || 0;
-  const avgTimeTaken = totalTaken / tasks.length || 0;
+  const avgTimeAllocated = totalAllocated / tasks.length || 0
+  const avgTimeTaken = totalTaken / tasks.length || 0
 
   charts[chartID] = new Chart(
     document.getElementById(chartID).getContext("2d"),
@@ -105,9 +108,8 @@ export function renderTimeStatsChart(tasks, context = "Employee") {
         },
       },
     }
-  );
+  )
 }
-
 
 export function renderDeadlineChart(tasks, context = "Employee") {
   const chartID =
@@ -152,89 +154,93 @@ export function renderDeadlineChart(tasks, context = "Employee") {
 
 export function renderWorkloadChart(tasks, context = "Employee") {
   const chartID =
-    context === "Manager" ? "workloadChartManager" : "workloadChartEmployee";
-  destroyChart(chartID);
+    context === "Manager" ? "workloadChartManager" : "workloadChartEmployee"
+  destroyChart(chartID)
 
   // Ensure tasks is an array
   if (!Array.isArray(tasks)) {
-    console.error("Expected tasks to be an array, but received:", tasks);
-    return;
+    console.error("Expected tasks to be an array, but received:", tasks)
+    return
   }
 
   // Group tasks by week or month
-  const timePeriod = "month";  // Change this to "week" if you'd prefer weeks
-  const groupedData = groupTasksByTimePeriod(tasks, timePeriod);
+  const timePeriod = "month" // Change this to "week" if you'd prefer weeks
+  const groupedData = groupTasksByTimePeriod(tasks, timePeriod)
 
   // Calculate total time allocated and time taken per time period
   const timeAllocated = groupedData.map((period) =>
     period.tasks.reduce((sum, task) => sum + task.time_allocated, 0)
-  );
+  )
   const timeTaken = groupedData.map((period) =>
     period.tasks.reduce((sum, task) => sum + (task.time_taken || 0), 0)
-  );
+  )
 
   // Get labels (weeks/months)
-  const labels = groupedData.map((period) => period.timePeriodLabel);
-  console.log("Tasks data for employee:", tasks);
+  const labels = groupedData.map((period) => period.timePeriodLabel)
+  console.log("Tasks data for employee:", tasks)
 
+  charts[chartID] = new Chart(
+    document.getElementById(chartID).getContext("2d"),
+    {
+      type: "line",
+      data: {
+        labels,
+        datasets: [
+          {
+            label: "Time Allocated",
+            data: timeAllocated,
+            borderColor: "#3f51b5",
+            fill: false,
+          },
+          {
+            label: "Time Taken",
+            data: timeTaken,
+            borderColor: "#f44336",
+            fill: false,
+          },
+        ],
+      },
+      options: {
+        maintainAspectRatio: false,
 
-  charts[chartID] = new Chart(document.getElementById(chartID).getContext("2d"), {
-    type: "line",
-    data: {
-      labels,
-      datasets: [
-        {
-          label: "Time Allocated",
-          data: timeAllocated,
-          borderColor: "#3f51b5",
-          fill: false,
-        },
-        {
-          label: "Time Taken",
-          data: timeTaken,
-          borderColor: "#f44336",
-          fill: false,
-        },
-      ],
-    },
-    options: {
-      maintainAspectRatio: false,
-
-      plugins: { title: { display: true, text: "Workload Over Time" } },
-      scales: {
-        y: {
-          beginAtZero: true,
-          title: { display: true, text: "Hours" },
+        plugins: { title: { display: true, text: "Workload Over Time" } },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: "Hours" },
+          },
         },
       },
-    },
-  });
+    }
+  )
 }
 
 // Helper function to group tasks by week/month
 function groupTasksByTimePeriod(tasks, period = "month") {
   const grouped = tasks.reduce((result, task) => {
-    const date = new Date(task.start_date);
-    const label = period === "month" ? `${date.getFullYear()}-${date.getMonth() + 1}` : getWeekNumber(date);
-    
+    const date = new Date(task.start_date)
+    const label =
+      period === "month"
+        ? `${date.getFullYear()}-${date.getMonth() + 1}`
+        : getWeekNumber(date)
+
     if (!result[label]) {
-      result[label] = { timePeriodLabel: label, tasks: [] };
+      result[label] = { timePeriodLabel: label, tasks: [] }
     }
 
-    result[label].tasks.push(task);
-    return result;
-  }, {});
+    result[label].tasks.push(task)
+    return result
+  }, {})
 
-  return Object.values(grouped);
+  return Object.values(grouped)
 }
 
 // Helper function to get the week number of a date
 function getWeekNumber(date) {
-  const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
-  const days = Math.floor((date - firstDayOfYear) / (24 * 60 * 60 * 1000));
-  return Math.ceil((days + 1) / 7);
+  const firstDayOfYear = new Date(date.getFullYear(), 0, 1)
+  const days = Math.floor((date - firstDayOfYear) / (24 * 60 * 60 * 1000))
+  return Math.ceil((days + 1) / 7)
 }
-
 
 export function renderTeamCompletionChart(data, context = "TL") {
   const chartID =
@@ -249,21 +255,52 @@ export function renderTeamCompletionChart(data, context = "TL") {
       sum + (emp.tasks?.filter((t) => t.completed === 1).length || 0),
     0
   )
+  const pending = total - completed
+
+  // Prepare the task data
+  const completedTasks = []
+  const pendingTasks = []
+
+  data.forEach((emp) => {
+    emp.tasks?.forEach((t) => {
+      if (t.completed === 1) {
+        completedTasks.push(t)
+      } else {
+        pendingTasks.push(t)
+      }
+    })
+  })
+
   charts[chartID] = new Chart(document.getElementById(chartID), {
     type: "pie",
     data: {
       labels: ["Completed", "Pending"],
       datasets: [
         {
-          data: [completed, total - completed],
+          data: [completed, pending],
           backgroundColor: ["#4caf50", "#f44336"],
         },
       ],
     },
-    options: {      maintainAspectRatio: false,
-
+    options: {
+      maintainAspectRatio: false,
       plugins: {
-        title: { display: true, text: `${context} Team Task Completion` },
+        title: { display: true, text: "Task Completion Status" },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => `Tasks (${ctx.dataset.data[ctx.dataIndex]})`,
+            afterLabel: (ctx) => {
+              const isCompleted = ctx.dataIndex === 0
+              return (isCompleted ? completed : pending).map(
+                (t) =>
+                  `• ${t.task_name}` +
+                  (isCompleted
+                    ? ""
+                    : ` (Due: ${new Date(t.finish_date).toLocaleDateString()})`)
+              )
+            },
+          },
+        },
       },
     },
   })
@@ -274,7 +311,9 @@ export function renderTeamBreakdownChart(data, context = "TL") {
     context === "Manager" ? "teamBreakdownChartManager" : "teamBreakdownChartTL"
   destroyChart(chartID)
   console.log("Render teambreakdown:", data)
-  const labels = data.map((emp) => emp.employee_name || emp.name || `ID ${emp.employee_id}`)
+  const labels = data.map(
+    (emp) => emp.employee_name || emp.name || `ID ${emp.employee_id}`
+  )
 
   charts[chartID] = new Chart(document.getElementById(chartID), {
     type: "bar",
@@ -297,12 +336,13 @@ export function renderTeamBreakdownChart(data, context = "TL") {
         },
       ],
     },
-    options: {      maintainAspectRatio: false,
+    options: {
+      maintainAspectRatio: false,
 
       plugins: {
         title: {
           display: true,
-          text: `${context} Tasks by Team Member`,
+          text: `Tasks by Team Member`,
         },
       },
       responsive: true,
@@ -329,10 +369,11 @@ export function renderProjectProgressChart(progressData, context = "TL") {
         { label: "Completion (%)", data: values, backgroundColor: "#2196f3" },
       ],
     },
-    options: {      maintainAspectRatio: false,
+    options: {
+      maintainAspectRatio: false,
 
       plugins: {
-        title: { display: true, text: `${context} Project Progress` },
+        title: { display: true, text: `Project Progress` },
       },
       scales: { y: { beginAtZero: true, max: 100 } },
     },
@@ -367,7 +408,8 @@ export function renderOrgTaskSummaryChart(tasks) {
         },
       ],
     },
-    options: {      maintainAspectRatio: false,
+    options: {
+      maintainAspectRatio: false,
 
       plugins: {
         title: {
@@ -456,7 +498,6 @@ export function renderProjectCompletionOverviewChart(projectProgress) {
       },
     }
   )
-  
 }
 
 export function renderTeamComparisonChart(performanceData) {
