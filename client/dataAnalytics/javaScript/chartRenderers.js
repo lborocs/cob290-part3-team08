@@ -274,7 +274,7 @@ export function renderTeamBreakdownChart(data, context = "TL") {
     context === "Manager" ? "teamBreakdownChartManager" : "teamBreakdownChartTL"
   destroyChart(chartID)
   console.log("Render teambreakdown:", data)
-  const labels = data.map((emp) => emp.employee_name || `ID ${emp.employee_id}`)
+  const labels = data.map((emp) => emp.employee_name || emp.name || `ID ${emp.employee_id}`)
 
   charts[chartID] = new Chart(document.getElementById(chartID), {
     type: "bar",
