@@ -190,7 +190,7 @@ export function renderTeamBreakdownChart(data, context = "TL") {
   destroyChart(chartID)
   console.log("Render teambreakdown:" , data)
   const labels = data.map(emp =>
-    emp.employee_name || `ID ${task.assigned_employee}`
+    emp.employee_name || `ID ${emp.employee_id}`
   )
 
   charts[chartID] = new Chart(document.getElementById(chartID), {
@@ -377,7 +377,8 @@ export function renderTeamComparisonChart(performanceData) {
   const efficiencyScores = []
 
   performanceData.forEach((entry) => {
-    const { teamLeaderId, performance } = entry
+    const { teamLeaderId, teamLeaderName, performance } = entry
+    console.log("entry:",entry)
 
     let onTime = 0
     let totalCompleted = 0
@@ -401,7 +402,7 @@ export function renderTeamComparisonChart(performanceData) {
     const efficiency =
       totalCompleted > 0 ? Math.round((onTime / totalCompleted) * 100) : 0
 
-    labels.push(`TL ${teamLeaderId}`)
+    labels.push(teamLeaderName)
     efficiencyScores.push(efficiency)
   })
 

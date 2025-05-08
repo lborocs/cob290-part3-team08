@@ -37,12 +37,6 @@ if ($method === 'GET') {
 
     // GET /analytics/employees
     if (count($parts) === 1 && $parts[0] === 'employees') {
-        if ($_SESSION['user_type'] !== 0) {
-            http_response_code(403);
-            echo json_encode(['error' => 'Access denied']);
-            exit;
-        }
-
         $employees = $db->getAllEmployees();
         echo json_encode($employees);
         exit;
@@ -116,16 +110,28 @@ if ($method === 'GET') {
 
     // GET /analytics/tasks
     if (count($parts) === 1 && $parts[0] === 'tasks') {
-        $filters = $_GET;
-        if (isset($_SESSION['page_type']) && $_SESSION['page_type'] === 'project') {
+        $filters = [];
+    
+        // Use query parameter if it's provided
+        if (!empty($_GET['project_id'])) {
+            $filters['project_id'] = $_GET['project_id'];
+        } elseif (isset($_SESSION['page_type']) && $_SESSION['page_type'] === 'project') {
+            // Otherwise fall back to session context
             $filters['project_id'] = $_SESSION['page_id'];
-        } else {
+        }
+    
+        if (!empty($_GET['employee_id'])) {
+            $filters['employee_id'] = $_GET['employee_id'];
+        } elseif (!isset($filters['project_id']) && isset($_SESSION['page_id'])) {
+            // Use session page_id as employee_id only if project_id isn't set
             $filters['employee_id'] = $_SESSION['page_id'];
         }
+    
         $tasks = $db->getTasks($filters);
         echo json_encode($tasks);
         exit;
     }
+    
 
     // GET /analytics/completion?employee_id=..&project_id=..
     if (count($parts) === 1 && $parts[0] === 'completion') {

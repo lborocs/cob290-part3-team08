@@ -107,6 +107,7 @@ export function loadTeamPerformanceOverview() {
           .then(data => {
             analyticsData.teamPerformance.push({
               teamLeaderId: leader.employee_id,
+              teamLeaderName: `${leader.first_name} ${leader.second_name}`, // ✅ Add this
               performance: data,
             })
           })

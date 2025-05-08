@@ -55,6 +55,8 @@ export function setupProjectSearch(apiBase, leaderIdToName) {
 
       projectSelect.addEventListener("change", () => {
         const projectId = projectSelect.value
+        console.log("Current:", projectId)
+
         if (!projectId) return
 
         const projectName = projectSelect.options[projectSelect.selectedIndex].textContent
@@ -75,13 +77,15 @@ export function setupProjectSearch(apiBase, leaderIdToName) {
               fetch(`${apiBase}/tasks?project_id=${projectId}`).then(r => r.json())
             ]).then(([filteredTasks]) => {
               analyticsData.tasks = filteredTasks
+              console.log("Filtered Tasks:" , filteredTasks)
             
               const grouped = groupTasksByEmployee(filteredTasks)
-              renderTeamBreakdownChart(grouped, "Manager")
-        
+              console.log(grouped);
+
             
+              renderTeamBreakdownChart(grouped, "Manager")
+              renderTeamCompletionChart(grouped, "Manager")
               renderProjectProgressChart(progressData, "Manager")
-              renderTeamCompletionChart(filteredTasks, "Manager")
             })
           })
       })
@@ -154,4 +158,25 @@ export function setupEmployeeSearch(apiBase) {
       employeeSelect.appendChild(option)
     })
   }
+}
+
+export function groupTasksByEmployee(tasks) {
+  const grouped = {}
+
+  tasks.forEach((task) => {
+    const empId = task.assigned_employee
+    const empName = task.employee_name || `ID ${empId}`
+
+    if (!grouped[empId]) {
+      grouped[empId] = {
+        employee_id: empId,
+        employee_name: empName,
+        tasks: [],
+      }
+    }
+
+    grouped[empId].tasks.push(task)
+  })
+
+  return Object.values(grouped)
 }
