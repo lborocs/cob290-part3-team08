@@ -298,6 +298,12 @@ class Database
             $sql .= " AND priority = :priority";
             $params[':priority'] = $filters['priority'];
         }
+        // If the user is an employee, filter by their employee ID
+        if ($_SESSION['user_type'] === 2) { // Employee user type
+            $sql .= " AND tasks.assigned_employee = :emp";
+            $params[':emp'] = $_SESSION['user_id'];
+        }
+
 
         $stmt = $this->conn->prepare($sql);
         foreach ($params as $key => &$val) {
@@ -310,20 +316,26 @@ class Database
     #Function to get all projects with filtering (start date, end date, by team leader)
     public function getProjects($filters = [])
     {
-        $sql = "SELECT * FROM Projects WHERE 1=1";
+        $sql = "
+            SELECT p.project_id, p.project_name, p.start_date, p.finish_date, 
+                   p.team_leader_id, CONCAT(e.first_name, ' ', e.second_name) AS team_leader_name
+            FROM Projects p
+            LEFT JOIN Employees e ON p.team_leader_id = e.employee_id
+            WHERE 1=1";
+
         $params = [];
 
         if (!empty($filters['start_date']) && !empty($filters['end_date'])) {
-            $sql .= " AND start_date >= :start AND finish_date <= :end";
+            $sql .= " AND p.start_date >= :start AND p.finish_date <= :end";
             $params[':start'] = $filters['start_date'];
             $params[':end'] = $filters['end_date'];
         }
         if (!empty($filters['project_id'])) {
-            $sql .= " AND project_id = :proj";
+            $sql .= " AND p.project_id = :proj";
             $params[':proj'] = $filters['project_id'];
         }
         if (!empty($filters['team_leader_id'])) {
-            $sql .= " AND team_leader_id = :lead";
+            $sql .= " AND p.team_leader_id = :lead";
             $params[':lead'] = $filters['team_leader_id'];
         }
 
@@ -332,8 +344,14 @@ class Database
             $stmt->bindParam($key, $val);
         }
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+
+        return $projects;
     }
+
 
     public function getEmployee($filters = [])
     {
@@ -360,7 +378,7 @@ class Database
     public function getEmployeesByProject($projectId)
     {
         $sql = "
-            SELECT e.employee_id
+            SELECT e.employee_id, CONCAT(e.first_name, ' ', e.second_name) AS employee_name
             FROM Employees e
             JOIN EmployeeProjects ep ON ep.employee_id = e.employee_id
             WHERE ep.project_id = :projectId
@@ -483,7 +501,7 @@ class Database
         $stmt->bindParam(':lead', $teamLeaderId);
         $stmt->execute();
         $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
+
         // Fetch tasks for each employee
         foreach ($employees as &$emp) {
             $empId = $emp['employee_id'];
@@ -495,11 +513,11 @@ class Database
             $stmtTasks->execute();
             $emp['tasks'] = $stmtTasks->fetchAll(PDO::FETCH_ASSOC);
         }
-    
+
         return $employees;
     }
-    
-    
+
+
 
     public function getProjectProgress($projectId)
     {
@@ -515,13 +533,13 @@ class Database
         $stmt->bindParam(':pid', $projectId);
         $stmt->execute();
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    
+
         return [
             'completed_percentage' => $row['total'] ? round(($row['completed'] / $row['total']) * 100, 2) : 0,
             'project_due_date' => $row['project_due_date'] ?? null
         ];
     }
-    
+
 
 }
 ?>

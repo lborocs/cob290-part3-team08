@@ -17,7 +17,8 @@ import {
   loadTeamLeaderNames,
   loadAllEmployees,
   analyticsData,
-  leaderIdToName
+  leaderIdToName,
+  fetchProjectDetails
 } from "./dataLoaders.js"
 
 import {
@@ -129,7 +130,7 @@ function renderTeamLeaderCharts() {
 
 function renderEmployeeCharts() {
   renderCompletionChart(analyticsData.tasks, "Employee")
-  renderTimeStatsChart(analyticsData.avgTimeStats, "Employee")
+  renderTimeStatsChart(analyticsData.tasks, "Employee")
   renderDeadlineChart(analyticsData.deadlines, "Employee")
-  renderWorkloadChart(analyticsData.workload, "Employee")
+  renderWorkloadChart(analyticsData.tasks, "Employee")
 }

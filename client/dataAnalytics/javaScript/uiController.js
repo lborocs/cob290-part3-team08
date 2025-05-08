@@ -10,6 +10,7 @@ import {
   renderTeamCompletionChart,
   renderTeamBreakdownChart,
 } from "./chartRenderers.js"
+import { fetchProjectDetails,currentProjectData } from "./dataLoaders.js"
 
 export function setupManagerViewSwitcher() {
   const views = ["managerView", "projectsView", "employeesView"]
@@ -42,55 +43,90 @@ export function setupManagerViewSwitcher() {
 }
 
 export function setupProjectSearch(apiBase, leaderIdToName) {
-  const projectSelect = document.getElementById("projectSelect")
+  const projectSelect = document.getElementById("projectSelect");
+
   fetch(`${apiBase}/projects`)
-    .then(res => res.json())
-    .then(projects => {
-      projects.forEach(p => {
-        const option = document.createElement("option")
-        option.value = p.project_id
-        option.textContent = p.project_name
-        projectSelect.appendChild(option)
-      })
+    .then((res) => res.json())
+    .then((projects) => {
+      // Populate project selection dropdown
+      projects.forEach((p) => {
+        const option = document.createElement("option");
+        option.value = p.project_id;
+        option.textContent = p.project_name;
+        projectSelect.appendChild(option);
+      });
 
+      // Add event listener for project selection
       projectSelect.addEventListener("change", () => {
-        const projectId = projectSelect.value
-        console.log("Current:", projectId)
+        const projectId = projectSelect.value;
+        console.log("Current project ID:", projectId);
+        const infoIcon = document.getElementById("infoIcon");
+        infoIcon.classList.remove("hidden")
 
-        if (!projectId) return
+        // Make sure project ID is valid before fetching
+        if (!projectId) return;
 
-        const projectName = projectSelect.options[projectSelect.selectedIndex].textContent
+        // Fetch and store the project details when a project is selected
+        fetchProjectDetails(projectId); // This is in dataLoaders.js
 
+        // Fetch project progress
+        const projectName = projectSelect.options[projectSelect.selectedIndex].textContent;
         fetch(`${apiBase}/progress?project_id=${projectId}`)
-          .then(r => r.json())
-          .then(progress => {
+          .then((r) => r.json())
+          .then((progress) => {
             analyticsData.projectProgress[projectId] = {
               projectName,
               progress: progress.completed_percentage,
-            }
+            };
 
             const progressData = {
               [projectId]: analyticsData.projectProgress[projectId],
-            }
+            };
 
+            // Fetch filtered tasks for the selected project
             Promise.all([
-              fetch(`${apiBase}/tasks?project_id=${projectId}`).then(r => r.json())
+              fetch(`${apiBase}/tasks?project_id=${projectId}`).then((r) =>
+                r.json()
+              ),
             ]).then(([filteredTasks]) => {
-              analyticsData.tasks = filteredTasks
-              console.log("Filtered Tasks:" , filteredTasks)
-            
-              const grouped = groupTasksByEmployee(filteredTasks)
-              console.log(grouped);
+              analyticsData.tasks = filteredTasks;
+              console.log("Filtered Tasks:", filteredTasks);
 
-            
-              renderTeamBreakdownChart(grouped, "Manager")
-              renderTeamCompletionChart(grouped, "Manager")
-              renderProjectProgressChart(progressData, "Manager")
-            })
-          })
-      })
-    })
+              // Group tasks by employee
+              const grouped = groupTasksByEmployee(filteredTasks);
+              console.log("Grouped Tasks:", grouped);
+
+              // Show the project info modal
+              const projectInfoModal = document.getElementById("projectInfoModal");
+              projectInfoModal.classList.remove("hidden"); // Show modal
+
+              // Render charts
+              renderTeamBreakdownChart(grouped, "Manager");
+              renderTeamCompletionChart(grouped, "Manager");
+              renderProjectProgressChart(progressData, "Manager");
+            });
+          });
+      });
+    });
 }
+
+// When the info icon is clicked, show the modal
+document.getElementById("infoIcon").addEventListener("click", function () {
+  if (currentProjectData) {
+    document.getElementById("projectInfoModal").classList.remove("hidden");
+  } else {
+    console.log("No project data available.");
+  }
+});
+
+// Close the modal when the close button is clicked
+document
+  .getElementById("closeModal")
+  .addEventListener("click", function () {
+    document.getElementById("projectInfoModal").classList.add("hidden");
+  });
+
+
 
 export function setupEmployeeSearch(apiBase) {
   const projectFilter = document.getElementById("projectFilter")
@@ -98,18 +134,20 @@ export function setupEmployeeSearch(apiBase) {
 
   let allEmployees = []
 
-  fetch(`${apiBase}/projects`).then(res => res.json()).then(projects => {
-    projects.forEach(p => {
-      const option = document.createElement("option")
-      option.value = p.project_id
-      option.textContent = p.project_name
-      projectFilter.appendChild(option)
+  fetch(`${apiBase}/projects`)
+    .then((res) => res.json())
+    .then((projects) => {
+      projects.forEach((p) => {
+        const option = document.createElement("option")
+        option.value = p.project_id
+        option.textContent = p.project_name
+        projectFilter.appendChild(option)
+      })
     })
-  })
 
   fetch(`${apiBase}/employees`)
-    .then(r => r.json())
-    .then(users => {
+    .then((r) => r.json())
+    .then((users) => {
       allEmployees = users
       renderEmployeeOptions(users)
 
@@ -118,10 +156,14 @@ export function setupEmployeeSearch(apiBase) {
         if (!projectId) return renderEmployeeOptions(allEmployees)
 
         fetch(`${apiBase}/projects?project_id=${projectId}`)
-          .then(res => res.json())
-          .then(projects => {
-            const assignedIds = projects[0].assigned_employee_ids || []
-            const filtered = allEmployees.filter(e => assignedIds.includes(e.employee_id))
+          .then((res) => res.json())
+          .then((projects) => {
+            console.log(projects)
+            const assignedIds = projects[0]?.team_members?.map(member => member.employee_id) || [];
+            console.log("Assigned Employee IDs:", assignedIds);
+            const filtered = allEmployees.filter((e) =>
+              assignedIds.includes(e.employee_id)
+            )
             renderEmployeeOptions(filtered)
           })
       })
@@ -131,10 +173,16 @@ export function setupEmployeeSearch(apiBase) {
         if (!employeeId) return
 
         Promise.all([
-          fetch(`${apiBase}/tasks?employee_id=${employeeId}`).then(r => r.json()),
-          fetch(`${apiBase}/avg-time?employee_id=${employeeId}`).then(r => r.json()),
-          fetch(`${apiBase}/deadlines`).then(r => r.json()),
-          fetch(`${apiBase}/workload?employee_id=${employeeId}&start_date=2024-04-01&end_date=2024-06-30`).then(r => r.json()),
+          fetch(`${apiBase}/tasks?employee_id=${employeeId}`).then((r) =>
+            r.json()
+          ),
+          fetch(`${apiBase}/avg-time?employee_id=${employeeId}`).then((r) =>
+            r.json()
+          ),
+          fetch(`${apiBase}/deadlines`).then((r) => r.json()),
+          fetch(
+            `${apiBase}/workload?employee_id=${employeeId}&start_date=2024-04-01&end_date=2024-06-30`
+          ).then((r) => r.json()),
         ]).then(([tasks, avgTimeStats, deadlines, workload]) => {
           analyticsData.tasks = tasks
           analyticsData.avgTimeStats = avgTimeStats
@@ -142,16 +190,17 @@ export function setupEmployeeSearch(apiBase) {
           analyticsData.workload = workload
 
           renderCompletionChart(tasks, "Manager")
-          renderTimeStatsChart(avgTimeStats, "Manager")
+          renderTimeStatsChart(tasks, "Manager")
           renderDeadlineChart(deadlines, "Manager")
-          renderWorkloadChart(workload, "Manager")
+          renderWorkloadChart(tasks, "Manager")
         })
       })
     })
 
   function renderEmployeeOptions(list) {
-    employeeSelect.innerHTML = '<option value="">-- Select an employee --</option>'
-    list.forEach(e => {
+    employeeSelect.innerHTML =
+      '<option value="">-- Select an employee --</option>'
+    list.forEach((e) => {
       const option = document.createElement("option")
       option.value = e.employee_id
       option.textContent = `${e.first_name} ${e.second_name}`

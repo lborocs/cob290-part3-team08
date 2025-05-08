@@ -18,12 +18,14 @@ require_once __DIR__ . '/../../server/includes/database.php';
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Data Analytics</title>
   <link rel="stylesheet" href="css/analytics.css" />
 </head>
+
 <body>
   <?php include __DIR__ . '/../includes/navbar.php'; ?>
 
@@ -63,6 +65,24 @@ require_once __DIR__ . '/../../server/includes/database.php';
             <select id="projectSelect">
               <option value="">-- Select a project --</option>
             </select>
+            <!-- Info Icon (could be placed near project name or in header) -->
+            <button id="infoIcon" class="info-icon hidden">ℹ️</button>
+
+            <!-- Project Info Modal -->
+            <div id="projectInfoModal" class="modal hidden">
+              <div class="modal-content">
+                <span id="closeModal" class="close-button">&times;</span>
+                <h2>Project Info</h2>
+                <p><strong>Project Name:</strong> <span id="projectName"></span></p>
+                <p><strong>Project ID:</strong> <span id="projectId"></span></p>
+                <p><strong>Team Leader:</strong> <span id="teamLeaderName"></span> (ID: <span id="teamLeaderId"></span>)
+                </p>
+                <p><strong>Start Date:</strong> <span id="startDate"></span></p>
+                <p><strong>Due Date:</strong> <span id="dueDate"></span></p>
+                <p><strong>Completion:</strong> <span id="completionPercentage"></span>%</p>
+                <div id="teamMembersContainer"></div>
+              </div>
+            </div>
             <div class="chart-grid">
               <div class="graph-card">
                 <canvas id="teamCompletionChartManager"></canvas>
@@ -123,5 +143,6 @@ require_once __DIR__ . '/../../server/includes/database.php';
   </script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script type="module" src="javaScript/dataAnalytics.js"></script>
-  </body>
+</body>
+
 </html>

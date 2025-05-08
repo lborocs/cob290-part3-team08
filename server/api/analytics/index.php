@@ -86,20 +86,13 @@ if ($method === 'GET') {
     if (count($parts) === 1 && $parts[0] === 'projects') {
         $filters = $_GET;
 
-        // Only apply project_id filter if NOT manager
-        if ($_SESSION['user_type'] !== 0) {
-            $filters['project_id'] = $_SESSION['page_id'] ?? null;
-        }
-
+        // Fetch projects based on filters
         $projects = $db->getProjects($filters);
 
-        // If manager, attach employee assignments for each project
-        if ($_SESSION['user_type'] === 0) {
-            foreach ($projects as &$project) {
-                $projectId = $project['project_id'];
-                $employees = $db->getEmployeesByProject($projectId);
-                $project['assigned_employee_ids'] = array_column($employees, 'employee_id');
-            }
+        // For each project, get the team members and append to the project data
+        foreach ($projects as &$project) {
+            $teamMembers = $db->getEmployeesByProject($project['project_id']);
+            $project['team_members'] = $teamMembers;
         }
 
         echo json_encode($projects);
@@ -108,10 +101,12 @@ if ($method === 'GET') {
 
 
 
+
+
     // GET /analytics/tasks
     if (count($parts) === 1 && $parts[0] === 'tasks') {
         $filters = [];
-    
+
         // Use query parameter if it's provided
         if (!empty($_GET['project_id'])) {
             $filters['project_id'] = $_GET['project_id'];
@@ -119,19 +114,19 @@ if ($method === 'GET') {
             // Otherwise fall back to session context
             $filters['project_id'] = $_SESSION['page_id'];
         }
-    
+
         if (!empty($_GET['employee_id'])) {
             $filters['employee_id'] = $_GET['employee_id'];
         } elseif (!isset($filters['project_id']) && isset($_SESSION['page_id'])) {
             // Use session page_id as employee_id only if project_id isn't set
             $filters['employee_id'] = $_SESSION['page_id'];
         }
-    
+
         $tasks = $db->getTasks($filters);
         echo json_encode($tasks);
         exit;
     }
-    
+
 
     // GET /analytics/completion?employee_id=..&project_id=..
     if (count($parts) === 1 && $parts[0] === 'completion') {
