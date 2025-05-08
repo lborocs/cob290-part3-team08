@@ -71,12 +71,7 @@ export function fetchProjectDetails(projectId) {
       document.getElementById("startDate").textContent = currentProjectData.start_date;
       document.getElementById("dueDate").textContent = currentProjectData.finish_date;
 
-      // Calculate completion percentage
-      const completionPercentage =
-        (currentProjectData.completed_tasks / currentProjectData.total_tasks) * 100;
-      document.getElementById("completionPercentage").textContent =
-        completionPercentage.toFixed(2);
-
+    
       // Create a hoverable title for team members
       const teamMembersContainer = document.getElementById("teamMembersContainer");
 

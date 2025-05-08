@@ -79,7 +79,6 @@ require_once __DIR__ . '/../../server/includes/database.php';
                 </p>
                 <p><strong>Start Date:</strong> <span id="startDate"></span></p>
                 <p><strong>Due Date:</strong> <span id="dueDate"></span></p>
-                <p><strong>Completion:</strong> <span id="completionPercentage"></span>%</p>
                 <div id="teamMembersContainer"></div>
               </div>
             </div>

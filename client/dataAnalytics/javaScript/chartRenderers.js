@@ -33,6 +33,8 @@ export function renderCompletionChart(tasks, context = "Employee") {
         ],
       },
       options: {
+        maintainAspectRatio: false,
+
         plugins: {
           title: { display: true, text: "Task Completion Status" },
           tooltip: {
@@ -92,6 +94,8 @@ export function renderTimeStatsChart(tasks, context = "Employee") {
         ],
       },
       options: {
+        maintainAspectRatio: false,
+
         plugins: { title: { display: true, text: "Average Time per Task" } },
         scales: {
           y: {
@@ -129,6 +133,8 @@ export function renderDeadlineChart(tasks, context = "Employee") {
         ],
       },
       options: {
+        maintainAspectRatio: false,
+
         plugins: { title: { display: true, text: "Upcoming Deadlines" } },
         scales: {
           y: {
@@ -192,6 +198,8 @@ export function renderWorkloadChart(tasks, context = "Employee") {
       ],
     },
     options: {
+      maintainAspectRatio: false,
+
       plugins: { title: { display: true, text: "Workload Over Time" } },
       scales: {
         y: {
@@ -252,7 +260,8 @@ export function renderTeamCompletionChart(data, context = "TL") {
         },
       ],
     },
-    options: {
+    options: {      maintainAspectRatio: false,
+
       plugins: {
         title: { display: true, text: `${context} Team Task Completion` },
       },
@@ -288,7 +297,8 @@ export function renderTeamBreakdownChart(data, context = "TL") {
         },
       ],
     },
-    options: {
+    options: {      maintainAspectRatio: false,
+
       plugins: {
         title: {
           display: true,
@@ -319,7 +329,8 @@ export function renderProjectProgressChart(progressData, context = "TL") {
         { label: "Completion (%)", data: values, backgroundColor: "#2196f3" },
       ],
     },
-    options: {
+    options: {      maintainAspectRatio: false,
+
       plugins: {
         title: { display: true, text: `${context} Project Progress` },
       },
@@ -356,7 +367,8 @@ export function renderOrgTaskSummaryChart(tasks) {
         },
       ],
     },
-    options: {
+    options: {      maintainAspectRatio: false,
+
       plugins: {
         title: {
           display: true,
@@ -420,6 +432,7 @@ export function renderProjectCompletionOverviewChart(projectProgress) {
         ],
       },
       options: {
+        maintainAspectRatio: false,
         plugins: {
           title: {
             display: true,
@@ -443,6 +456,7 @@ export function renderProjectCompletionOverviewChart(projectProgress) {
       },
     }
   )
+  
 }
 
 export function renderTeamComparisonChart(performanceData) {
@@ -495,6 +509,7 @@ export function renderTeamComparisonChart(performanceData) {
       ],
     },
     options: {
+      maintainAspectRatio: false,
       plugins: {
         title: {
           display: true,
