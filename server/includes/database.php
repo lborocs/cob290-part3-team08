@@ -43,7 +43,7 @@ class Database
     public function getAllEmployees(): array
     {
         $stmt = $this->conn->prepare(
-            "SELECT employee_id, first_name, second_name, user_type_id FROM Employees"
+            "SELECT employee_id, first_name, second_name, user_type_id FROM employees"
         );
         $stmt->execute();
         return $stmt->fetchAll();
@@ -70,7 +70,7 @@ class Database
         $stmt = $this->conn->prepare(
             "SELECT cm.*, e.first_name, e.second_name, e.profile_picture_path
               FROM ChatMessages cm
-              JOIN Employees e ON cm.sender_id = e.employee_id
+              JOIN employees e ON cm.sender_id = e.employee_id
               WHERE cm.chat_id = :chatId
               ORDER BY cm.date_time ASC"
         );
@@ -93,7 +93,7 @@ class Database
         $stmt = $this->conn->prepare(
             "SELECT e.employee_id, e.first_name, e.second_name, cm.is_admin
               FROM ChatMembers cm
-              JOIN Employees e ON e.employee_id = cm.employee_id
+              JOIN employees e ON e.employee_id = cm.employee_id
               WHERE cm.chat_id = :chat_id"
         );
         $stmt->execute(['chat_id' => $chatId]);
@@ -320,7 +320,7 @@ class Database
             SELECT p.project_id, p.project_name, p.start_date, p.finish_date, 
                    p.team_leader_id, CONCAT(e.first_name, ' ', e.second_name) AS team_leader_name
             FROM Projects p
-            LEFT JOIN Employees e ON p.team_leader_id = e.employee_id
+            LEFT JOIN employees e ON p.team_leader_id = e.employee_id
             WHERE 1=1";
 
         $params = [];
@@ -390,8 +390,8 @@ class Database
     {
         $sql = "
             SELECT e.employee_id, CONCAT(e.first_name, ' ', e.second_name) AS employee_name
-            FROM Employees e
-            JOIN EmployeeProjects ep ON ep.employee_id = e.employee_id
+            FROM employees e
+            JOIN employeeprojects ep ON ep.employee_id = e.employee_id
             WHERE ep.project_id = :projectId
         ";
 
@@ -446,8 +446,8 @@ class Database
     {
         $stmt = $this->conn->prepare("
         SELECT T.task_name, T.time_allocated, T.time_taken, T.start_date, T.finish_date
-        FROM Tasks T
-        JOIN EmployeeTasks ET ON T.task_id = ET.task_id
+        FROM tasks T
+        JOIN employeetasks ET ON T.task_id = ET.task_id
         WHERE ET.employee_id = :emp AND T.start_date >= :start AND T.finish_date <= :end
     ");
         $stmt->bindParam(':emp', $employeeId);
@@ -514,8 +514,8 @@ class Database
                 E.employee_id,
                 CONCAT(E.first_name, ' ', E.second_name) AS name
             FROM employees E
-            JOIN EmployeeProjects EP ON E.employee_id = EP.employee_id
-            JOIN Projects P ON EP.project_id = P.project_id
+            JOIN employeeprojects EP ON E.employee_id = EP.employee_id
+            JOIN projects P ON EP.project_id = P.project_id
             WHERE P.team_leader_id = :lead
             GROUP BY E.employee_id
         ");
@@ -527,7 +527,7 @@ class Database
         foreach ($employees as &$emp) {
             $empId = $emp['employee_id'];
             $stmtTasks = $this->conn->prepare("
-                SELECT * FROM Tasks
+                SELECT * FROM tasks
                 WHERE assigned_employee = :emp
             ");
             $stmtTasks->bindParam(':emp', $empId);

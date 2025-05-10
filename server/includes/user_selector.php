@@ -7,7 +7,7 @@ if (!empty($_GET['user_id'])) {
     $db = new Database();
     $stmt = $db->conn->prepare(
         "SELECT first_name, second_name 
-           FROM Employees 
+           FROM employees 
           WHERE employee_id = :id"
     );
     $stmt->execute(['id' => $_SESSION['user_id']]);
