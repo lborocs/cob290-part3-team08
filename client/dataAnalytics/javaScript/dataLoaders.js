@@ -124,6 +124,7 @@ export function loadAverageTimeStats(userId) {
   return fetch(`${API_BASE}/avg-time?employee_id=${userId}`)
     .then((r) => r.json())
     .then((data) => {
+      console.log(data)
       analyticsData.avgTimeStats = data
     })
 }
@@ -136,13 +137,21 @@ export function loadOverrunningTasks() {
     })
 }
 
-export function loadDeadlineTasks(days = 5) {
-  return fetch(`${API_BASE}/deadlines?days=${days}`)
+export function loadDeadlineTasks(days = 5, employeeId = null) {
+  let url = `${API_BASE}/deadlines?days=${days}`;
+  
+  if (employeeId) {
+    url += `&employee_id=${employeeId}`;  
+  }
+
+  return fetch(url)
     .then((r) => r.json())
     .then((data) => {
-      analyticsData.deadlines = data
-    })
+      console.log("deadline",url)
+      analyticsData.deadlines = data;
+    });
 }
+
 
 export function loadWorkload(empId, start, end) {
   return fetch(

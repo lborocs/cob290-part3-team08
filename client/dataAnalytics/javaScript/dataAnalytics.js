@@ -131,7 +131,7 @@ function loadEmployeeAnalytics() {
     loadCompletionStats(currentUserId),
     loadAverageTimeStats(currentUserId),
     loadOverrunningTasks(),
-    loadDeadlineTasks(5),
+    loadDeadlineTasks(10, currentUserId),
     //loadDetails(),
     loadAllEmployees(),
   ]).then(renderEmployeeCharts)
@@ -160,5 +160,6 @@ function renderEmployeeCharts() {
   renderCompletionChart(analyticsData.tasks, "Employee")
   renderTimeStatsChart(analyticsData.tasks, "Employee")
   renderDeadlineChart(analyticsData.deadlines, "Employee")
+  console.log(analyticsData.deadlines)
   renderWorkloadChart(analyticsData.tasks, "Employee")
 }

@@ -420,16 +420,26 @@ class Database
     }
 
     #Function to get tasks near deadline (within 5 days)
-    public function getTasksNearDeadline($daysAhead = 5)
-    {
-        $stmt = $this->conn->prepare("
-            SELECT * FROM Tasks 
-            WHERE DATEDIFF(finish_date, CURDATE()) BETWEEN 0 AND :days
-        ");
-        $stmt->bindParam(':days', $daysAhead);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    public function getTasksNearDeadline($daysAhead = 5, $employeeId = null)
+{
+    $sql = "SELECT * FROM Tasks WHERE DATEDIFF(finish_date, CURDATE()) < :days AND completed = 0";
+    
+    if ($employeeId) {
+        $sql .= " AND assigned_employee = :employee_id"; // Add the employee_id filter if it's provided
     }
+
+    $stmt = $this->conn->prepare($sql);
+    $stmt->bindParam(':days', $daysAhead);
+    
+    if ($employeeId) {
+        $stmt->bindParam(':employee_id', $employeeId);
+    }
+
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+
 
     #Function that gets information relating to employee workload in given time 
     public function getEmployeeWorkload(int $employeeId, string $startDate, string $endDate): array

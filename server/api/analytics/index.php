@@ -92,7 +92,9 @@ if ($method === 'GET') {
     // GET /analytics/deadlines?days=5
     if (count($parts) === 1 && $parts[0] === 'deadlines') {
         $days = $_GET['days'] ?? 5;
-        $data = $db->getTasksNearDeadline($days);
+        $employeeId = $_GET['employee_id'] ?? null;  // Get the employee_id from the query parameter
+    
+        $data = $db->getTasksNearDeadline($days, $employeeId); // Pass employee_id to the function
         echo json_encode($data);
         exit;
     }
