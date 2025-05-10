@@ -107,9 +107,9 @@ if ($userId) {
     <div class="navbar-brand">Make It All</div>
 
     <div class="navbar-links" id="navbarLinks">
-        <a href="/client/chatSystem/ChatSystem.php">Chats</a>
-        <a href="/client/dataAnalytics/dataAnalytics.php">Data Analytics</a>
-        <a href="/index.php">Dashboard</a>
+        <a href="/client/chatSystem/chatSystem.php?user_id=<?= $userId ?>">Chats</a>
+        <a href="/client/dataAnalytics/dataAnalytics.php?user_id=<?= $userId ?>">Data Analytics</a>
+        <a href="/index.php?user_id=<?= $userId ?>">Dashboard</a>
     </div>
 
     <?php if ($user): ?>
