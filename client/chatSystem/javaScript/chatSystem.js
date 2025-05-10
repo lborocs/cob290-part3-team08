@@ -1,11 +1,7 @@
 //adjust this if your path is different
 const API_BASE = "/server/api/chats/index.php"
 
-const currentUserId = new URLSearchParams(window.location.search).get("user_id")
-if (!currentUserId) {
-  alert("No user ID provided.")
-  throw new Error("Missing user_id")
-}
+
 
 const withUser = (url, extraParams = {}) => {
   const params = new URLSearchParams({ user_id: currentUserId, ...extraParams })
