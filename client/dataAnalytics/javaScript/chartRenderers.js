@@ -528,14 +528,14 @@ export function renderProjectProgressChart(progressData, context = "TL") {
   let values = []
 
   if (context === "Manager") {
-    // For Manager context, assume progressData is an array of project objects
-    labels = progressData.map((p) => p.projectName)
-    values = progressData.map((p) => p.progress)
+    const progressArray = Object.values(progressData)
+    labels = progressArray.map((p) => p.projectName)
+    values = progressArray.map((p) => p.progress)
   } else {
-    // For Team Leader context, assume progressData is an object where each key is a project
-    labels = [progressData.project_name];  // Use the project_name directly
-    values = [progressData.progress];  // Use the progress directly
+    labels = [progressData.project_name]
+    values = [progressData.progress]
   }
+  
   console.log(labels, values)
   charts[chartID] = new Chart(document.getElementById(chartID), {
     type: "bar",
