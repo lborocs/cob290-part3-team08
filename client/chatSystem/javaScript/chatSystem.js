@@ -1,5 +1,5 @@
 //adjust this if your path is different
-const API_BASE = "/makeitall/cob290-part3-team08/server/api/chats/index.php"
+const API_BASE = "/server/api/chats/index.php"
 
 //promoting to admin, only non-admin members in the members list
 function rebuildPromoteSelect(members) {
