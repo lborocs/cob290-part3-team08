@@ -417,7 +417,7 @@ class Database
     #Function to get tasks near deadline (within 5 days)
     public function getTasksNearDeadline($daysAhead = 5, $employeeId = null)
 {
-    $sql = "SELECT * FROM Tasks WHERE DATEDIFF(finish_date, CURDATE()) < :days AND completed = 0";
+    $sql = "SELECT * FROM tasks WHERE DATEDIFF(finish_date, CURDATE()) < :days AND completed = 0";
     
     if ($employeeId) {
         $sql .= " AND assigned_employee = :employee_id"; // Add the employee_id filter if it's provided
