@@ -471,9 +471,9 @@ export function renderTeamBreakdownChart(data, context = "TL") {
           label: "Pending Tasks",
           data: data.map((emp) => {
             // Filter for pending tasks (completed = 0)
-            const pendingTasks = emp.tasks?.filter((t) => t.completed === 0)
-              .length || 0;
-            return pendingTasks;
+            const pendingTasks =
+              emp.tasks?.filter((t) => t.completed === 0).length || 0
+            return pendingTasks
           }),
           backgroundColor: "#ff9800", // Orange for pending tasks
         },
@@ -490,10 +490,11 @@ export function renderTeamBreakdownChart(data, context = "TL") {
           label: "Overdue Tasks",
           data: data.map((emp) => {
             // Find overdue tasks (completed = 0 and finish_date is past)
-            const overdueTasks = emp.tasks?.filter(
-              (t) => t.completed === 0 && new Date(t.finish_date) < new Date()
-            ).length || 0;
-            return overdueTasks;
+            const overdueTasks =
+              emp.tasks?.filter(
+                (t) => t.completed === 0 && new Date(t.finish_date) < new Date()
+              ).length || 0
+            return overdueTasks
           }),
           backgroundColor: "#f44336", // Red for overdue tasks
         },
@@ -514,8 +515,6 @@ export function renderTeamBreakdownChart(data, context = "TL") {
   })
 }
 
-
-
 export function renderProjectProgressChart(progressData, context = "TL") {
   const chartID =
     context === "Manager"
@@ -532,10 +531,11 @@ export function renderProjectProgressChart(progressData, context = "TL") {
     labels = progressArray.map((p) => p.projectName)
     values = progressArray.map((p) => p.progress)
   } else {
-    labels = [progressData.project_name]
-    values = [progressData.progress]
+    const singleProject = Object.values(progressData)[0] 
+    labels = [singleProject.projectName]
+    values = [singleProject.progress]
   }
-  
+
   console.log(labels, values)
   charts[chartID] = new Chart(document.getElementById(chartID), {
     type: "bar",
