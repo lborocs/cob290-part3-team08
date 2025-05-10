@@ -19,7 +19,7 @@ $baseUrl = "{$protocol}://{$host}{$basePath}";
   <div class="container">
     <h1> Welcome to Make-It-All </h1>
     <div class="user-selector-container">
-      <?php include __DIR__ . '/../includes/user_selector.php'; ?>
+      <?php include __DIR__ . '/server/includes/user_selector.php'; ?>
     </div>
     
     <?php 
