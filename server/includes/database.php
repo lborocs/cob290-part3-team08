@@ -298,11 +298,6 @@ class Database
             $sql .= " AND priority = :priority";
             $params[':priority'] = $filters['priority'];
         }
-        // If the user is an employee, filter by their employee ID
-        if ($_SESSION['user_type'] === 2) { // Employee user type
-            $sql .= " AND tasks.assigned_employee = :emp";
-            $params[':emp'] = $_SESSION['user_id'];
-        }
 
 
         $stmt = $this->conn->prepare($sql);
