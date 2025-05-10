@@ -22,16 +22,17 @@ if (!empty($_GET['user_id'])) {
 $db   = new Database();
 $emps = $db->getAllEmployees();
 ?>
-<form method="post" style="margin:20px;">
+<form method="get" style="margin:20px;">
   <label style="color:white;">
     Select user:
     <select name="user_id" onchange="this.form.submit()">
-      <option value="" disabled selected>— pick one —</option>
+      <option value="" disabled <?= !$userId ? 'selected' : '' ?>>— pick one —</option>
       <?php foreach($emps as $e): ?>
-        <option value="<?= $e['employee_id'] ?>">
+        <option value="<?= $e['employee_id'] ?>" <?= $userId == $e['employee_id'] ? 'selected' : '' ?>>
           <?= htmlspecialchars($e['first_name'] . ' ' . $e['second_name']) ?>
         </option>
       <?php endforeach; ?>
     </select>
   </label>
 </form>
+
