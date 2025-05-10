@@ -65,11 +65,11 @@ class Database
         return false;
     }
 
-    public function getChatMessages(int $chatId): array
+    public function getchatmessages(int $chatId): array
     {
         $stmt = $this->conn->prepare(
             "SELECT cm.*, e.first_name, e.second_name, e.profile_picture_path
-              FROM ChatMessages cm
+              FROM chatmessages cm
               JOIN employees e ON cm.sender_id = e.employee_id
               WHERE cm.chat_id = :chatId
               ORDER BY cm.date_time ASC"
@@ -81,18 +81,18 @@ class Database
 
     public function getMessageById(int $messageId): ?array
     {
-        $stmt = $this->conn->prepare("SELECT * FROM ChatMessages WHERE message_id = :messageId");
+        $stmt = $this->conn->prepare("SELECT * FROM chatmessages WHERE message_id = :messageId");
         $stmt->bindParam(':messageId', $messageId, PDO::PARAM_INT);
         $stmt->execute();
         $message = $stmt->fetch();
         return $message ?: null;
     }
 
-    public function getChatMembers(int $chatId): array
+    public function getchatmembers(int $chatId): array
     {
         $stmt = $this->conn->prepare(
             "SELECT e.employee_id, e.first_name, e.second_name, cm.is_admin
-              FROM ChatMembers cm
+              FROM chatmembers cm
               JOIN employees e ON e.employee_id = cm.employee_id
               WHERE cm.chat_id = :chat_id"
         );
@@ -103,7 +103,7 @@ class Database
     public function isUserInChat(int $chatId, int $userId): bool
     {
         $stmt = $this->conn->prepare(
-            "SELECT 1 FROM ChatMembers WHERE chat_id = :chatId AND employee_id = :userId"
+            "SELECT 1 FROM chatmembers WHERE chat_id = :chatId AND employee_id = :userId"
         );
         $stmt->bindParam(':chatId', $chatId);
         $stmt->bindParam(':userId', $userId);
@@ -116,7 +116,7 @@ class Database
         if ($this->isUserInChat($chatId, $userId))
             return false;
         $stmt = $this->conn->prepare(
-            "INSERT INTO ChatMembers (chat_id, employee_id, is_admin)
+            "INSERT INTO chatmembers (chat_id, employee_id, is_admin)
               VALUES (:chatId, :userId, :isAdmin)"
         );
         $stmt->bindParam(':chatId', $chatId);
@@ -128,7 +128,7 @@ class Database
     public function removeUserFromChat(int $chatId, int $userId): bool
     {
         $stmt = $this->conn->prepare(
-            "DELETE FROM ChatMembers WHERE chat_id = :chatId AND employee_id = :userId"
+            "DELETE FROM chatmembers WHERE chat_id = :chatId AND employee_id = :userId"
         );
         $stmt->bindParam(':chatId', $chatId);
         $stmt->bindParam(':userId', $userId);
@@ -138,7 +138,7 @@ class Database
     public function setAdminStatus(int $chatId, int $userId, bool $status): bool
     {
         $stmt = $this->conn->prepare(
-            "UPDATE ChatMembers SET is_admin = :status
+            "UPDATE chatmembers SET is_admin = :status
               WHERE chat_id = :chatId AND employee_id = :userId"
         );
         $stmt->bindParam(':chatId', $chatId);
@@ -150,7 +150,7 @@ class Database
     public function isAdmin(int $chatId, int $userId): bool
     {
         $stmt = $this->conn->prepare(
-            "SELECT is_admin FROM ChatMembers WHERE chat_id = :chatId AND employee_id = :userId"
+            "SELECT is_admin FROM chatmembers WHERE chat_id = :chatId AND employee_id = :userId"
         );
         $stmt->bindParam(':chatId', $chatId);
         $stmt->bindParam(':userId', $userId);
@@ -165,7 +165,7 @@ class Database
             return true;
 
         $stmt = $this->conn->prepare(
-            "SELECT COUNT(*) AS admin_count FROM ChatMembers WHERE chat_id = :chatId AND is_admin = 1"
+            "SELECT COUNT(*) AS admin_count FROM chatmembers WHERE chat_id = :chatId AND is_admin = 1"
         );
         $stmt->bindParam(':chatId', $chatId);
         $stmt->execute();
@@ -196,7 +196,7 @@ class Database
     public function getUserChats(int $userId): array
     {
         $stmt = $this->conn->prepare(
-            "SELECT C.chatID, C.chat_name FROM chats C JOIN ChatMembers CM ON C.chatID = CM.chat_id WHERE CM.employee_id = :userId"
+            "SELECT C.chatID, C.chat_name FROM chats C JOIN chatmembers CM ON C.chatID = CM.chat_id WHERE CM.employee_id = :userId"
         );
         $stmt->bindParam(':userId', $userId);
         $stmt->execute();
@@ -206,7 +206,7 @@ class Database
     public function sendMessage(int $chatId, int $senderId, string $message): bool
     {
         $stmt = $this->conn->prepare(
-            "INSERT INTO ChatMessages (chat_id, sender_id, message_contents)
+            "INSERT INTO chatmessages (chat_id, sender_id, message_contents)
               VALUES (:chatId, :senderId, :msg)"
         );
         $stmt->bindParam(':chatId', $chatId);
@@ -217,14 +217,14 @@ class Database
 
     public function markMessageRead(int $messageId, int $userId): bool
     {
-        $stmt = $this->conn->prepare("UPDATE ChatMessages SET read_receipt = 1 WHERE message_id = :msgId");
+        $stmt = $this->conn->prepare("UPDATE chatmessages SET read_receipt = 1 WHERE message_id = :msgId");
         $stmt->bindParam(':msgId', $messageId);
         return $stmt->execute();
     }
 
     public function deleteMessage(int $messageId, int $requesterId): bool
     {
-        $stmt = $this->conn->prepare("SELECT sender_id, chat_id FROM ChatMessages WHERE message_id = :msgId");
+        $stmt = $this->conn->prepare("SELECT sender_id, chat_id FROM chatmessages WHERE message_id = :msgId");
         $stmt->bindParam(':msgId', $messageId);
         $stmt->execute();
         $msg = $stmt->fetch();
@@ -232,7 +232,7 @@ class Database
             return false;
 
         if ($msg['sender_id'] == $requesterId || $this->isAdmin($msg['chat_id'], $requesterId)) {
-            $upd = $this->conn->prepare("DELETE FROM ChatMessages WHERE message_id = :msgId");
+            $upd = $this->conn->prepare("DELETE FROM chatmessages WHERE message_id = :msgId");
             $upd->bindParam(':msgId', $messageId);
             return $upd->execute();
         }
@@ -245,7 +245,7 @@ class Database
         error_log("Editing message ID $messageId with new content: '$newContent'");
 
         $stmt = $this->conn->prepare(
-            "UPDATE ChatMessages 
+            "UPDATE chatmessages 
              SET message_contents = :msg, is_edited = 1 
              WHERE message_id = :msgId"
         );
