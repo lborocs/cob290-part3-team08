@@ -9,7 +9,7 @@ if (!$userId) {
   exit;
 }
 
-require_once __DIR__ . '/../../server/includes/database.php';
+require_once __DIR__ . '/server/includes/database.php';
 ?>
 
 <!DOCTYPE html>

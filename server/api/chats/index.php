@@ -18,7 +18,7 @@ header('Content-Type: application/json');
 
 //this is the path of the API and picks the HTTP method (GET, POST, PATCH, DELETE) and URI path 
 
-$base = '/makeitall/cob290-part3-team08/server/api/chats/index.php';
+$base = '/server/api/chats/index.php';
 
 //this basically gets the URI which is the Uniform Resource Identifier that the server gets from the client
 

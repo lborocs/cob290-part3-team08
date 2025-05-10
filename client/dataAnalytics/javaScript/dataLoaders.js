@@ -1,6 +1,6 @@
 // dataLoaders.js
 
-const API_BASE = "/makeitall/cob290-part3-team08/server/api/analytics/index.php"
+const API_BASE = "/server/api/analytics/index.php"
 
 
 export const analyticsData = {

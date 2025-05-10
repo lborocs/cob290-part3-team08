@@ -8,7 +8,7 @@ require_once __DIR__ . '/../../includes/headers.php';
 $db = new Database();
 header('Content-Type: application/json');
 
-$base = '/makeitall/cob290-part3-team08/server/api/analytics/index.php';
+$base = '/server/api/analytics/index.php';
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $path = substr($uri, strlen($base));
 $parts = array_values(array_filter(explode('/', $path)));
