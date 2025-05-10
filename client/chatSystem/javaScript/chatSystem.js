@@ -195,7 +195,7 @@ function addQueued() {
 
 //this function helps with getting the chats that the current user is part of
 function loadChats(searchTerm = "") {
-  fetch(withUser(`${API_BASE}?user_id=${currentUserId}`), { method: "GET" })
+  fetch(withUser(`${API_BASE}`), { method: "GET" })
     .then((r) => r.json())
     .then((chats) => {
       const list = document.getElementById("chatList")
