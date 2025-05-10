@@ -1,26 +1,32 @@
 <?php
 require_once __DIR__ . '/database.php';
-if (session_status() === PHP_SESSION_NONE) session_start();
-$userId = $_GET['user_id'] ?? null;
 
-//* If already have a user, show their name and bail out
-if (!empty($_GET['user_id'])) {
-    $db = new Database();
+// Get user_id from query string safely
+$userId = isset($_GET['user_id']) ? (int) $_GET['user_id'] : null;
+
+$db = new Database();
+
+// If a user_id was provided, show the user name
+if ($userId) {
     $stmt = $db->conn->prepare(
         "SELECT first_name, second_name 
-           FROM employees 
-          WHERE employee_id = :id"
+         FROM employees 
+         WHERE employee_id = :id"
     );
-    $stmt->execute(['id' => $_SESSION['user_id']]);
+    $stmt->execute(['id' => $userId]);
     $u = $stmt->fetch();
-    echo "<p style='color:white;'>Logged in as: "
-       . htmlspecialchars("{$u['first_name']} {$u['second_name']}")
-       . "</p>";
+
+    if ($u) {
+        echo "<p style='color:white;'>Logged in as: "
+           . htmlspecialchars("{$u['first_name']} {$u['second_name']}") . "</p>";
+    } else {
+        echo "<p style='color:red;'>User not found.</p>";
+    }
+
     return;
 }
 
-// Otherwise render a single auto‑submitting dropdown:
-$db   = new Database();
+// Otherwise render a dropdown list of employees
 $emps = $db->getAllEmployees();
 ?>
 <form method="get" style="margin:20px;">
@@ -36,4 +42,3 @@ $emps = $db->getAllEmployees();
     </select>
   </label>
 </form>
-
