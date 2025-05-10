@@ -29,8 +29,8 @@ $baseUrl = "{$protocol}://{$host}{$basePath}";
 
     <div class="nav-buttons">
       <!-- Pass the user_id in the URL query parameter -->
-      <button onclick="window.location.href ='<?= $baseUrl ?>/dataAnalytics/dataAnalytics.php?user_id=<?= $userId ?>'">Data Analytics</button>
-      <button onclick="window.location.href ='<?= $baseUrl ?>/chatSystem/chatSystem.php?user_id=<?= $userId ?>'">Chat System</button>
+      <button onclick="window.location.href ='<?= $baseUrl ?>/client/dataAnalytics/dataAnalytics.php?user_id=<?= $userId ?>'">Data Analytics</button>
+      <button onclick="window.location.href ='<?= $baseUrl ?>/client/chatSystem/chatSystem.php?user_id=<?= $userId ?>'">Chat System</button>
     </div>
   </div>
 </body>
