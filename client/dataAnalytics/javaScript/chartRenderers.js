@@ -13,26 +13,28 @@ function destroyChart(id) {
 
 export function renderCompletionChart(tasks, context = "Employee") {
   const chartID =
-    context === "Manager" ? "completionChartManager" : "completionChartEmployee";
-  destroyChart(chartID);
+    context === "Manager" ? "completionChartManager" : "completionChartEmployee"
+  destroyChart(chartID)
 
   // Classify tasks based on their completion status and due date
-  const completed = tasks.filter((t) => t.completed === 1);
-  const pending = tasks.filter((t) => t.completed === 0 && new Date(t.finish_date) > new Date());
+  const completed = tasks.filter((t) => t.completed === 1)
+  const pending = tasks.filter(
+    (t) => t.completed === 0 && new Date(t.finish_date) > new Date()
+  )
   const overdue = tasks.filter(
     (t) => t.completed === 0 && new Date(t.finish_date) < new Date()
-  );
+  )
 
   // Add colors for the tasks
   const taskColors = tasks.map((task) => {
     if (task.completed === 1) {
-      return "#4caf50"; // Green for completed tasks
+      return "#4caf50" // Green for completed tasks
     } else if (new Date(task.finish_date) < new Date()) {
-      return "#f44336"; // Red for overdue tasks
+      return "#f44336" // Red for overdue tasks
     } else {
-      return "#ff9800"; // Orange for pending tasks
+      return "#ff9800" // Orange for pending tasks
     }
-  });
+  })
 
   // Render the pie chart
   charts[chartID] = new Chart(
@@ -56,32 +58,30 @@ export function renderCompletionChart(tasks, context = "Employee") {
             callbacks: {
               label: (ctx) => `Tasks (${ctx.dataset.data[ctx.dataIndex]})`,
               afterLabel: (ctx) => {
-                const isCompleted = ctx.dataIndex === 0;
-                const isOverdue = ctx.dataIndex === 2;
-                const isPending = ctx.dataIndex === 1;
-                return (isCompleted
-                  ? completed
-                  : isOverdue
-                  ? overdue
-                  : isPending
-                  ? pending
-                  : []
+                const isCompleted = ctx.dataIndex === 0
+                const isOverdue = ctx.dataIndex === 2
+                const isPending = ctx.dataIndex === 1
+                return (
+                  isCompleted
+                    ? completed
+                    : isOverdue
+                    ? overdue
+                    : isPending
+                    ? pending
+                    : []
                 ).map(
                   (t) =>
                     `• ${t.task_name}` +
-                    (isCompleted
-                      ? ""
-                      : ` (Due: ${formatDate(t.finish_date)})`)
-                );
+                    (isCompleted ? "" : ` (Due: ${formatDate(t.finish_date)})`)
+                )
               },
             },
           },
         },
       },
     }
-  );
+  )
 }
-
 
 export function renderTimeStatsChart(tasks, context = "Employee") {
   const chartID =
@@ -150,20 +150,22 @@ export function renderDeadlineChart(tasks, context = "Employee") {
       return "#4caf50" // Green for far deadlines (more than 7 days)
     }
   }
-  tasks.forEach(t => {
+  tasks.forEach((t) => {
     const daysRemaining = Math.ceil(
       (new Date(t.finish_date) - new Date()) / (1000 * 60 * 60 * 24)
-    );
-    
-    // Log whether the task is due within 11 days
-    console.log(daysRemaining);
-  });
-  
-  
-  const incompleteTasks = tasks.filter((t) => t.completed === 0 && Math.ceil(
-    (new Date(t.finish_date) - new Date()) / (1000 * 60 * 60 * 24)
-  ) < 11 );
+    )
 
+    // Log whether the task is due within 11 days
+    console.log(daysRemaining)
+  })
+
+  const incompleteTasks = tasks.filter(
+    (t) =>
+      t.completed === 0 &&
+      Math.ceil(
+        (new Date(t.finish_date) - new Date()) / (1000 * 60 * 60 * 24)
+      ) < 11
+  )
 
   charts[chartID] = new Chart(
     document.getElementById(chartID).getContext("2d"),
@@ -185,7 +187,7 @@ export function renderDeadlineChart(tasks, context = "Employee") {
                   (new Date(t.finish_date) - new Date()) / (1000 * 60 * 60 * 24)
                 )
               )
-            ), 
+            ),
           },
         ],
       },
@@ -206,164 +208,167 @@ export function renderDeadlineChart(tasks, context = "Employee") {
   )
 }
 
-
-
 export function renderWorkloadChart(tasks, context = "Employee") {
   const chartID =
-    context === "Manager" ? "workloadChartManager" : "workloadChartEmployee";
-  destroyChart(chartID);
+    context === "Manager" ? "workloadChartManager" : "workloadChartEmployee"
+  destroyChart(chartID)
 
   // Ensure tasks is an array
   if (!Array.isArray(tasks)) {
-    console.error("Expected tasks to be an array, but received:", tasks);
-    return;
+    console.error("Expected tasks to be an array, but received:", tasks)
+    return
   }
 
-  const timePeriod = "week"; // Group by week
-  const groupedData = groupTasksByTimePeriod(tasks, timePeriod);
+  const timePeriod = "week" // Group by week
+  const groupedData = groupTasksByTimePeriod(tasks, timePeriod)
 
   // Calculate weekly workload and weekly hours worked
-  const { weeklyWorkload, weeklyWorkedHours } = calculateWeeklyWorkload(tasks);
+  const { weeklyWorkload, weeklyWorkedHours } = calculateWeeklyWorkload(tasks)
 
   // Get labels (weeks/months)
   const labels = groupedData.map((period) => {
-    const startDate = new Date(period.tasks[0].start_date); // Ensure this is correct, using the first task's start date
-    const monday = getMonday(startDate); // Get Monday for that week
+    const startDate = new Date(period.tasks[0].start_date) // Ensure this is correct, using the first task's start date
+    const monday = getMonday(startDate) // Get Monday for that week
     if (isNaN(monday.getTime())) {
-      console.error("Invalid date:", monday);
-      return "Invalid Date"; // In case the date is invalid
+      console.error("Invalid date:", monday)
+      return "Invalid Date" // In case the date is invalid
     }
-    return `${formatDate(monday)}`;  // Format as dd/mm/yy
-  });
+    return `${formatDate(monday)}` // Format as dd/mm/yy
+  })
 
   // Define chart
-  charts[chartID] = new Chart(document.getElementById(chartID).getContext("2d"), {
-    type: "line",
-    data: {
-      labels,
-      datasets: [
-        {
-          label: "Expected Weekly Workload",
-          data: weeklyWorkload,
-          borderColor: "#3f51b5",
-          fill: false,
-        },
-        {
-          label: "Actual Weekly Workload (Hours Worked)",
-          data: weeklyWorkedHours,
-          borderColor: "#f44336",
-          fill: false,
-        },
-      ],
-    },
-    options: {
-      maintainAspectRatio: false,
-      responsive: true,
-      plugins: {
-        title: {
-          display: true,
-          text: "Workload Over Time (Weekly)",
-        },
+  charts[chartID] = new Chart(
+    document.getElementById(chartID).getContext("2d"),
+    {
+      type: "line",
+      data: {
+        labels,
+        datasets: [
+          {
+            label: "Expected Weekly Workload",
+            data: weeklyWorkload,
+            borderColor: "#3f51b5",
+            fill: false,
+          },
+          {
+            label: "Actual Weekly Workload (Hours Worked)",
+            data: weeklyWorkedHours,
+            borderColor: "#f44336",
+            fill: false,
+          },
+        ],
       },
-      scales: {
-        y: {
-          beginAtZero: true,
+      options: {
+        maintainAspectRatio: false,
+        responsive: true,
+        plugins: {
           title: {
             display: true,
-            text: "Hours",
+            text: "Workload Over Time (Weekly)",
+          },
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: "Hours",
+            },
           },
         },
       },
-    },
-  });
+    }
+  )
 }
 
 // Helper function to format the date to dd/mm/yy
 function formatDate(date) {
   const d = new Date(date)
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const year = d.getFullYear().toString().slice(-2);  // Get last 2 digits of the year
-  return `${day}/${month}/${year}`;
+  const day = String(d.getDate()).padStart(2, "0")
+  const month = String(d.getMonth() + 1).padStart(2, "0")
+  const year = d.getFullYear().toString().slice(-2) // Get last 2 digits of the year
+  return `${day}/${month}/${year}`
 }
 
 // Helper function to get the Monday of the week from a given date
 function getMonday(date) {
   const day = date.getDay(),
-    diff = date.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is Sunday
-  const monday = new Date(date.setDate(diff));
-  return monday;
+    diff = date.getDate() - day + (day === 0 ? -6 : 1) // adjust when day is Sunday
+  const monday = new Date(date.setDate(diff))
+  return monday
 }
 
 // Function to calculate the weekly workload based on task start and end dates
 function calculateWeeklyWorkload(tasks) {
-  const weeklyWorkload = [];
-  const weeklyWorkedHours = [];
+  const weeklyWorkload = []
+  const weeklyWorkedHours = []
 
   tasks.forEach((task) => {
-    const startDate = new Date(task.start_date);
-    const endDate = new Date(task.finish_date);
-    const expectedTime = task.time_allocated || 0; // Expected time allocated for the task
-    const workedTime = task.time_taken || 0; // Actual time worked on the task
+    const startDate = new Date(task.start_date)
+    const endDate = new Date(task.finish_date)
+    const expectedTime = task.time_allocated || 0 // Expected time allocated for the task
+    const workedTime = task.time_taken || 0 // Actual time worked on the task
 
     // Calculate the number of weeks this task spans
-    const diffInTime = endDate.getTime() - startDate.getTime();
-    const numberOfWeeks = Math.ceil(diffInTime / (1000 * 3600 * 24 * 7)); // Convert time to weeks
+    const diffInTime = endDate.getTime() - startDate.getTime()
+    const numberOfWeeks = Math.ceil(diffInTime / (1000 * 3600 * 24 * 7)) // Convert time to weeks
 
     // Distribute the task's expected time across the weeks
-    const weeklyHours = expectedTime / numberOfWeeks;
-    const workedHours = workedTime / numberOfWeeks;
+    const weeklyHours = expectedTime / numberOfWeeks
+    const workedHours = workedTime / numberOfWeeks
 
     // Loop through the weeks and add the weekly hours to the appropriate weeks
-    let currentDate = new Date(startDate);
+    let currentDate = new Date(startDate)
     while (currentDate <= endDate) {
-      const weekLabel = getWeekLabel(currentDate); // Get the label for the current week
+      const weekLabel = getWeekLabel(currentDate) // Get the label for the current week
       if (!weeklyWorkload[weekLabel]) {
-        weeklyWorkload[weekLabel] = 0;
-        weeklyWorkedHours[weekLabel] = 0;
+        weeklyWorkload[weekLabel] = 0
+        weeklyWorkedHours[weekLabel] = 0
       }
 
       // Add the expected and worked hours to the weekly workload
-      weeklyWorkload[weekLabel] += weeklyHours;
-      weeklyWorkedHours[weekLabel] += workedHours;
+      weeklyWorkload[weekLabel] += weeklyHours
+      weeklyWorkedHours[weekLabel] += workedHours
 
       // Move to the next week
-      currentDate.setDate(currentDate.getDate() + 7); // Add 7 days for the next week
+      currentDate.setDate(currentDate.getDate() + 7) // Add 7 days for the next week
     }
-  });
+  })
 
-  return { weeklyWorkload: Object.values(weeklyWorkload), weeklyWorkedHours: Object.values(weeklyWorkedHours) };
+  return {
+    weeklyWorkload: Object.values(weeklyWorkload),
+    weeklyWorkedHours: Object.values(weeklyWorkedHours),
+  }
 }
 
 // Helper function to get the week label (ISO week number)
 function getWeekLabel(date) {
-  const startDate = new Date(date.getFullYear(), 0, 1); // Start of the year
-  const days = Math.floor((date - startDate) / (24 * 60 * 60 * 1000)); // Days from start of the year
-  const weekNumber = Math.ceil((days + 1) / 7); // Calculate ISO week number
+  const startDate = new Date(date.getFullYear(), 0, 1) // Start of the year
+  const days = Math.floor((date - startDate) / (24 * 60 * 60 * 1000)) // Days from start of the year
+  const weekNumber = Math.ceil((days + 1) / 7) // Calculate ISO week number
 
-  return `Week ${weekNumber}`;
+  return `Week ${weekNumber}`
 }
 
 // Helper function to group tasks by week/month
 function groupTasksByTimePeriod(tasks, period = "month") {
   const grouped = tasks.reduce((result, task) => {
-    const date = new Date(task.start_date);
+    const date = new Date(task.start_date)
     const label =
       period === "month"
         ? `${date.getFullYear()}-${date.getMonth() + 1}` // Group by month "YYYY-MM"
-        : getWeekLabel(date); // Group by week "Week X"
+        : getWeekLabel(date) // Group by week "Week X"
 
     if (!result[label]) {
-      result[label] = { timePeriodLabel: label, tasks: [] };
+      result[label] = { timePeriodLabel: label, tasks: [] }
     }
 
-    result[label].tasks.push(task);
-    return result;
-  }, {});
+    result[label].tasks.push(task)
+    return result
+  }, {})
 
-  return Object.values(grouped);
+  return Object.values(grouped)
 }
-
 
 export function renderTeamCompletionChart(data, context = "TL") {
   const chartID =
@@ -427,14 +432,17 @@ export function renderTeamCompletionChart(data, context = "TL") {
               const isOverdue = ctx.dataIndex === 2
               const isPending = ctx.dataIndex === 1
               return (
-                (isCompleted ? completedTasks : isOverdue ? overdueTasks : pendingTasks)
-                  .map(
-                    (t) =>
-                      `• ${t.task_name}` +
-                      (isCompleted
-                        ? ""
-                        : ` (Due: ${new Date(t.finish_date).toLocaleDateString()})`)
-                  )
+                isCompleted
+                  ? completedTasks
+                  : isOverdue
+                  ? overdueTasks
+                  : pendingTasks
+              ).map(
+                (t) =>
+                  `• ${t.task_name}` +
+                  (isCompleted
+                    ? ""
+                    : ` (Due: ${new Date(t.finish_date).toLocaleDateString()})`)
               )
             },
           },
@@ -444,12 +452,12 @@ export function renderTeamCompletionChart(data, context = "TL") {
   })
 }
 
-
 export function renderTeamBreakdownChart(data, context = "TL") {
   const chartID =
     context === "Manager" ? "teamBreakdownChartManager" : "teamBreakdownChartTL"
   destroyChart(chartID)
   console.log("Render teambreakdown:", data)
+
   const labels = data.map(
     (emp) => emp.employee_name || emp.name || `ID ${emp.employee_id}`
   )
@@ -460,9 +468,14 @@ export function renderTeamBreakdownChart(data, context = "TL") {
       labels,
       datasets: [
         {
-          label: "Total Tasks",
-          data: data.map((emp) => emp.total_tasks || emp.tasks?.length || 0),
-          backgroundColor: "#90caf9",
+          label: "Pending Tasks",
+          data: data.map((emp) => {
+            // Filter for pending tasks (completed = 0)
+            const pendingTasks = emp.tasks?.filter((t) => t.completed === 0)
+              .length || 0;
+            return pendingTasks;
+          }),
+          backgroundColor: "#ff9800", // Orange for pending tasks
         },
         {
           label: "Completed Tasks",
@@ -471,7 +484,18 @@ export function renderTeamBreakdownChart(data, context = "TL") {
               emp.completed_tasks ??
               (emp.tasks?.filter((t) => t.completed === 1).length || 0)
           ),
-          backgroundColor: "#4caf50",
+          backgroundColor: "#4caf50", // Green for completed tasks
+        },
+        {
+          label: "Overdue Tasks",
+          data: data.map((emp) => {
+            // Find overdue tasks (completed = 0 and finish_date is past)
+            const overdueTasks = emp.tasks?.filter(
+              (t) => t.completed === 0 && new Date(t.finish_date) < new Date()
+            ).length || 0;
+            return overdueTasks;
+          }),
+          backgroundColor: "#f44336", // Red for overdue tasks
         },
       ],
     },
@@ -490,16 +514,28 @@ export function renderTeamBreakdownChart(data, context = "TL") {
   })
 }
 
+
+
 export function renderProjectProgressChart(progressData, context = "TL") {
   const chartID =
     context === "Manager"
       ? "projectProgressChartManager"
       : "projectProgressChartTL"
   destroyChart(chartID)
+  console.log(progressData)
 
-  const labels = Object.values(progressData).map((p) => p.projectName)
-  const values = Object.values(progressData).map((p) => p.progress)
+  let labels = []
+  let values = []
 
+  if (context === "Manager") {
+    // For Manager context, assume progressData is an array of project objects
+    labels = progressData.map((p) => p.projectName)
+    values = progressData.map((p) => p.progress)
+  } else {
+    // For Team Leader context, assume progressData is an object where each key is a project
+    labels = [progressData.project_name];  // Use the project_name directly
+    values = [progressData.progress];  // Use the progress directly
+  }
   charts[chartID] = new Chart(document.getElementById(chartID), {
     type: "bar",
     data: {
@@ -648,43 +684,41 @@ export function renderTeamComparisonChart(performanceData) {
 
   performanceData.forEach((entry) => {
     const { teamLeaderId, teamLeaderName, performance } = entry
-    console.log("entry:", entry)
 
-    let onTime = 0
-    let totalCompleted = 0
+    let totalEfficiency = 0
+    let employeeCount = 0
 
     performance.forEach((emp) => {
-      emp.tasks.forEach((t) => {
-        if (t.completed === 1 && t.time_completed && t.finish_date) {
-          const completedDate = new Date(t.time_completed)
-          const dueDate = new Date(t.finish_date)
+      if (emp.tasks && Array.isArray(emp.tasks)) {
+        // Calculate the weighted efficiency for each employee
+        const weightedEfficiency = calculateWeightedEfficiency(emp.tasks)
 
-          if (!isNaN(completedDate) && !isNaN(dueDate)) {
-            totalCompleted++
-            if (completedDate <= dueDate) {
-              onTime++
-            }
-          }
-        }
-      })
+        // Accumulate the efficiency for each employee
+        totalEfficiency += weightedEfficiency
+        employeeCount++
+      }
     })
 
-    const efficiency =
-      totalCompleted > 0 ? Math.round((onTime / totalCompleted) * 100) : 0
+    // Calculate the average efficiency for the team leader (if there are employees)
+    const efficiency = employeeCount > 0 ? totalEfficiency / employeeCount : 0
 
+    // Push the team leader name and the average efficiency to the chart data
     labels.push(teamLeaderName)
     efficiencyScores.push(efficiency)
+
+    console.log(`Efficiency for ${teamLeaderName}:`, efficiency)
   })
 
+  // Render the chart
   charts[chartID] = new Chart(document.getElementById(chartID), {
     type: "bar",
     data: {
       labels,
       datasets: [
         {
-          label: "Efficiency (% of completed tasks on time)",
+          label: "Efficiency (%)",
           data: efficiencyScores,
-          backgroundColor: "#4caf50",
+          backgroundColor: "#4caf50", // Green bars
         },
       ],
     },
@@ -708,4 +742,30 @@ export function renderTeamComparisonChart(performanceData) {
       },
     },
   })
+}
+
+// Calculate weighted efficiency function (example)
+function calculateWeightedEfficiency(tasks) {
+  let totalScore = 0
+  let completedScore = 0
+
+  tasks.forEach((task) => {
+    const completedDate = new Date(task.completed_date)
+    const dueDate = new Date(task.finish_date)
+    const priority = task.priority || 1 // Default priority is 1
+    const difficulty = task.difficulty || 1 // Default difficulty is 1
+
+    if (!isNaN(completedDate) && !isNaN(dueDate)) {
+      const weight = priority * difficulty
+      totalScore += weight
+
+      if (completedDate <= dueDate) {
+        completedScore += weight
+      } else {
+        completedScore += weight * 0.5 // Apply a penalty for late completions
+      }
+    }
+  })
+
+  return totalScore > 0 ? Math.round((completedScore / totalScore) * 100) : 0
 }

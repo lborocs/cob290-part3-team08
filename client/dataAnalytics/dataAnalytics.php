@@ -47,7 +47,7 @@ require_once __DIR__ . '/../../server/includes/database.php';
               </div>
               <div class="graph-card">
                 <canvas id="teamComparisonChart"></canvas>
-                <p class="chart-description">Compare completed tasks by team leader.</p>
+                <p class="chart-description">Compare completed tasks by team leader.<br> Efficiency= Total Completed Tasks / On Time Tasks x 100</p>
               </div>
               <div class="graph-card">
                 <canvas id="projectCompletionOverviewChart"></canvas>

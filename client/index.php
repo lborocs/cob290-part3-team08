@@ -17,7 +17,7 @@ $baseUrl = "{$protocol}://{$host}{$basePath}";
 </head>
 <body>
   <div class="container">
-    <h1>🎉 Welcome to Make-It-All 🎉</h1>
+    <h1> Welcome to Make-It-All </h1>
     <div class="user-selector-container">
       <?php include __DIR__ . '/includes/user_selector.php'; ?>
     </div>
@@ -29,8 +29,8 @@ $baseUrl = "{$protocol}://{$host}{$basePath}";
 
     <div class="nav-buttons">
       <!-- Pass the user_id in the URL query parameter -->
-      <button onclick="window.location.href ='<?= $baseUrl ?>/dataAnalytics/dataAnalytics.php?user_id=<?= $userId ?>'">🚀 Data Analytics</button>
-      <button onclick="window.location.href ='<?= $baseUrl ?>/chatSystem/chatSystem.php?user_id=<?= $userId ?>'">💬 Chat System</button>
+      <button onclick="window.location.href ='<?= $baseUrl ?>/dataAnalytics/dataAnalytics.php?user_id=<?= $userId ?>'">Data Analytics</button>
+      <button onclick="window.location.href ='<?= $baseUrl ?>/chatSystem/chatSystem.php?user_id=<?= $userId ?>'">Chat System</button>
     </div>
   </div>
 </body>

@@ -170,6 +170,7 @@ export function loadTeamPerformance(leaderId) {
       return r.json()
     })
     .then((data) => {
+      
       analyticsData.teamPerformance = data
     })
 }
@@ -185,9 +186,10 @@ export function loadTeamPerformanceOverview() {
           .then((data) => {
             analyticsData.teamPerformance.push({
               teamLeaderId: leader.employee_id,
-              teamLeaderName: `${leader.first_name} ${leader.second_name}`, // ✅ Add this
+              teamLeaderName: `${leader.first_name} ${leader.second_name}`,
               performance: data,
             })
+            console.log("Team performance:" , analyticsData.teamPerformance)
           })
       )
       return Promise.all(fetches)

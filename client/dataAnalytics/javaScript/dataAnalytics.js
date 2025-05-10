@@ -131,7 +131,7 @@ function loadEmployeeAnalytics() {
     loadCompletionStats(currentUserId),
     loadAverageTimeStats(currentUserId),
     loadOverrunningTasks(),
-    loadDeadlineTasks(10, currentUserId),
+    loadDeadlineTasks(20, currentUserId),
     //loadDetails(),
     loadAllEmployees(),
   ]).then(renderEmployeeCharts)
@@ -153,7 +153,7 @@ function renderTeamLeaderCharts() {
     [currentUserId]: analyticsData.projectProgress[currentUserId] || {},
   }
   console.log(analyticsData.projectProgress[currentUserId])
-  renderProjectProgressChart(progressData, "TL")
+  renderProjectProgressChart(progressData[currentUserId], "TL")
 }
 
 function renderEmployeeCharts() {
