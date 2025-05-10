@@ -1,5 +1,4 @@
 <?php
-session_start();
 require_once __DIR__ . '/../../includes/database.php';
 require_once __DIR__ . '/../../includes/headers.php';
 
@@ -41,11 +40,7 @@ if ($method === 'GET') {
 
     // GET /analytics/team-leaders
     if (count($parts) === 1 && $parts[0] === 'team-leaders') {
-        if ($_SESSION['user_type'] !== 0) {
-            http_response_code(403);
-            echo json_encode(['error' => 'Access denied']);
-            exit;
-        }
+
 
         $leaders = $db->getAllTeamLeaders();
         echo json_encode($leaders);
