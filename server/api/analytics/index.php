@@ -3,12 +3,7 @@ session_start();
 require_once __DIR__ . '/../../includes/database.php';
 require_once __DIR__ . '/../../includes/headers.php';
 
-$currentUser = $_SESSION['user_id'] ?? null;
-if (!$currentUser) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Not authenticated']);
-    exit;
-}
+
 
 $db = new Database();
 header('Content-Type: application/json');
