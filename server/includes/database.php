@@ -541,7 +541,8 @@ class Database
             SELECT 
                 COUNT(t.task_id) AS total,
                 SUM(CASE WHEN t.completed = 1 THEN 1 ELSE 0 END) AS completed,
-                p.finish_date AS project_due_date, p.project_name AS project_name
+                MAX(p.finish_date) AS project_due_date,
+                MAX(p.project_name) AS project_name
             FROM projects p
             LEFT JOIN tasks t ON p.project_id = t.project_id
             WHERE p.project_id = :project_id
@@ -549,7 +550,7 @@ class Database
         $stmt->bindParam(':project_id', $projectId);
         $stmt->execute();
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
+    
         return [
             'completed_percentage' => $row['total'] ? round(($row['completed'] / $row['total']) * 100, 2) : 0,
             'project_due_date' => $row['project_due_date'] ?? null
@@ -558,24 +559,26 @@ class Database
     public function getProjectProgressByTeamLeader($teamLeaderId)
     {
         $stmt = $this->conn->prepare("
-        SELECT 
-            COUNT(t.task_id) AS total,
-            SUM(CASE WHEN t.completed = 1 THEN 1 ELSE 0 END) AS completed,
-            p.finish_date AS project_due_date, p.project_name AS project_name
-        FROM projects p
-        LEFT JOIN tasks t ON p.project_id = t.project_id
-        WHERE p.team_leader_id = :team_leader_id
-    ");
+            SELECT 
+                COUNT(t.task_id) AS total,
+                SUM(CASE WHEN t.completed = 1 THEN 1 ELSE 0 END) AS completed,
+                MAX(p.finish_date) AS project_due_date,
+                MAX(p.project_name) AS project_name
+            FROM projects p
+            LEFT JOIN tasks t ON p.project_id = t.project_id
+            WHERE p.team_leader_id = :team_leader_id
+        ");
         $stmt->bindParam(':team_leader_id', $teamLeaderId);
         $stmt->execute();
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
+    
         return [
             'completed_percentage' => $row['total'] ? round(($row['completed'] / $row['total']) * 100, 2) : 0,
             'project_due_date' => $row['project_due_date'] ?? null,
             'project_name' => $row['project_name'] ?? null,
         ];
     }
+        
 
 
 
