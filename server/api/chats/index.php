@@ -6,7 +6,7 @@ session_start();
 //Basically this is a RESTful API router that handles the requests in the application. 
 //dependencies are above ^^ and below it checks if there is an actual user "logged in" by checking the session
 
-$currentUser = $_SESSION['user_id'] ?? null;
+$currentUser = $_GET['user_id'] ?? null;
 if (!$currentUser) {
     http_response_code(401);
     echo json_encode(['error' => 'Not authenticated']);
