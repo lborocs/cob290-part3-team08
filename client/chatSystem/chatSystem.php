@@ -1,16 +1,8 @@
 <?php
-session_start();
 
 $userId = $_GET['user_id'] || null;
 
-require_once __DIR__ . '/../../server/includes/database.php';
-$db = new Database();
-$stmt = $db->conn->prepare(
-  "SELECT user_type_id FROM Employees WHERE employee_id = :id"
-);
-$stmt->execute(['id' => $userId]);
-$row = $stmt->fetch();
-$currentUserType = $row['user_type_id'] ?? 2;
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -112,7 +104,6 @@ $currentUserType = $row['user_type_id'] ?? 2;
 
   <script>
     let currentUserId = <?= json_encode($userId) ?>;
-    let currentUserType = <?= json_encode($currentUserType) ?>;
   </script>
   <script src="javaScript/chatSystem.js"></script>
 </body>

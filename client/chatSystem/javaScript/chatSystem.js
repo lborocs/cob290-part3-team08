@@ -231,7 +231,7 @@ function selectChat(id, name, elem) {
   loadMessages(id)
   loadMembers(id).then((isAdmin) => {
     currentIsAdmin = isAdmin
-    const canManage = isAdmin || currentUserType < 2
+    const canManage = isAdmin
     document.querySelector(".more-btn").style.display = canManage
       ? "inline-block"
       : "none"
