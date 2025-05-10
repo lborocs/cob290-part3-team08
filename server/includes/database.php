@@ -272,7 +272,7 @@ class Database
         $sql = "SELECT tasks.*, CONCAT(employees.first_name, ' ', employees.second_name) AS employee_name, 
         projects.project_name AS project_name, projects.team_leader_id AS team_leader_id
 
-        FROM Tasks tasks 
+        FROM tasks  
         LEFT JOIN employees ON tasks.assigned_employee = employees.employee_id 
         LEFT JOIN projects ON tasks.project_id = projects.project_id 
         WHERE 1=1";
@@ -319,7 +319,7 @@ class Database
         $sql = "
             SELECT p.project_id, p.project_name, p.start_date, p.finish_date, 
                    p.team_leader_id, CONCAT(e.first_name, ' ', e.second_name) AS team_leader_name
-            FROM Projects p
+            FROM projects p
             LEFT JOIN employees e ON p.team_leader_id = e.employee_id
             WHERE 1=1";
 
@@ -413,7 +413,7 @@ class Database
     public function getTasksOverrunning()
     {
         $stmt = $this->conn->prepare("
-            SELECT * FROM Tasks WHERE time_taken > time_allocated
+            SELECT * FROM tasks WHERE time_taken > time_allocated
         ");
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
