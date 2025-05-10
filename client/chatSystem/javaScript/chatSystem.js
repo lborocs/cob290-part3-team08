@@ -246,7 +246,7 @@ function selectChat(id, name, elem) {
 //this function deals with kicking people from the chat by using the x next to their name on the members list
 //it also adds an admin label if the member has privileges (is_admin on current chat or < 2 user type)
 function loadMembers(chatId) {
-  fetch(withUser(`${API_BASE}/${chatId}/members`), { method: "GET" })
+  return fetch(withUser(`${API_BASE}/${chatId}/members`), { method: "GET" })
     .then((r) => r.json())
     .then((data) => {
       currentIsAdmin = data.members.some(
@@ -355,7 +355,7 @@ function loadMessages(chatId) {
               <div class="message-meta">
                 ${
                   m.profile_picture_path
-                    ? `<img class="profile-pic" src="/makeitall/cob290-part3-team08/${m.profile_picture_path}" alt="profile">
+                    ? `<img class="profile-pic" src="/${m.profile_picture_path}" alt="profile">
 `
                     : `<div class="profile-pic placeholder"></div>`
                 }
