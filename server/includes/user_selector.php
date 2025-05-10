@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/database.php';
 if (session_status() === PHP_SESSION_NONE) session_start();
+$userId = $_GET['user_id'] ?? null;
 
 //* If already have a user, show their name and bail out
 if (!empty($_GET['user_id'])) {
