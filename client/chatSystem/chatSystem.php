@@ -1,10 +1,7 @@
 <?php
 session_start();
-if (empty($_SESSION['user_id'])) {
-  header('Location: index.php');
-  exit;
-}
-$userId = $_SESSION['user_id'];
+
+$userId = $_GET['user_id'] || null;
 
 require_once __DIR__ . '/../../server/includes/database.php';
 $db = new Database();

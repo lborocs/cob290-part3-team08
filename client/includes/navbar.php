@@ -109,7 +109,7 @@ if ($userId) {
     <div class="navbar-links" id="navbarLinks">
         <a href="/client/chatSystem/ChatSystem.php">Chats</a>
         <a href="/client/dataAnalytics/dataAnalytics.php">Data Analytics</a>
-        <a href="/client/index.php">Dashboard</a>
+        <a href="/index.php">Dashboard</a>
     </div>
 
     <?php if ($user): ?>
