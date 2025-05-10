@@ -96,7 +96,7 @@ $userId = $_GET['user_id'] ?? null;
 $user = null;
 
 if ($userId) {
-    $stmt = $db->conn->prepare("SELECT first_name, profile_picture_path FROM Employees WHERE employee_id = :id");
+    $stmt = $db->conn->prepare("SELECT first_name, profile_picture_path FROM employees WHERE employee_id = :id");
     $stmt->execute(['id' => $userId]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 }
