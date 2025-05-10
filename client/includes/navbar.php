@@ -92,7 +92,7 @@
 require_once __DIR__ . '/../../server/includes/database.php'; // adjust path as needed
 
 $db = new Database();
-$userId = $_SESSION['user_id'] ?? null;
+$userId = $_GET['user_id'] ?? null;
 $user = null;
 
 if ($userId) {
@@ -107,9 +107,9 @@ if ($userId) {
     <div class="navbar-brand">Make It All</div>
 
     <div class="navbar-links" id="navbarLinks">
-        <a href="index.php">Dashboard</a>
-        <a href="chatSystem.php">Chats</a>
-        <a href="dataAnalytics.php">Data Analytics</a>
+        <a href="/makeitall/cob290-part3-team08/client/chatSystem/ChatSystem.php">Chats</a>
+        <a href="/makeitall/cob290-part3-team08/client/dataAnalytics/dataAnalytics.php">Data Analytics</a>
+        <a href="/makeitall/cob290-part3-team08/client/index.php">Dashboard</a>
     </div>
 
     <?php if ($user): ?>

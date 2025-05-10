@@ -137,7 +137,7 @@ document.addEventListener("DOMContentLoaded", () => {
 //it then populates the dropdowns with the employees
 //it also populates the list of employees in the admin menu
 function loadUserDropdowns() {
-  return fetch("../server/api/users/getAll.php")
+  return fetch("../../server/api/users/getAll.php")
     .then((r) => r.json())
     .then((users) => {
       allEmployees = users
@@ -346,7 +346,8 @@ function loadMessages(chatId) {
             ${showMeta ? `
               <div class="message-meta">
                 ${m.profile_picture_path
-                  ? `<img class="profile-pic" src="../${m.profile_picture_path}" alt="profile">`
+                  ? `<img class="profile-pic" src="/makeitall/cob290-part3-team08/${m.profile_picture_path}" alt="profile">
+`
                   : `<div class="profile-pic placeholder"></div>`}
                 <div class="meta-text">
                   <div class="sender-name">${m.first_name} ${m.second_name}</div>
