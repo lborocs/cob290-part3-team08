@@ -100,7 +100,7 @@ export function setupProjectSearch(apiBase, leaderIdToName) {
                 // Render charts
                 renderTeamBreakdownChart(grouped, "Manager");
                 renderTeamCompletionChart(grouped, "Manager");
-                renderProjectProgressChart(progressData, "TL");
+                renderProjectProgressChart(progressData, "Manager");
               });
             });
         }
