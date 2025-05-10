@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../server/includes/database.php';
+require_once __DIR__ . 'database.php';
 if (session_status() === PHP_SESSION_NONE) session_start();
 
 // If already have a user, show their name and bail out
