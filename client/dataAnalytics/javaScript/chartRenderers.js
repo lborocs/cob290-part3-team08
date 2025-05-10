@@ -536,6 +536,7 @@ export function renderProjectProgressChart(progressData, context = "TL") {
     labels = [progressData.project_name];  // Use the project_name directly
     values = [progressData.progress];  // Use the progress directly
   }
+  console.log(labels, values)
   charts[chartID] = new Chart(document.getElementById(chartID), {
     type: "bar",
     data: {
