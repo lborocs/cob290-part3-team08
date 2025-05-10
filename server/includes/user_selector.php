@@ -2,8 +2,8 @@
 require_once __DIR__ . '/database.php';
 if (session_status() === PHP_SESSION_NONE) session_start();
 
-/* If already have a user, show their name and bail out
-if (!empty($_SESSION['user_id'])) {
+//* If already have a user, show their name and bail out
+if (!empty($_GET['user_id'])) {
     $db = new Database();
     $stmt = $db->conn->prepare(
         "SELECT first_name, second_name 
@@ -16,7 +16,7 @@ if (!empty($_SESSION['user_id'])) {
        . htmlspecialchars("{$u['first_name']} {$u['second_name']}")
        . "</p>";
     return;
-}*/
+}
 
 // Otherwise render a single auto‑submitting dropdown:
 $db   = new Database();
