@@ -1,12 +1,8 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-  session_start();
-}
 
-$userId = $_SESSION['user_id'] ?? null;
-$userType = $_SESSION['user_type'] ?? null;
-$pageId = $_SESSION['page_id'] ?? null;
-$pageType = $_SESSION['page_type'] ?? null;
+
+$userId = $_GET['user_id'] ?? null;
+
 
 if (!$userId) {
   echo "No user selected.";
@@ -113,38 +109,42 @@ require_once __DIR__ . '/../../server/includes/database.php';
               <div class="graph-card"><canvas id="workloadChartManager"></canvas></div>
             </div>
           </div>
-
-
-
-          <!-- Team Leader View -->
-          <div id="teamLeaderStats" class="hidden">
-            <div class="chart-grid">
-              <div class="graph-card"><canvas id="teamCompletionChartTL"></canvas></div>
-              <div class="graph-card"><canvas id="teamBreakdownChartTL"></canvas></div>
-              <div class="graph-card"><canvas id="projectProgressChartTL"></canvas></div>
-            </div>
-          </div>
-
-          <!-- Employee View -->
-          <div id="employeeStats" class="hidden">
-            <div class="chart-grid">
-              <div class="graph-card"><canvas id="completionChartEmployee"></canvas></div>
-              <div class="graph-card"><canvas id="timeStatsChartEmployee"></canvas></div>
-              <div class="graph-card"><canvas id="deadlineChartEmployee"></canvas></div>
-              <div class="graph-card"><canvas id="workloadChartEmployee"></canvas></div>
-            </div>
-          </div>
         </div>
       </div>
 
-      <script>
-        window.currentUserId = <?= json_encode($userId) ?>;
-        window.currentUserType = <?= json_encode($userType) ?>;
-        window.currentPageId = <?= json_encode($pageId) ?>;
-        window.currentPageType = <?= json_encode($pageType) ?>;
-      </script>
-      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-      <script type="module" src="javaScript/dataAnalytics.js"></script>
+
+
+      <!-- Team Leader View -->
+      <div id="teamLeaderStats" class="hidden">
+        <div class="chart-grid">
+          <div class="graph-card"><canvas id="teamCompletionChartTL"></canvas></div>
+          <div class="graph-card"><canvas id="teamBreakdownChartTL"></canvas></div>
+          <div class="graph-card"><canvas id="projectProgressChartTL"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Employee View -->
+      <div id="employeeStats" class="hidden">
+        <div class="chart-grid">
+          <div class="graph-card"><canvas id="completionChartEmployee"></canvas></div>
+          <div class="graph-card"><canvas id="timeStatsChartEmployee"></canvas></div>
+          <div class="graph-card"><canvas id="deadlineChartEmployee"></canvas></div>
+          <div class="graph-card"><canvas id="workloadChartEmployee"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+    // Pass user_id and user_type to JavaScript from PHP
+    window.currentUserId = <?= json_encode($userId) ?>;
+
+
+
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module" src="javaScript/dataAnalytics.js"></script>
 </body>
 
 </html>

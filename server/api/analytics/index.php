@@ -22,6 +22,28 @@ $method = $_SERVER['REQUEST_METHOD'];
 if ($method === 'GET') {
 
 
+    // GET /analytics/user-type
+    if (count($parts) === 1 && $parts[0] === 'user-type') {
+        $userId = $_GET['user_id'] ?? null;
+
+        if (!$userId) {
+            http_response_code(400);
+            echo json_encode(['error' => 'user_id is required']);
+            exit;
+        }
+
+        // Fetch user type from the database
+        $userType = $db->getUserTypeById($userId);
+
+        if ($userType !== null) {
+            echo json_encode(['user_type' => $userType]);
+        } else {
+            http_response_code(404);
+            echo json_encode(['error' => 'User not found']);
+        }
+        exit;
+    }
+
     // GET /analytics/team-leaders
     if (count($parts) === 1 && $parts[0] === 'team-leaders') {
         if ($_SESSION['user_type'] !== 0) {
@@ -110,16 +132,9 @@ if ($method === 'GET') {
         // Use query parameter if it's provided
         if (!empty($_GET['project_id'])) {
             $filters['project_id'] = $_GET['project_id'];
-        } elseif (isset($_SESSION['page_type']) && $_SESSION['page_type'] === 'project') {
-            // Otherwise fall back to session context
-            $filters['project_id'] = $_SESSION['page_id'];
         }
-
         if (!empty($_GET['employee_id'])) {
             $filters['employee_id'] = $_GET['employee_id'];
-        } elseif (!isset($filters['project_id']) && isset($_SESSION['page_id'])) {
-            // Use session page_id as employee_id only if project_id isn't set
-            $filters['employee_id'] = $_SESSION['page_id'];
         }
 
         $tasks = $db->getTasks($filters);
@@ -157,18 +172,28 @@ if ($method === 'GET') {
         exit;
     }
 
-    // GET /analytics/progress?project_id=..
+    // GET /analytics/progress?team_leader_id=..
     if (count($parts) === 1 && $parts[0] === 'progress') {
         $projectId = $_GET['project_id'] ?? null;
-        if (!$projectId) {
+        $teamLeaderId = $_GET['team_leader_id'] ?? null;
+
+        if (!$projectId && !$teamLeaderId) {
             http_response_code(400);
-            echo json_encode(['error' => 'project_id required']);
+            echo json_encode(['error' => 'Either project_id or team_leader_id is required']);
             exit;
         }
-        $data = $db->getProjectProgress($projectId);
+
+        // Choose which ID to use
+        if ($projectId) {
+            $data = $db->getProjectProgressByProject($projectId);  // For project_id
+        } elseif ($teamLeaderId) {
+            $data = $db->getProjectProgressByTeamLeader($teamLeaderId);  // For team_leader_id
+        }
+
         echo json_encode($data);
         exit;
     }
+
 
 }
 

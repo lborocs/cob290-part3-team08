@@ -1,5 +1,3 @@
-<?php include_once __DIR__ . '/../server/includes/set_user_session.php'; ?>
-
 <?php
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
 $host = $_SERVER['HTTP_HOST'];
@@ -8,6 +6,7 @@ $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
 // Build dynamic base URL
 $baseUrl = "{$protocol}://{$host}{$basePath}";
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,9 +21,16 @@ $baseUrl = "{$protocol}://{$host}{$basePath}";
     <div class="user-selector-container">
       <?php include __DIR__ . '/includes/user_selector.php'; ?>
     </div>
+    
+    <?php 
+      // Get the user ID from the URL query string
+      $userId = $_GET['user_id'] ?? null;
+    ?>
+
     <div class="nav-buttons">
-      <button onclick="window.location.href ='<?= $baseUrl ?>/dataAnalytics/dataAnalytics.php'">🚀 Data Analytics</button>
-      <button onclick="window.location.href ='<?= $baseUrl ?>/chatSystem/chatSystem.php'">💬 Chat System</button>
+      <!-- Pass the user_id in the URL query parameter -->
+      <button onclick="window.location.href ='<?= $baseUrl ?>/dataAnalytics/dataAnalytics.php?user_id=<?= $userId ?>'">🚀 Data Analytics</button>
+      <button onclick="window.location.href ='<?= $baseUrl ?>/chatSystem/chatSystem.php?user_id=<?= $userId ?>'">💬 Chat System</button>
     </div>
   </div>
 </body>

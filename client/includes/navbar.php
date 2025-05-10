@@ -92,7 +92,7 @@
 require_once __DIR__ . '/../../server/includes/database.php'; // adjust path as needed
 
 $db = new Database();
-$userId = $_SESSION['user_id'] ?? null;
+$userId = $_GET['user_id'] ?? null;
 $user = null;
 
 if ($userId) {

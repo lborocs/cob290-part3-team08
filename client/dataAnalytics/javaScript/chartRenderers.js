@@ -122,6 +122,7 @@ export function renderDeadlineChart(tasks, context = "Employee") {
       type: "bar",
       data: {
         labels: tasks.map((t) => t.task_name),
+        labels: taskNames, // Task names on the Y-axis
         datasets: [
           {
             label: "Days Remaining",
@@ -151,6 +152,8 @@ export function renderDeadlineChart(tasks, context = "Employee") {
     }
   )
 }
+
+
 
 export function renderWorkloadChart(tasks, context = "Employee") {
   const chartID =
@@ -291,7 +294,7 @@ export function renderTeamCompletionChart(data, context = "TL") {
             label: (ctx) => `Tasks (${ctx.dataset.data[ctx.dataIndex]})`,
             afterLabel: (ctx) => {
               const isCompleted = ctx.dataIndex === 0
-              return (isCompleted ? completed : pending).map(
+              return (isCompleted ? completedTasks : pendingTasks).map(
                 (t) =>
                   `• ${t.task_name}` +
                   (isCompleted

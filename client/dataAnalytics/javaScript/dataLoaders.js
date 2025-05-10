@@ -2,6 +2,7 @@
 
 const API_BASE = "/makeitall/cob290-part3-team08/server/api/analytics/index.php"
 
+
 export const analyticsData = {
   tasks: [],
   completionStats: {},
@@ -107,7 +108,7 @@ export function loadAllTasks() {
 }
 
 export function loadDetails() {
-  const endpoint = currentPageType === "project" ? "projects" : "employee"
+  const endpoint = currentUserType === 2 ? "projects" : "employee"
   return fetch(`${API_BASE}/${endpoint}`).then((r) => r.json())
 }
 
@@ -184,13 +185,13 @@ export function loadTeamPerformanceOverview() {
     })
 }
 
-export function loadProjectProgress(projectId) {
-  return fetch(`${API_BASE}/progress?project_id=${projectId}`)
+export function loadProjectProgress(currentUserId) {
+  return fetch(`${API_BASE}/progress?team_leader_id=${currentUserId}`)
     .then((r) => r.json())
     .then((progress) => {
       analyticsData.projectProgress = {
-        [projectId]: {
-          projectName: "Current Project",
+        [currentUserId]: {
+          project_name: progress.project_name,
           progress: progress.completed_percentage,
           project_due_date: progress.project_due_date,
         },
