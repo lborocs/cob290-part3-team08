@@ -52,7 +52,7 @@ window.addEventListener("DOMContentLoaded", () => {
   )
   if (userIdFromUrl) {
     fetch(
-      `/makeitall/cob290-part3-team08/server/api/analytics/index.php/user-type?user_id=${userIdFromUrl}`
+      `/server/api/analytics/index.php/user-type?user_id=${userIdFromUrl}`
     )
       .then((response) => response.json())
       .then((data) => {
