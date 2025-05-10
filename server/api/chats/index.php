@@ -11,6 +11,7 @@ if (!$currentUser) {
     echo json_encode(['error' => 'Not authenticated']);
     exit;
 }
+$currentUser = isset($_GET['user_id']) ? (int) $_GET['user_id'] : null;
 
 $db = new Database();
 header('Content-Type: application/json');

@@ -54,7 +54,7 @@ class Database
     public function createChatWithCreator(int $creatorId, ?string $chatName = null)
     {
         $stmt = $this->conn->prepare(
-            "INSERT INTO Chats (chat_name) VALUES (:chatName)"
+            "INSERT INTO chats (chat_name) VALUES (:chatName)"
         );
         $stmt->bindParam(':chatName', $chatName);
         if ($stmt->execute()) {
@@ -180,7 +180,7 @@ class Database
 
     public function renameChat(int $chatId, string $newName): bool
     {
-        $stmt = $this->conn->prepare("UPDATE Chats SET chat_name = :newName WHERE chatID = :chatId");
+        $stmt = $this->conn->prepare("UPDATE chats SET chat_name = :newName WHERE chatID = :chatId");
         $stmt->bindParam(':newName', $newName);
         $stmt->bindParam(':chatId', $chatId);
         return $stmt->execute();
@@ -188,7 +188,7 @@ class Database
 
     public function deleteChat(int $chatId): bool
     {
-        $stmt = $this->conn->prepare("DELETE FROM Chats WHERE chatID = :chatId");
+        $stmt = $this->conn->prepare("DELETE FROM chats WHERE chatID = :chatId");
         $stmt->bindParam(':chatId', $chatId);
         return $stmt->execute();
     }
@@ -196,7 +196,7 @@ class Database
     public function getUserChats(int $userId): array
     {
         $stmt = $this->conn->prepare(
-            "SELECT C.chatID, C.chat_name FROM Chats C JOIN ChatMembers CM ON C.chatID = CM.chat_id WHERE CM.employee_id = :userId"
+            "SELECT C.chatID, C.chat_name FROM chats C JOIN ChatMembers CM ON C.chatID = CM.chat_id WHERE CM.employee_id = :userId"
         );
         $stmt->bindParam(':userId', $userId);
         $stmt->execute();
