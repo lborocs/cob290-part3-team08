@@ -526,7 +526,7 @@ export function renderProjectProgressChart(progressData, context = "TL") {
   let labels = []
   let values = []
 
-  if (context === "Manager") {
+  if (context === "TL") {
     // Manager: progressData is expected to be an array of { projectName, progress }
     labels = progressData.map((p) => p.project_name)
     values = progressData.map((p) => p.progress)
@@ -536,7 +536,7 @@ export function renderProjectProgressChart(progressData, context = "TL") {
     labels = [singleProject.project_name]
     values = [singleProject.progress]
   }
-//fff
+
   console.log(labels, values)
   charts[chartID] = new Chart(document.getElementById(chartID), {
     type: "bar",
