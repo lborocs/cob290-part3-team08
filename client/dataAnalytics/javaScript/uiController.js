@@ -9,7 +9,7 @@ import {
   renderProjectProgressChart,
   renderTeamCompletionChart,
   renderTeamBreakdownChart,
-} from "./chartRenderers.js"
+} from "./chartRenderers1.js"
 import { fetchProjectDetails, currentProjectData } from "./dataLoaders.js"
 
 export function setupManagerViewSwitcher() {

@@ -33,7 +33,7 @@ import {
   renderOrgTaskSummaryChart,
   renderTeamComparisonChart,
   renderProjectCompletionOverviewChart,
-} from "./chartRenderers.js"
+} from "./chartRenderers1.js"
 
 import {
   setupManagerViewSwitcher,
