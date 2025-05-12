@@ -40,6 +40,7 @@ import {
   setupProjectSearch,
   setupEmployeeSearch,
 } from "./uiController.js"
+console.log("Hello")
 
 // Shortcut
 const $ = (sel) => document.querySelector(sel)
