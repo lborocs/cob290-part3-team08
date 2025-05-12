@@ -528,15 +528,15 @@ export function renderProjectProgressChart(progressData, context = "TL") {
 
   if (context === "Manager") {
     // Manager: progressData is expected to be an array of { projectName, progress }
-    labels = progressData.map((p) => p.projectName)
+    labels = progressData.map((p) => p.project_name)
     values = progressData.map((p) => p.progress)
   } else {
     // Team Leader: progressData is an object like { 6: { projectName, progress } }
     const singleProject = Object.values(progressData)[0]
-    labels = [singleProject.projectName]
+    labels = [singleProject.project_name]
     values = [singleProject.progress]
   }
-  
+
   console.log(labels, values)
   charts[chartID] = new Chart(document.getElementById(chartID), {
     type: "bar",
