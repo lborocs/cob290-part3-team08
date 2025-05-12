@@ -536,7 +536,7 @@ export function renderProjectProgressChart(progressData, context = "TL") {
     labels = [singleProject.project_name]
     values = [singleProject.progress]
   }
-
+//fff
   console.log(labels, values)
   charts[chartID] = new Chart(document.getElementById(chartID), {
     type: "bar",
