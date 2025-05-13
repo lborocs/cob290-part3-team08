@@ -35,11 +35,11 @@ $userId = $_GET['user_id'] || null;
 
 
       <div class="chat-window">
-        <div <div class="chat-header hidden" id="chatHeader">
+        <div <div class="chat-header" id="chatHeader">
           <h2 id="currentChatName">Select a chat</h2>
-          <button id="membersBtn" class="icon-btn" title="Show members" onclick="toggleMembers()">👥</button>
+          <button id="membersBtn" class="icon-btn hidden" title="Show members" onclick="toggleMembers()">👥</button>
 
-          <div class="message-search-controls">
+          <div id="searchBar" class="message-search-controls hidden">
             <input type="text" id="messageSearchInput" placeholder="Search messages..." />
             <select id="senderSearchSelect">
               <option value="">Filter By Sender</option>

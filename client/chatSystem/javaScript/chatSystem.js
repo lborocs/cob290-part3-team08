@@ -227,6 +227,8 @@ function selectChat(id, name, elem) {
   currentChatId = id
   document.getElementById("currentChatName").textContent = name
   document.getElementById("chatHeader").classList.remove("hidden")
+  document.getElementById("membersBtn").classList.remove("hidden")
+  document.getElementById("searchBar").classList.remove("hidden")
 
   document
     .querySelectorAll(".chat-item")
@@ -375,18 +377,17 @@ function loadMessages(chatId, silent = false) {
             ${
               showMeta
                 ? `
-              <div class="message-meta">
-                ${
-                  m.profile_picture_path
-`
-                    : `<div class="profile-pic placeholder"></div>`
-                }
-                <div class="meta-text">
-                  <div class="sender-name">${m.first_name} ${
-                    m.second_name
+              <div class="message-header">
+                <div class="message-meta">
+                  ${
+                    m.profile_picture_path
                       ? `<img class="profile-pic" src="/makeitall/cob290-part3-team08/${m.profile_picture_path}" alt="profile">`
+                      : `<div class="profile-pic placeholder"></div>`
                   }</div>
-                  <div class="message-time">${timeStr}</div>
+                  <div class="meta-text">
+                    <div class="sender-name">${m.first_name} ${m.second_name}</div>
+                    <div class="message-time">${timeStr}</div>
+                  
                 </div>
               </div>`
                 : `<div class="message-meta spacer"></div>`
