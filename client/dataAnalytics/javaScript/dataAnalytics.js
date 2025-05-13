@@ -1,5 +1,5 @@
 // analytics_dashboard.js
-const API_BASE = "/server/api/analytics/index.php"
+const API_BASE = "/makeitall/cob290-part3-team08/server/api/analytics/index.php"
 
 console.log(currentUserId)
 import {
@@ -52,8 +52,7 @@ window.addEventListener("DOMContentLoaded", () => {
     "user_id"
   )
   if (userIdFromUrl) {
-    fetch(
-      `/server/api/analytics/index.php/user-type?user_id=${userIdFromUrl}`
+    fetch(`/makeitall/cob290-part3-team08/server/api/analytics/index.php/user-type?user_id=${userIdFromUrl}`
     )
       .then((response) => response.json())
       .then((data) => {

@@ -164,12 +164,6 @@ export function setupEmployeeSearch(apiBase) {
       // Add employees to the datalist
       renderEmployeeOptions(regularEmployees);
 
-      regularEmployees.forEach((e) => {
-        const option = document.createElement("option");
-        option.value = `${e.first_name} ${e.second_name}`;
-        option.dataset.id = e.employee_id;
-        employeesDatalist.appendChild(option);
-      });
 
       // Handle project filter changes
       projectFilter.addEventListener("change", () => {

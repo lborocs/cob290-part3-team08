@@ -21,7 +21,7 @@ if ($userId) {
         echo "<p style='color:red;'>User not found.</p>";
     }
 
-    return;
+    
 }
 
 $emps = $db->getAllEmployees();

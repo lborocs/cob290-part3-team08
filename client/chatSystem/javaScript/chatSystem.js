@@ -1,5 +1,5 @@
 //adjust this if your path is different
-const API_BASE = "/server/api/chats/index.php"
+const API_BASE = "/makeitall/cob290-part3-team08/server/api/chats/index.php"
 
 
 
@@ -601,7 +601,7 @@ document.addEventListener("click", () => {
 function leaveChat() {
   if (!currentChatId || !confirm("Leave this chat?")) return
 
-  fetch(`withUser(${API_BASE}/${currentChatId}/members/${currentUserId})`, {
+  fetch(withUser(`${API_BASE}/${currentChatId}/members/${currentUserId})`), {
     method: "DELETE",
   }).then((r) => {
     if (r.status === 204) {

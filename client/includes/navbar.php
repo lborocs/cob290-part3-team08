@@ -107,16 +107,16 @@ if ($userId) {
     <div class="navbar-brand">Make It All</div>
 
     <div class="navbar-links" id="navbarLinks">
-        <a href="/client/chatSystem/chatSystem.php?user_id=<?= $userId ?>">Chats</a>
-        <a href="/client/dataAnalytics/dataAnalytics.php?user_id=<?= $userId ?>">Data Analytics</a>
-        <a href="/index.php?user_id=<?= $userId ?>">Dashboard</a>
+        <a href="/makeitall/cob290-part3-team08/client/chatSystem/chatSystem.php?user_id=<?= $userId ?>">Chats</a>
+        <a href="/makeitall/cob290-part3-team08/client/dataAnalytics/dataAnalytics.php?user_id=<?= $userId ?>">Data Analytics</a>
+        <a href="/makeitall/cob290-part3-team08/index1.php?user_id=<?= $userId ?>">Dashboard</a>
     </div>
 
     <?php if ($user): ?>
         <div class="navbar-user">
             <span class="user-name"><?= htmlspecialchars($user['first_name']) ?></span>
             <img class="user-avatar"
-                src="/<?= htmlspecialchars($user['profile_picture_path'] ?? 'server/images/default-avatar.png') ?>"
+                src="/<?= htmlspecialchars($user['profile_picture_path'] ?? '/makeitall/cob290-part3-team08/server/images/default-avatar.png') ?>"
                 alt="Profile Picture">
         </div>
 
