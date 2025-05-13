@@ -511,7 +511,7 @@ class Database
             FROM employees E
             JOIN employeeprojects EP ON E.employee_id = EP.employee_id
             JOIN projects P ON EP.project_id = P.project_id
-            WHERE P.team_leader_id = :lead
+            WHERE P.team_leader_id = :lead AND E.user_type_id != 1
             GROUP BY E.employee_id
         ");
         $stmt->bindParam(':lead', $teamLeaderId);

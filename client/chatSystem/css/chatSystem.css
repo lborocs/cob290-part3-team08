@@ -306,6 +306,7 @@ body {
   margin-top: 4px;
   margin-right: 10px;
   align-self: flex-end;
+  min-height: 1em;
 }
 
 .date-divider {
@@ -335,6 +336,7 @@ body {
 }
 
 .options-btn {
+  vertical-align: bottom;
   background: none;
   border: none;
   font-size: 1.2em;
@@ -376,7 +378,8 @@ body {
 .message-options-top {
   align-self: flex-start;
   position: relative;
-  margin-bottom: 4px;
+  margin-bottom: 0px;
+  margin-top:5px;
 }
 
 .message-wrapper.own .message-options-top {

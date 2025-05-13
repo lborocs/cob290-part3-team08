@@ -48,7 +48,6 @@ export function loadTasks(query = "") {
     .then((r) => r.json())
     .then((data) => {
       analyticsData.tasks = data
-      console.log("Tasks:", data)
       return data
     })
 }
@@ -59,7 +58,6 @@ export function fetchProjectDetails(projectId) {
   fetch(`${API_BASE}/projects?project_id=${projectId}`)
     .then((response) => response.json())
     .then((projectData) => {
-      console.log("Fetched Project Data:", projectData);
 
       // Store the project data for later use
       currentProjectData = projectData[0];  // Assuming it's an array with one project object
@@ -124,7 +122,6 @@ export function loadAverageTimeStats(userId) {
   return fetch(`${API_BASE}/avg-time?employee_id=${userId}`)
     .then((r) => r.json())
     .then((data) => {
-      console.log(data)
       analyticsData.avgTimeStats = data
     })
 }
@@ -147,7 +144,6 @@ export function loadDeadlineTasks(days = 5, employeeId = null) {
   return fetch(url)
     .then((r) => r.json())
     .then((data) => {
-      console.log("deadline",url)
       analyticsData.deadlines = data;
     });
 }
@@ -170,8 +166,10 @@ export function loadTeamPerformance(leaderId) {
       return r.json()
     })
     .then((data) => {
+
       
       analyticsData.teamPerformance = data
+      console.log("Team Performance for ", leaderId, ": ",data)
     })
 }
 
@@ -189,7 +187,8 @@ export function loadTeamPerformanceOverview() {
               teamLeaderName: `${leader.first_name} ${leader.second_name}`,
               performance: data,
             })
-            console.log("Team performance:" , analyticsData.teamPerformance)
+            console.log("Team Performance Overall: ",data)
+
           })
       )
       return Promise.all(fetches)

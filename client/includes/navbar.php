@@ -116,7 +116,7 @@ if ($userId) {
         <div class="navbar-user">
             <span class="user-name"><?= htmlspecialchars($user['first_name']) ?></span>
             <img class="user-avatar"
-                src="/<?= htmlspecialchars($user['profile_picture_path'] ?? '/makeitall/cob290-part3-team08/server/images/default-avatar.png') ?>"
+                src="/makeitall/cob290-part3-team08/<?= htmlspecialchars($user['profile_picture_path'] ?? 'server/images/default-avatar.png') ?>"
                 alt="Profile Picture">
         </div>
 

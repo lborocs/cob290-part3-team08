@@ -22,7 +22,7 @@ export function renderCompletionChart(tasks, context = "Employee") {
     (t) => t.completed === 0 && new Date(t.finish_date) > new Date()
   )
   const overdue = tasks.filter(
-    (t) => t.completed === 0 && new Date(t.finish_date) < new Date()
+    (t) => t.completed === 0 && !t.completed_date && new Date(t.finish_date) < new Date()
   )
 
   // Add colors for the tasks
@@ -92,7 +92,6 @@ export function renderTimeStatsChart(tasks, context = "Employee") {
     console.error("Expected tasks to be an array, but received:", tasks)
     return
   }
-  console.log(tasks)
 
   // Calculate the total time allocated and time taken
   const totalAllocated = tasks
@@ -156,7 +155,6 @@ export function renderDeadlineChart(tasks, context = "Employee") {
     )
 
     // Log whether the task is due within 11 days
-    console.log(daysRemaining)
   })
 
   const incompleteTasks = tasks.filter(
@@ -392,7 +390,7 @@ export function renderTeamCompletionChart(data, context = "TL") {
       // Categorize based on task completion and due date
       if (t.completed === 1) {
         completedTasks.push(t)
-      } else if (t.completed === 0 && daysRemaining < 0) {
+      } else if (t.completed === 0 && daysRemaining < 0 && !t.completed_date) {
         overdueTasks.push(t) // Task is overdue
       } else {
         pendingTasks.push(t) // Task is pending
@@ -456,7 +454,6 @@ export function renderTeamBreakdownChart(data, context = "TL") {
   const chartID =
     context === "Manager" ? "teamBreakdownChartManager" : "teamBreakdownChartTL"
   destroyChart(chartID)
-  console.log("Render teambreakdown:", data)
 
   const labels = data.map(
     (emp) => emp.employee_name || emp.name || `ID ${emp.employee_id}`
@@ -492,7 +489,7 @@ export function renderTeamBreakdownChart(data, context = "TL") {
             // Find overdue tasks (completed = 0 and finish_date is past)
             const overdueTasks =
               emp.tasks?.filter(
-                (t) => t.completed === 0 && new Date(t.finish_date) < new Date()
+                (t) => t.completed === 0 && new Date(t.finish_date) < new Date() && !t.completed_date
               ).length || 0
             return overdueTasks
           }),
@@ -521,7 +518,6 @@ export function renderProjectProgressChart(progressData, context = "TL") {
       ? "projectProgressChartManager"
       : "projectProgressChartTL"
   destroyChart(chartID)
-  console.log(progressData)
 
   let labels = []
   let values = []
@@ -537,7 +533,6 @@ export function renderProjectProgressChart(progressData, context = "TL") {
     values = [singleProject.progress]
   }
 
-  console.log(labels, values)
   charts[chartID] = new Chart(document.getElementById(chartID), {
     type: "bar",
     data: {
@@ -567,7 +562,7 @@ export function renderOrgTaskSummaryChart(tasks) {
     (t) => t.completed === 0 && new Date(t.finish_date) >= now
   )
   const overdue = tasks.filter(
-    (t) => t.completed === 0 && new Date(t.finish_date) < now
+    (t) => t.completed === 0 && new Date(t.finish_date) < now && !t.completed_date
   )
 
   const completedCount = completed.length
@@ -626,15 +621,12 @@ export function renderOrgTaskSummaryChart(tasks) {
 export function renderProjectCompletionOverviewChart(projectProgress) {
   destroyChart("projectCompletionOverviewChart")
 
-  console.log("Rendering project overview chart:")
   const labels = Object.values(projectProgress).map(
     (p) => `${p.projectName}\n(${p.project_due_date}`
   )
 
   const values = Object.values(projectProgress).map((p) => p.progress)
 
-  console.log("Labels:", labels)
-  console.log("Values:", values)
 
   charts.projectCompletionOverviewChart = new Chart(
     document.getElementById("projectCompletionOverviewChart"),
@@ -684,6 +676,8 @@ export function renderTeamComparisonChart(performanceData) {
   const labels = []
   const efficiencyScores = []
 
+  const weightedMethod = "weighted" // or "simple"
+
   performanceData.forEach((entry) => {
     const { teamLeaderId, teamLeaderName, performance } = entry
 
@@ -693,11 +687,13 @@ export function renderTeamComparisonChart(performanceData) {
     performance.forEach((emp) => {
       if (emp.tasks && Array.isArray(emp.tasks)) {
         // Calculate the weighted efficiency for each employee
-        const weightedEfficiency = calculateWeightedEfficiency(emp.tasks)
+        const weightedEfficiency = calculateEfficiency(emp.tasks, weightedMethod)
+        console.log(emp, weightedEfficiency)
 
         // Accumulate the efficiency for each employee
         totalEfficiency += weightedEfficiency
         employeeCount++
+        console.log(totalEfficiency)
       }
     })
 
@@ -708,7 +704,6 @@ export function renderTeamComparisonChart(performanceData) {
     labels.push(teamLeaderName)
     efficiencyScores.push(efficiency)
 
-    console.log(`Efficiency for ${teamLeaderName}:`, efficiency)
   })
 
   // Render the chart
@@ -746,28 +741,80 @@ export function renderTeamComparisonChart(performanceData) {
   })
 }
 
-// Calculate weighted efficiency function (example)
+// Wrapper: Switch calculation method here
+export function calculateEfficiency(tasks, method = "weighted") {
+  switch (method) {
+    case "simple":
+      return calculateSimpleEfficiency(tasks)
+    case "weighted":
+    default:
+      return calculateWeightedEfficiency(tasks)
+  }
+}
+
 function calculateWeightedEfficiency(tasks) {
   let totalScore = 0
   let completedScore = 0
+  const now = new Date()
 
   tasks.forEach((task) => {
-    const completedDate = new Date(task.completed_date)
     const dueDate = new Date(task.finish_date)
-    const priority = task.priority || 1 // Default priority is 1
-    const difficulty = task.difficulty || 1 // Default difficulty is 1
+    const completedDate = task.completed_date ? new Date(task.completed_date) : null
+    const priority = task.priority || 1
+    const difficulty = task.difficulty || 1
 
-    if (!isNaN(completedDate) && !isNaN(dueDate)) {
+    if (!isNaN(dueDate)) {
       const weight = priority * difficulty
       totalScore += weight
 
-      if (completedDate <= dueDate) {
-        completedScore += weight
+      if (completedDate && !isNaN(completedDate)) {
+        // Task was completed
+        if (completedDate <= dueDate) {
+          completedScore += weight
+        } else {
+          completedScore += weight * 0.5 // Late completion penalty
+        }
       } else {
-        completedScore += weight * 0.5 // Apply a penalty for late completions
+        // Task not completed
+        if (now <= dueDate) {
+          
+        } else {
+          // Overdue → apply penalty
+          completedScore += weight * 0.5
+        }
       }
     }
   })
 
   return totalScore > 0 ? Math.round((completedScore / totalScore) * 100) : 0
 }
+
+
+function calculateSimpleEfficiency(tasks) {
+  let onTime = 0
+  let total = 0
+  const now = new Date()
+
+  tasks.forEach((task) => {
+    const dueDate = new Date(task.finish_date)
+    const completedDate = task.completed_date ? new Date(task.completed_date) : null
+
+    if (!isNaN(dueDate)) {
+      total++
+
+      if (completedDate && !isNaN(completedDate)) {
+        // Completed — check if on time
+        if (completedDate <= dueDate) {
+          onTime++
+        }
+      } else {
+        if (now <= dueDate) {
+          total--
+        }
+      }
+    }
+  })
+
+  return total > 0 ? Math.round((onTime / total) * 100) : 0
+}
+

@@ -1,7 +1,8 @@
-//adjust this if your path is different
 const API_BASE = "/makeitall/cob290-part3-team08/server/api/chats/index.php"
 
-
+//variables to control message reloading
+let messagePollingInterval = null
+let lastMessageId = null
 
 const withUser = (url, extraParams = {}) => {
   const params = new URLSearchParams({ user_id: currentUserId, ...extraParams })
@@ -55,6 +56,10 @@ function resetChatUI() {
   queue = []
   renderQueue()
   closeAdminMenus()
+  if (messagePollingInterval) {
+    clearInterval(messagePollingInterval)
+    messagePollingInterval = null
+  }
 }
 
 function clearInputs() {
@@ -232,7 +237,7 @@ function selectChat(id, name, elem) {
   document.getElementById("leaveBtn").style.display = "inline-block"
   document.getElementById("messageInput").disabled = false
 
-  loadMessages(id)
+  loadMessages(id, false)
   loadMembers(id).then((isAdmin) => {
     currentIsAdmin = isAdmin
     const canManage = isAdmin
@@ -240,6 +245,14 @@ function selectChat(id, name, elem) {
       ? "inline-block"
       : "none"
     if (!canManage) closeAdminMenus()
+
+    // CLEAR existing polling if any
+    if (messagePollingInterval) clearInterval(messagePollingInterval)
+
+    // SETUP polling every 5 seconds
+    messagePollingInterval = setInterval(() => {
+      if (currentChatId) loadMessages(currentChatId, true)
+    }, 2500)
   })
 }
 
@@ -297,10 +310,20 @@ function loadMembers(chatId) {
 //each message gets assgined its own div so basically iterating over the messages
 //adds a (read) receipt if the message has been read, edited if message has been edited
 
-function loadMessages(chatId) {
+function loadMessages(chatId, silent = false) {
   fetch(withUser(`${API_BASE}/${chatId}/messages`), { method: "GET" })
     .then((r) => r.json())
     .then((msgs) => {
+      if (!msgs.length) return
+
+      const newest = msgs[msgs.length - 1].message_id
+
+      if (silent && newest === lastMessageId) {
+        return // Skip if no new messages
+      }
+
+      lastMessageId = newest
+
       const pane = document.getElementById("messageList")
       pane.innerHTML = ""
 
@@ -355,13 +378,13 @@ function loadMessages(chatId) {
               <div class="message-meta">
                 ${
                   m.profile_picture_path
-                    ? `<img class="profile-pic" src="/${m.profile_picture_path}" alt="profile">
 `
                     : `<div class="profile-pic placeholder"></div>`
                 }
                 <div class="meta-text">
                   <div class="sender-name">${m.first_name} ${
                     m.second_name
+                      ? `<img class="profile-pic" src="/makeitall/cob290-part3-team08/${m.profile_picture_path}" alt="profile">`
                   }</div>
                   <div class="message-time">${timeStr}</div>
                 </div>
@@ -438,9 +461,8 @@ function markMessageRead(msgId) {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ read: true }),
-  });
+  })
 }
-
 
 //this function handles the action of sending a new message
 function sendMessage() {
@@ -525,12 +547,14 @@ function promoteUser() {
 function deleteChat() {
   if (!currentChatId || !confirm("Delete this chat?")) return
 
-  fetch(withUser(`${API_BASE}/${currentChatId}`), { method: "DELETE" }).then((r) => {
-    if (r.status === 204) {
-      resetChatUI()
-      loadChats()
+  fetch(withUser(`${API_BASE}/${currentChatId}`), { method: "DELETE" }).then(
+    (r) => {
+      if (r.status === 204) {
+        resetChatUI()
+        loadChats()
+      }
     }
-  })
+  )
 }
 
 //function to toggle message options

@@ -91,11 +91,9 @@ export function setupProjectSearch(apiBase, leaderIdToName) {
                 ),
               ]).then(([filteredTasks]) => {
                 analyticsData.tasks = filteredTasks;
-                console.log("Filtered Tasks:", filteredTasks);
 
                 // Group tasks by employee
                 const grouped = groupTasksByEmployee(filteredTasks); // This function should be defined elsewhere
-                console.log("Grouped Tasks:", grouped);
 
                 // Render charts
                 renderTeamBreakdownChart(grouped, "Manager");
@@ -114,7 +112,6 @@ document.getElementById("infoIcon").addEventListener("click", function () {
   if (currentProjectData) {
     document.getElementById("projectInfoModal").classList.remove("hidden")
   } else {
-    console.log("No project data available.")
   }
 })
 
@@ -181,7 +178,6 @@ export function setupEmployeeSearch(apiBase) {
             const assignedIds = projects[0]?.team_members?.map(
               (member) => member.employee_id
             ) || [];
-            console.log("Assigned Employee IDs:", assignedIds);
 
             // Filter employees based on project selection
             const filtered = regularEmployees.filter((e) =>

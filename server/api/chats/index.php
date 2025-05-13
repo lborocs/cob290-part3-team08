@@ -6,6 +6,7 @@ require_once __DIR__ . '/../../includes/headers.php';
 //dependencies are above ^^ and below it checks if there is an actual user "logged in" by checking the session
 
 $currentUser = $_GET['user_id'] ?? null;
+
 if (!$currentUser) {
     http_response_code(401);
     echo json_encode(['error' => 'Not authenticated']);
@@ -18,7 +19,7 @@ header('Content-Type: application/json');
 
 //this is the path of the API and picks the HTTP method (GET, POST, PATCH, DELETE) and URI path 
 
-$base = '/server/api/chats/index.php';
+$base = '/makeitall/cob290-part3-team08/server/api/chats/index.php';
 
 //this basically gets the URI which is the Uniform Resource Identifier that the server gets from the client
 

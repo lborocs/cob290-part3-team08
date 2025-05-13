@@ -1,7 +1,6 @@
 // analytics_dashboard.js
 const API_BASE = "/makeitall/cob290-part3-team08/server/api/analytics/index.php"
 
-console.log(currentUserId)
 import {
   loadTasks,
   loadAllTasks,
@@ -40,7 +39,6 @@ import {
   setupProjectSearch,
   setupEmployeeSearch,
 } from "./uiController.js"
-console.log("Hello")
 
 // Shortcut
 const $ = (sel) => document.querySelector(sel)
@@ -56,10 +54,8 @@ window.addEventListener("DOMContentLoaded", () => {
     )
       .then((response) => response.json())
       .then((data) => {
-        console.log(data)
         if (data.user_type !== undefined) {
           window.currentUserType = data.user_type // Store the user type in JavaScript variable
-          console.log("User Type:", window.currentUserType)
           showPanelsByUserType()
           loadAnalytics()
           if (currentUserType === 0) setupManagerViewSwitcher()
@@ -119,7 +115,6 @@ function loadTeamLeaderAnalytics() {
     loadProjectProgress(currentUserId),
     //loadDetails(),
     loadAllEmployees(),
-    console.log(analyticsData),
   ]).then(renderTeamLeaderCharts)
 }
 
@@ -152,7 +147,6 @@ function renderTeamLeaderCharts() {
     
     [currentUserId]: analyticsData.projectProgress[currentUserId] || {},
   }
-  console.log(analyticsData.projectProgress[currentUserId])
   renderProjectProgressChart(progressData[currentUserId], "TL")
 }
 
@@ -160,6 +154,5 @@ function renderEmployeeCharts() {
   renderCompletionChart(analyticsData.tasks, "Employee")
   renderTimeStatsChart(analyticsData.tasks, "Employee")
   renderDeadlineChart(analyticsData.deadlines, "Employee")
-  console.log(analyticsData.deadlines)
   renderWorkloadChart(analyticsData.tasks, "Employee")
 }
