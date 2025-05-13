@@ -139,72 +139,63 @@ export function renderDeadlineChart(tasks, context = "Employee") {
     context === "Manager" ? "deadlineChartManager" : "deadlineChartEmployee"
   destroyChart(chartID)
 
-  // Define the color scale based on days remaining
+  // Define the color scale based on days remaining (including negative)
   const getColor = (daysRemaining) => {
-    if (daysRemaining <= 3) {
-      return "#ff0000" // Red for close deadlines (2 days or less)
-    } else if (daysRemaining <= 7) {
-      return "#ff4d00" // Yellow for medium deadlines (3-7 days)
-    } else {
-      return "#4caf50" // Green for far deadlines (more than 7 days)
-    }
+    if (daysRemaining < 0) return "#ff0000" // Gray for overdue
+    if (daysRemaining <= 3) return "#ff4d00" // Red
+    if (daysRemaining <= 7) return "#00ff00" // Orange
+    return "#4caf50" // Green
   }
-  tasks.forEach((t) => {
-    const daysRemaining = Math.ceil(
-      (new Date(t.finish_date) - new Date()) / (1000 * 60 * 60 * 24)
-    )
 
-    // Log whether the task is due within 11 days
-  })
+  const today = new Date()
 
-  const incompleteTasks = tasks.filter(
-    (t) =>
-      t.completed === 0 &&
-      Math.ceil(
-        (new Date(t.finish_date) - new Date()) / (1000 * 60 * 60 * 24)
-      ) < 11
-  )
+  // Prepare task data with capped overdue values
+  const incompleteTasks = tasks
+    .filter((t) => t.completed === 0)
+    .map((t) => {
+      const rawDays = Math.ceil(
+        (new Date(t.finish_date) - today) / (1000 * 60 * 60 * 24)
+      )
+      return {
+        name: t.task_name,
+        daysRemaining: rawDays,
+        color: getColor(rawDays),
+      }
+    })
 
   charts[chartID] = new Chart(
     document.getElementById(chartID).getContext("2d"),
     {
       type: "bar",
       data: {
-        labels: incompleteTasks.map((t) => t.task_name),
+        labels: incompleteTasks.map((t) => t.name),
         datasets: [
           {
             label: "Days Remaining",
-            data: incompleteTasks.map((t) =>
-              Math.ceil(
-                (new Date(t.finish_date) - new Date()) / (1000 * 60 * 60 * 24)
-              )
-            ),
-            backgroundColor: incompleteTasks.map((t) =>
-              getColor(
-                Math.ceil(
-                  (new Date(t.finish_date) - new Date()) / (1000 * 60 * 60 * 24)
-                )
-              )
-            ),
+            data: incompleteTasks.map((t) => t.daysRemaining),
+            backgroundColor: incompleteTasks.map((t) => t.color),
           },
         ],
       },
       options: {
         maintainAspectRatio: false,
-        plugins: { title: { display: true, text: "Upcoming Deadlines" } },
+        plugins: {
+          title: { display: true, text: "Upcoming & Overdue Deadlines" },
+        },
         scales: {
           y: {
-            beginAtZero: true,
-            min: 1,
+            beginAtZero: false,
+            min: -10,
             max: 10,
-            ticks: { stepSize: 1 },
-            title: { display: true, text: "Days Left" },
+            ticks: { stepSize: 2 },
+            title: { display: true, text: "Days Left (Negative = Overdue)" },
           },
         },
       },
     }
   )
 }
+
 
 export function renderWorkloadChart(tasks, context = "Employee") {
   const chartID =
