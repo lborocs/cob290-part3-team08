@@ -87,23 +87,37 @@ export function renderTimeStatsChart(tasks, context = "Employee") {
   const chartID =
     context === "Manager" ? "timeStatsChartManager" : "timeStatsChartEmployee"
   destroyChart(chartID)
-  // Ensure tasks is an array
+
   if (!Array.isArray(tasks)) {
     console.error("Expected tasks to be an array, but received:", tasks)
     return
   }
 
-  // Calculate the total time allocated and time taken
-  const totalAllocated = tasks
-    .filter((task) => task.completed === 1) // Filter for completed tasks
-    .reduce((acc, task) => acc + task.time_allocated, 0)
-  const totalTaken = tasks
-    .filter((task) => task.completed === 1) // Filter for completed tasks
-    .reduce((acc, task) => acc + task.time_taken, 0)
+  // Filter only completed tasks
+  const completedTasks = tasks.filter((task) => task.completed === 1)
 
-  // Calculate the average time allocated and time taken
-  const avgTimeAllocated = totalAllocated / tasks.length || 0
-  const avgTimeTaken = totalTaken / tasks.length || 0
+  const totalAllocated = completedTasks.reduce(
+    (acc, task) => acc + task.time_allocated,
+    0
+  )
+  const totalTaken = completedTasks.reduce(
+    (acc, task) => acc + task.time_taken,
+    0
+  )
+
+  const avgTimeAllocated =
+    completedTasks.length > 0 ? totalAllocated / completedTasks.length : 0
+  const avgTimeTaken =
+    completedTasks.length > 0 ? totalTaken / completedTasks.length : 0
+
+  // Determine bar colors
+  let timeTakenColor = "#4caf50" // green by default
+
+  if (avgTimeTaken > avgTimeAllocated) {
+    timeTakenColor = "#f44336" // red if over time
+  } else if (avgTimeTaken === avgTimeAllocated) {
+    timeTakenColor = "#2196f3" // same as allocated
+  }
 
   charts[chartID] = new Chart(
     document.getElementById(chartID).getContext("2d"),
@@ -115,14 +129,15 @@ export function renderTimeStatsChart(tasks, context = "Employee") {
           {
             label: "Hours",
             data: [avgTimeAllocated, avgTimeTaken],
-            backgroundColor: ["#2196f3", "#ff9800"],
+            backgroundColor: ["#2196f3", timeTakenColor],
           },
         ],
       },
       options: {
         maintainAspectRatio: false,
-
-        plugins: { title: { display: true, text: "Average Time per Task" } },
+        plugins: {
+          title: { display: true, text: "Average Time per Task" },
+        },
         scales: {
           y: {
             beginAtZero: true,
@@ -133,6 +148,7 @@ export function renderTimeStatsChart(tasks, context = "Employee") {
     }
   )
 }
+
 
 export function renderDeadlineChart(tasks, context = "Employee") {
   const chartID =
