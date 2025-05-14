@@ -35,7 +35,7 @@ $userId = $_GET['user_id'] || null;
 
 
       <div class="chat-window">
-        <div <div class="chat-header" id="chatHeader">
+        <div class="chat-header" id="chatHeader">
           <h2 id="currentChatName">Select a chat</h2>
           <button id="membersBtn" class="icon-btn hidden" title="Show members" onclick="toggleMembers()">👥</button>
 
